@@ -132,6 +132,14 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--c);border:1px solid var(--br);border-radius:20px;padding:10px 22px;font-size:13px;color:var(--t);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
 .toast.show{opacity:1}
 
+
+/* ── CONTEXT MENU ── */
+.cm{position:fixed;z-index:250;background:var(--c);border:1px solid var(--br);border-radius:12px;padding:6px;min-width:140px;box-shadow:0 8px 30px rgba(0,0,0,.5);display:none;animation:fadeIn .15s ease-out}
+.cm.show{display:block}
+.cm button{display:block;width:100%;padding:10px 14px;border:none;background:none;color:var(--t);font-size:13px;text-align:left;cursor:pointer;border-radius:8px;font-family:inherit;display:flex;align-items:center;gap:8px}
+.cm button:active,.cm button:hover{background:rgba(255,255,255,.05)}
+.cm button.del{color:var(--pink)}
+.cm .sep{height:1px;background:var(--br);margin:4px 0}
 /* ── DAY CARD DETAIL ANIMATION ── */
 .dayc .db{display:block;max-height:0;overflow:hidden;transition:max-height .35s ease-out;padding:0 16px 0 70px}
 .dayc.open .db{max-height:500px;padding-bottom:16px}
@@ -201,6 +209,13 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
   </div>
 </div>
 
+
+<!-- Context Menu -->
+<div class="cm" id="cm" onclick="event.stopPropagation()">
+  <button onclick="cmEdit()">✏️ 编辑</button>
+  <div class="sep"></div>
+  <button class="del" onclick="cmDel()">🗑️ 删除</button>
+</div>
 <!-- Toast -->
 <div id="toast" class="toast"></div>
 
@@ -277,14 +292,25 @@ async function ld(){
 let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00-\u9fff]+/,'')===it.tx.replace(/^[^\w\u4e00-\u9fff]+/,''));
    cl.push({...it,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':!!it.done});
   }));
-  dl=[];DAYS.forEach(d=>d.tl.forEach(t=>{
+  dl=[];let usedIds=new Set();
+  DAYS.forEach(d=>d.tl.forEach(t=>{
    let strip=t.tx.replace(/^[^\w\u4e00-\u9fff]+/,'');
    let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00-\u9fff]+/,'')===strip);
-   dl.push({...t,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':false,day:d.d});
+   if(fi)usedIds.add(fi.record_id);
+   dl.push({...t,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':false,day:d.d,_dyn:false});
   }));
+  // Add extra Feishu items in day categories not matched yet
+  items.forEach(fi=>{
+   let cat=fi.fields['分类']||'';
+   let m=cat.match(/Day(\d)/);
+   if(m&&!usedIds.has(fi.record_id)){
+    let d=parseInt(m[1]);
+    dl.push({ic:'📌',tx:fi.fields['文本'],tp:'a',lb:fi.fields['备注']||'新增',id:fi.record_id,done:fi.fields['状态']==='✅ 已完成',day:d,_dyn:true});
+   }
+  });
   document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
  }catch(e){
-  CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));DAYS.forEach(d=>d.tl.forEach(t=>dl.push({...t,id:null,done:false,day:d.d})));
+  CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));DAYS.forEach(d=>d.tl.forEach(t=>dl.push({...t,id:null,done:false,day:d.d,_dyn:false})));
   document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线';
  }
  ren();
@@ -320,7 +346,8 @@ function ren(){
    gh+=`<div class="gc">`;
    cell.forEach(it=>{
     let dx=it.done?' done':'';
-    let ocl=typeof it.idx!=='undefined'?` onclick="tgd(${it.idx})"`:``;
+    let rid=it._dyn&&it.id?it.id:'';
+    let ocl=typeof it.idx!=='undefined'?` onclick="tgd(${it.idx})" oncontextmenu="return false" data-dlidx="${it.idx}" data-rid="${rid}" data-dyn="${it._dyn?1:0}"`:``;
     gh+=`<div class="gb ${cls}${dx}"${ocl}>${it.em} ${it.tx.slice(0,8)}</div>`;
    });
    gh+=`</div>`;
@@ -376,7 +403,24 @@ async function tgd(i){
  }catch(e){document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线'}
 }
 
-function showAdd(){document.getElementById('mo').classList.add('show');document.getElementById('atx').focus()}
+let _editing=null;
+function showAdd(editIdx,editType){
+ _editing=editType?{idx:editIdx,type:editType}:null;
+ let mo=document.getElementById('mo');
+ mo.classList.add('show');
+ let h=mo.querySelector('h3');
+ if(_editing){
+  let item=_editing.type==='dl'?dl[_editing.idx]:cl[_editing.idx];
+  h.textContent='✏️ 编辑项目';
+  document.getElementById('atx').value=item.tx||'';
+  document.getElementById('ant').value=item.nb||item.lb||'';
+ }else{
+  h.textContent='➕ 添加新项目';
+  document.getElementById('atx').value='';
+  document.getElementById('ant').value='';
+ }
+ document.getElementById('atx').focus()
+}
 function hideAdd(){document.getElementById('mo').classList.remove('show')}
 
 async function doAdd(){
@@ -385,17 +429,26 @@ async function doAdd(){
  hideAdd();
  document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
  try{
-  await fs('/records',{method:'POST',body:JSON.stringify({fields:{'文本':tx,'分类':cat,'状态':'⬜ 待办','备注':nt}})});
-  toast('✅ 已添加');
+  if(_editing){
+   let item=_editing.type==='dl'?dl[_editing.idx]:cl[_editing.idx];
+   if(!item.id){toast('❌ 离线无法编辑');return;}
+   await fs('/records/'+item.id,{method:'PUT',body:JSON.stringify({fields:{'文本':tx,'备注':nt}})});
+   toast('✅ 已更新');
+  }else{
+   await fs('/records',{method:'POST',body:JSON.stringify({fields:{'文本':tx,'分类':cat,'状态':'⬜ 待办','备注':nt}})});
+   toast('✅ 已添加');
+  }
+  _editing=null;
   document.getElementById('atx').value='';document.getElementById('ant').value='';
   await ld();
- }catch(e){toast('❌ 添加失败')}
+ }catch(e){toast('❌ 操作失败')}
 }
 
 async function delItem(type,idx){
- if(!confirm('确定删除？此操作不可恢复'))return;
+ if(!confirm('确定删除「'+(type==='cl'?cl[idx]?.tx:dl[idx]?.tx)+'」？此操作不可恢复'))return;
  let item=type==='cl'?cl[idx]:dl[idx];
- if(!item||!item.id)return;
+ if(!item||!item.id)return toast('❌ 离线无法删除');
+ document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
  try{await fs('/records/'+item.id,{method:'DELETE'});toast('🗑️ 已删除');await ld();}
  catch(e){toast('❌ 删除失败')}
 }
