@@ -94,13 +94,13 @@ const APP_ID='cli_aabfb6e658789be8';
 const APP_SECRET='Bu1YYA1VseQefwB4UQJhleSIEN7UtaAr';
 const BITABLE='C28eb6d4VaGDtmsnACOc59ianOf';
 const TABLE='tbl9716rt5k5b37e';
-const CORS='https://corsproxy.io/?';
+const CORS='https://7b4ad832bd97d8.lhr.life/';
 
 let feishuToken='';
 
 async function feishu(path,opts={}){
   if(!feishuToken){
-    let r=await fetch(CORS+'https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal',{
+    let r=await fetch(CORS+'auth/v3/tenant_access_token/internal',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({app_id:APP_ID,app_secret:APP_SECRET})
     });
@@ -108,7 +108,7 @@ async function feishu(path,opts={}){
     feishuToken=d.tenant_access_token;
   }
   let h={Authorization:'Bearer '+feishuToken,'Content-Type':'application/json; charset=utf-8'};
-  let res=await fetch(CORS+'https://open.feishu.cn/open-apis/bitable/v1/apps/'+BITABLE+'/tables/'+TABLE+path,{headers:h,...opts});
+  let res=await fetch(CORS+'bitable/v1/apps/'+BITABLE+'/tables/'+TABLE+path,{headers:h,...opts});
   return res.json();
 }
 
