@@ -3,209 +3,385 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>🇰🇷 한국고고고</title>
+<title>🇰🇷 首尔5天4夜</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Noto Sans SC',sans-serif;background:#0a0a10;color:#d8d0c8;font-size:14px;-webkit-tap-highlight-color:transparent}
-.hd{background:#111118;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;border-bottom:1px solid #1e1e2a}
-.hd .logo{font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,#ff6b8a,#ff9a56,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hd .st{display:flex;gap:6px;font-size:11px}
-.hd .st span{padding:3px 8px;border-radius:10px;font-weight:600}
-.done{background:rgba(46,213,115,.15);color:#2ed573}
-.prog{background:rgba(88,166,255,.15);color:#58a6ff}
-.todo{background:rgba(255,107,138,.15);color:#ff6b8a}
-.sync{font-size:10px;color:#555;margin-left:4px}
-.bar{height:3px;background:#1e1e2a}
-.bar div{height:100%;background:linear-gradient(90deg,#2ed573,#58a6ff,#ff6b8a);transition:width .4s}
-.panel{display:none;padding:10px 12px 80px}
+body{font-family:'Noto Sans SC',sans-serif;background:#08080f;color:#e0d8d0;font-size:15px;min-height:100vh;overflow-x:hidden}
+::selection{background:rgba(255,154,86,.3)}
+
+/* ── HEADER ── */
+.hd{position:sticky;top:0;z-index:100;background:rgba(8,8,15,.92);backdrop-filter:blur(20px);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.06)}
+.hd .logo{font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,#ff9a56,#ff6b8a,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hd .sync{font-size:11px;display:flex;align-items:center;gap:4px;color:#666}
+
+/* ── HERO ── */
+.hero{position:relative;height:200px;overflow:hidden;display:flex;align-items:flex-end;padding:20px}
+.hero-bg{position:absolute;inset:0;background:url(https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?w=800&q=70)center/cover;filter:brightness(.35)}
+.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent 40%,#08080f)}
+.hero-txt{position:relative;z-index:1}
+.hero-txt h2{font-size:1.8rem;font-weight:900;color:#fff}
+.hero-txt p{font-size:13px;color:#a09088;margin-top:4px}
+
+/* ── STATS ── */
+.stats{display:flex;gap:8px;padding:12px 16px}
+.stat{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:12px;text-align:center}
+.stat .v{font-size:1.4rem;font-weight:700}
+.stat .l{font-size:11px;color:#666;margin-top:2px}
+.stat:nth-child(1) .v{color:#ff9a56}
+.stat:nth-child(2) .v{color:#58a6ff}
+.stat:nth-child(3) .v{color:#2ed573}
+.stat:nth-child(4) .v{color:#c084fc}
+
+/* ── DAY CARDS ── */
+.days{padding:0 12px}
+.day{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:.3s}
+.day:active{transform:scale(.98)}
+.day-top{display:flex;align-items:center;gap:12px;padding:14px;cursor:pointer}
+.day-num{font-size:2rem;font-weight:900;background:linear-gradient(135deg,#ff9a56,#ff6b8a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;min-width:48px;text-align:center}
+.day-hd h3{font-size:15px;font-weight:600}
+.day-hd .date{font-size:11px;color:#666}
+.day-hd .tag{display:inline-block;font-size:10px;background:rgba(255,154,86,.15);color:#ff9a56;padding:2px 8px;border-radius:10px;margin-top:3px}
+.day-arrow{margin-left:auto;color:#444;font-size:18px;transition:.3s}
+.day.open .day-arrow{transform:rotate(180deg)}
+.day-body{display:none;padding:0 14px 14px}
+.day.open .day-body{display:block}
+.day-img{width:100%;height:140px;border-radius:10px;background-size:cover;background-position:center;margin-bottom:10px}
+.tl-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.03);align-items:flex-start;font-size:14px}
+.tl-item:last-child{border-bottom:none}
+.tl-icon{font-size:18px;flex-shrink:0;width:24px;text-align:center}
+.tl-txt{flex:1;line-height:1.5}
+.tl-time{font-size:11px;color:#666;flex-shrink:0}
+.tl-tag{font-size:10px;padding:2px 6px;border-radius:6px;flex-shrink:0}
+.tl-tag.food{background:rgba(255,217,61,.12);color:#ffd93d}
+.tl-tag.act{background:rgba(88,166,255,.12);color:#58a6ff}
+.tl-tag.key{background:rgba(255,107,138,.12);color:#ff6b8a}
+
+/* ── CHECKLIST ── */
+.ck-section{padding:0 12px}
+.ck-group{margin-bottom:16px}
+.ck-group h3{font-size:13px;color:#ff9a56;margin-bottom:8px;font-weight:500;display:flex;align-items:center;gap:6px}
+.ck-group h3 .cnt{font-size:10px;background:rgba(255,154,86,.1);padding:2px 6px;border-radius:8px}
+.ck-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(255,255,255,.015);border-radius:10px;margin-bottom:4px;font-size:14px;cursor:pointer;transition:.2s}
+.ck-item:active{background:rgba(255,255,255,.04)}
+.ck-item.done{opacity:.4;text-decoration:line-through}
+.ck-item .cb{width:22px;height:22px;border:2px solid #444;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.2s}
+.ck-item.done .cb{border-color:#2ed573;background:#2ed573}
+.ck-item.done .cb::after{content:'✓';color:#08080f;font-weight:700;font-size:13px}
+.ck-item .em{font-size:18px;flex-shrink:0}
+.ck-item .tx{flex:1;line-height:1.4}
+.ck-item .note{font-size:11px;color:#555}
+
+/* ── GALLERY ── */
+.gallery{padding:0 12px}
+.gal-search{display:flex;gap:8px;margin-bottom:12px}
+.gal-search input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 14px;color:#e0d8d0;font-size:14px;outline:none;font-family:inherit}
+.gal-search input:focus{border-color:#ff9a56}
+.gal-search button{background:linear-gradient(135deg,#ff9a56,#ff6b8a);border:none;border-radius:10px;padding:10px 16px;color:#fff;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit}
+.gal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.gal-card{border-radius:12px;overflow:hidden;aspect-ratio:1;background-size:cover;background-position:center;position:relative;cursor:pointer}
+.gal-card .cap{position:absolute;bottom:0;left:0;right:0;padding:8px;background:linear-gradient(transparent,rgba(0,0,0,.8));font-size:11px;color:#fff}
+.gal-load{text-align:center;padding:20px;color:#444;font-size:13px}
+
+/* ── TABS ── */
+.tabs{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,15,.95);backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,.06);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;padding:10px 4px 6px;border:none;background:none;color:#555;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;transition:.2s}
+.tab .ti{font-size:20px}
+.tab.on{color:#ff9a56}
+.tab .dot{width:5px;height:5px;border-radius:50%;background:transparent;transition:.2s}
+.tab.on .dot{background:#ff9a56}
+
+/* ── PANELS ── */
+.panel{display:none;padding-bottom:90px}
 .panel.on{display:block}
-.nav{position:fixed;bottom:0;left:0;right:0;background:#111118;border-top:1px solid #1e1e2a;display:flex;z-index:100}
-.nav button{flex:1;padding:10px 4px 6px;border:none;background:none;color:#555;font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit}
-.nav button .ni{font-size:18px}
-.nav button.on{color:#ff9a56}
-.kb{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-@media(max-width:480px){.kb{grid-template-columns:1fr}}
-.kc{background:#111118;border:1px solid #1e1e2a;border-radius:8px;overflow:hidden}
-.kc-h{padding:8px 10px;font-size:11px;font-weight:600;border-bottom:1px solid #1e1e2a;display:flex;justify-content:space-between}
-.kc-h .cnt{font-size:10px;background:#1e1e2a;padding:1px 6px;border-radius:8px;color:#888}
-.kc-b{padding:4px;max-height:55vh;overflow-y:auto}
-.cg{margin-bottom:2px}
-.cl{font-size:9px;color:#555;padding:4px 8px 1px;font-weight:600;display:flex;gap:4px;align-items:center;text-transform:uppercase;letter-spacing:.5px}
-.cl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.04)}
-.cd{background:#16161f;border:1px solid #1e1e2a;border-radius:6px;padding:6px 8px;margin:2px 0;display:flex;align-items:center;gap:6px;font-size:12px}
-.cd .em{font-size:14px;flex-shrink:0}
-.cd .tx{flex:1;line-height:1.3}
-.cd select{background:#1e1e2a;color:#999;border:1px solid #2a2a35;border-radius:4px;padding:2px;font-size:10px;opacity:0;transition:opacity .2s}
-.cd:hover select,.cd:active select{opacity:1}
-.cd .syncing{color:#ff9a56;font-size:10px;animation:pulse .8s infinite}
-@keyframes pulse{50%{opacity:.3}}
-.gt-cat{display:flex;align-items:center;gap:8px;padding:8px 4px 4px;font-weight:600;font-size:12px;color:#ff9a56;border-top:1px solid rgba(255,255,255,.04)}
-.gt-cat:first-child{border-top:none}
-.gt-cat-icon{font-size:16px}
-.gt-cat-name{font-size:13px}
-.gt-r{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.02);font-size:13px}
-.gt-r:last-child{border-bottom:none}
-.gt-r.done{opacity:.5;text-decoration:line-through}
-.gt-r.prog{background:rgba(88,166,255,.06)}
-.gt-em{font-size:16px;flex-shrink:0}
-.gt-tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.gt-st{flex-shrink:0;font-size:11px;color:#888;background:rgba(255,255,255,.04);padding:2px 6px;border-radius:4px}
-.ck{margin-bottom:14px}
-.ck h3{font-size:13px;margin-bottom:6px;color:#ff9a56;font-weight:500}
-.ck label{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:13px;cursor:pointer}
-.ck label.done{opacity:.4;text-decoration:line-through}
-.ck input[type=checkbox]{appearance:none;width:18px;height:18px;border:2px solid #444;border-radius:4px;flex-shrink:0;position:relative;cursor:pointer}
-.ck input:checked{border-color:#2ed573;background:#2ed573}
-.ck input:checked::after{content:'✓';position:absolute;top:-1px;left:3px;color:#0a0a10;font-weight:700;font-size:12px}
-.dy{background:#111118;border:1px solid #1e1e2a;border-radius:8px;padding:12px;margin-bottom:8px}
-.dy h3{font-size:14px;margin-bottom:8px}
-.dy .ml{display:flex;flex-wrap:wrap;gap:5px}
-.ml>div{border-left:3px solid;padding:4px 8px;font-size:12px;border-radius:0 5px 5px 0;white-space:nowrap}
-.bf{border-color:#ffd93d!important;background:rgba(255,217,61,.06)}
-.lu{border-color:#ff9a56!important;background:rgba(255,154,86,.06)}
-.di{border-color:#8a4fff!important;background:rgba(138,79,255,.06)}
-.ac{border-color:#58a6ff!important;background:rgba(88,166,255,.06)}
+
+/* ── PROGRESS ── */
+.progress{padding:8px 16px}
+.progress-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2ed573,#ff9a56);border-radius:2px;transition:width .6s}
+
+/* ── SPINNER ── */
+.spin{display:flex;justify-content:center;padding:40px}
+.spin div{width:24px;height:24px;border:2px solid rgba(255,154,86,.2);border-top-color:#ff9a56;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#2ed573;color:#08080f;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:200;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
+.toast.err{background:#ff6b8a}
 </style>
 </head>
 <body>
 
 <div class="hd">
-  <div class="logo">🇰🇷 한국고고고 <span class="sync" id="syncStat"></span></div>
-  <div class="st"><span class="done" id="zD">✅0</span><span class="prog" id="zP">🔄0</span><span class="todo" id="zT">⬜0</span></div>
+  <div class="logo">🇰🇷 한국고고고</div>
+  <div class="sync" id="syncStat">⏳</div>
 </div>
-<div class="bar"><div id="pBar"></div></div>
 
-<div id="pK" class="panel on"><div class="kb"><div class="kc"><div class="kc-h">⬜ 待办 <span class="cnt" id="cT">0</span></div><div class="kc-b" id="kT"></div></div><div class="kc"><div class="kc-h">🔄 进行中 <span class="cnt" id="cP">0</span></div><div class="kc-b" id="kP"></div></div><div class="kc"><div class="kc-h">✅ 已完成 <span class="cnt" id="cD">0</span></div><div class="kc-b" id="kD"></div></div></div></div>
-<div id="pG" class="panel"><div id="gC"></div></div>
-<div id="pC" class="panel"><div id="ckC"></div></div>
-<div id="pI" class="panel"><div id="iC"></div></div>
-
-<div class="nav">
-  <button onclick="sw('kanban')" class="on" id="nK"><span class="ni">📋</span>看板</button>
-  <button onclick="sw('gantt')" id="nG"><span class="ni">📅</span>甘特图</button>
-  <button onclick="sw('checklist')" id="nC"><span class="ni">✅</span>清单</button>
-  <button onclick="sw('itinerary')" id="nI"><span class="ni">🎨</span>行程</button>
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-txt"><h2>首尔 · 5天4夜</h2><p>7.9 — 7.13 · 4人小队</p></div>
 </div>
+
+<div class="stats">
+  <div class="stat"><div class="v" id="stDays">5</div><div class="l">天数</div></div>
+  <div class="stat"><div class="v" id="stTasks">0</div><div class="l">待办</div></div>
+  <div class="stat"><div class="v" id="stDone">0</div><div class="l">已完成</div></div>
+  <div class="stat"><div class="v" id="stPct">0%</div><div class="l">进度</div></div>
+</div>
+
+<div class="progress"><div class="progress-bar"><div class="progress-fill" id="progFill"></div></div></div>
+
+<div id="pDays" class="panel on"><div id="daysC"></div></div>
+<div id="pCheck" class="panel"><div id="checkC"></div></div>
+<div id="pGallery" class="panel">
+  <div class="gal-search">
+    <input id="galQuery" placeholder="搜索首尔美图…" value="Seoul Korea night">
+    <button onclick="searchGallery()">🔍</button>
+  </div>
+  <div class="gal-grid" id="galC"></div>
+  <div class="gal-load" id="galLoad"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="swTab('days')"><span class="ti">📅</span>行程<span class="dot"></span></button>
+  <button class="tab" onclick="swTab('check')"><span class="ti">✅</span>清单<span class="dot"></span></button>
+  <button class="tab" onclick="swTab('gallery')"><span class="ti">🖼️</span>图集<span class="dot"></span></button>
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
-// ═══ FEISHU API ═══
-const APP_ID='cli_aabfb6e658789be8';
-const APP_SECRET='Bu1YYA1VseQefwB4UQJhleSIEN7UtaAr';
+// ═══ CONFIG ═══
+const PROXY='https://7b4ad832bd97d8.lhr.life/';
 const BITABLE='C28eb6d4VaGDtmsnACOc59ianOf';
 const TABLE='tbl9716rt5k5b37e';
-const CORS='https://7b4ad832bd97d8.lhr.life/';
 
+// ═══ TRIP DATA ═══
+const DAYS=[
+  {d:1,date:'7.9 周四',title:'抵达首尔',tag:'🛬 18:45仁川T1',
+   img:'https://images.unsplash.com/photo-1517154421773-0529f29ea451?w=600&q=70',
+   items:[
+    {icon:'✈️',txt:'18:45 仁川T1到达',tag:'key',tagT:'关键'},
+    {icon:'🥩',txt:'Gop烤肉 或 高度食烤肉',tag:'food',tagT:'晚餐'},
+    {icon:'🏨',txt:'入住酒店休息',tag:'act',tagT:'休息'},
+   ]},
+  {d:2,date:'7.10 周五',title:'明洞+演唱会',tag:'🎤 17:00入场⭐',
+   img:'https://images.unsplash.com/photo-1635321695868-4c9cd9db72e3?w=600&q=70',
+   items:[
+    {icon:'🍲',txt:'麻浦阳地雪浓汤',tag:'food',tagT:'早餐'},
+    {icon:'🛍️',txt:'明洞逛街',tag:'act',tagT:'购物'},
+    {icon:'🍗',txt:'炸鸡60',tag:'food',tagT:'午餐'},
+    {icon:'🎤',txt:'17:00 演唱会!!!',tag:'key',tagT:'重点'},
+    {icon:'🍕',txt:'外卖：罗杰炒年糕+Nomore披萨',tag:'food',tagT:'晚餐'},
+   ]},
+  {d:3,date:'7.11 周六',title:'汝矣岛+弘大',tag:'🌅 汉江日落',
+   img:'https://images.unsplash.com/photo-1568992687947-f8a46486d089?w=600&q=70',
+   items:[
+    {icon:'🐔',txt:'长寿韩方参鸡汤 / Fritz烘焙',tag:'food',tagT:'早餐'},
+    {icon:'🛍️',txt:'汝矣岛现代百货',tag:'act',tagT:'购物'},
+    {icon:'🐂',txt:'소곱창 烤牛肠',tag:'food',tagT:'午餐'},
+    {icon:'🌅',txt:'汉江公园看日落',tag:'act',tagT:'景点'},
+    {icon:'🍻',txt:'Hansabal大排档',tag:'food',tagT:'晚餐'},
+    {icon:'💄',txt:'Olive Young扫货',tag:'act',tagT:'购物'},
+   ]},
+  {d:4,date:'7.12 周日',title:'圣水洞+狎鸥亭',tag:'☕ 网红咖啡',
+   img:'https://images.unsplash.com/photo-1580656491633-98ba10fbf940?w=600&q=70',
+   items:[
+    {icon:'🍔',txt:"Mom's Touch 汉堡",tag:'food',tagT:'早餐'},
+    {icon:'🛍️',txt:'圣水洞逛街+网红咖啡',tag:'act',tagT:'购物'},
+    {icon:'🥩',txt:'水芹菜牛肉饭汤',tag:'food',tagT:'午餐'},
+    {icon:'🛍️',txt:'狎鸥亭设计师品牌',tag:'act',tagT:'购物'},
+    {icon:'🍖',txt:'양천뼈다귀 孔德脊骨汤',tag:'food',tagT:'晚餐'},
+   ]},
+  {d:5,date:'7.13 周一',title:'返程回家',tag:'✈️ 13:10起飞',
+   img:'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=70',
+   items:[
+    {icon:'⏰',txt:'8:00 起床',tag:'act',tagT:'起床'},
+    {icon:'🏪',txt:'CU/GS25便利店 饭团+香蕉牛奶',tag:'food',tagT:'早餐'},
+    {icon:'🚕',txt:'出发去机场',tag:'key',tagT:'交通'},
+    {icon:'🛍️',txt:'免税店提货',tag:'act',tagT:'购物'},
+    {icon:'✈️',txt:'13:10 仁川T1起飞 ✈️',tag:'key',tagT:'回家'},
+   ]},
+];
+
+const CHECKS=[
+  {g:'出发前准备',icon:'🎒',items:[
+    {em:'📱',tx:'LG U+ 电话卡',done:true},
+    {em:'🪥',tx:'牙刷+卫生蓝膜',done:true},
+    {em:'💰',tx:'现金 ₩',done:true},
+    {em:'🔋',tx:'充电宝（大容量）',done:true},
+    {em:'🔌',tx:'充电转换头（韩标→国标）',done:true},
+    {em:'🛏️',tx:'充气U形枕',done:true},
+    {em:'🚊',tx:'落地买 T-money 气候卡',note:'仁川地铁站'},
+    {em:'🧤',tx:'一次性手套'},
+    {em:'🧻',tx:'卫生纸/抽纸',note:'多拿！'},
+    {em:'🗑️',tx:'垃圾袋×5',note:'韩国没垃圾桶'},
+    {em:'💳',tx:'Visa卡'},
+    {em:'📿',tx:'手机挂绳',note:'防盗'},
+    {em:'🚕',tx:'预定接送机',note:'仁川⇄酒店'},
+    {em:'📱',tx:'必备APP：Uber/KakaoMap/Papago'},
+    {em:'🛍️',tx:'新罗免税店APP',note:'提前下单机场提'},
+  ]},
+  {g:'重要提醒',icon:'🚨',items:[
+    {em:'💳',tx:'刷支付宝/微信汇率更优惠',note:'Visa+现金保底'},
+    {em:'📱',tx:'手机挂绳不离身'},
+    {em:'🗑️',tx:'垃圾袋随身带'},
+    {em:'🧻',tx:'多拿抽纸',note:'餐厅纸很少'},
+    {em:'📲',tx:'用KakaoMap别用Google Map'},
+  ]},
+];
+
+// ═══ STATE ═══
+let checklist=[];
 let feishuToken='';
 
 async function feishu(path,opts={}){
   if(!feishuToken){
-    let r=await fetch(CORS+'auth/v3/tenant_access_token/internal',{
+    let r=await fetch(PROXY+'auth/v3/tenant_access_token/internal',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({app_id:APP_ID,app_secret:APP_SECRET})
+      body:JSON.stringify({app_id:'cli_aabfb6e658789be8',app_secret:'Bu1YYA1VseQefwB4UQJhleSIEN7UtaAr'})
     });
     let d=await r.json();
     feishuToken=d.tenant_access_token;
   }
   let h={Authorization:'Bearer '+feishuToken,'Content-Type':'application/json; charset=utf-8'};
-  let res=await fetch(CORS+'bitable/v1/apps/'+BITABLE+'/tables/'+TABLE+path,{headers:h,...opts});
+  let res=await fetch(PROXY+'bitable/v1/apps/'+BITABLE+'/tables/'+TABLE+path,{headers:h,...opts});
   return res.json();
 }
-
-// ═══ DATA ═══
-const CS=['准备','Day1','Day2','Day3','Day4','Day5','提醒'];
-const CI={准备:'🎒',Day1:'🌴',Day2:'🎵',Day3:'🌅',Day4:'☕',Day5:'✈️',提醒:'🚨'};
-const DN={1:'7.9 周四·抵达',2:'7.10 周五·明洞+演唱会',3:'7.11 周六·汝矣岛+弘大',4:'7.12 周日·圣水洞+狎鸥亭',5:'7.13 周一·返程'};
-
-const FALLBACK=[{id:1,em:'📱',tx:'LG U+ 电话卡',c:0,s:'✅ 已完成',d:0},{id:2,em:'🪥',tx:'牙刷+卫生蓝膜',c:0,s:'✅ 已完成',d:0},{id:3,em:'💰',tx:'现金 ₩',c:0,s:'✅ 已完成',d:0},{id:4,em:'🔋',tx:'充电宝',c:0,s:'✅ 已完成',d:0},{id:5,em:'🔌',tx:'充电转换头',c:0,s:'✅ 已完成',d:0},{id:6,em:'🛏️',tx:'充气U形枕',c:0,s:'✅ 已完成',d:0},{id:7,em:'🚊',tx:'T-money气候卡',c:0,s:'⬜ 待办',d:0},{id:8,em:'🧤',tx:'一次性手套',c:0,s:'⬜ 待办',d:0},{id:9,em:'🧻',tx:'卫生纸/抽纸',c:0,s:'⬜ 待办',d:0},{id:10,em:'🗑️',tx:'垃圾袋×5',c:0,s:'⬜ 待办',d:0},{id:11,em:'💳',tx:'Visa卡',c:0,s:'⬜ 待办',d:0},{id:12,em:'📿',tx:'手机挂绳',c:0,s:'⬜ 待办',d:0},{id:13,em:'🚕',tx:'预定接送机',c:0,s:'⬜ 待办',d:0},{id:14,em:'📱',tx:'必备APP',c:0,s:'⬜ 待办',d:0},{id:15,em:'🛍️',tx:'新罗免税店APP',c:0,s:'⬜ 待办',d:0},{id:16,em:'✈️',tx:'18:45 仁川T1',c:1,s:'⬜ 待办',d:1},{id:17,em:'🥩',tx:'Gop/高度食烤肉',c:1,s:'⬜ 待办',d:1},{id:18,em:'🏨',tx:'入住酒店休息',c:1,s:'⬜ 待办',d:1},{id:19,em:'🍲',tx:'麻浦阳地雪浓汤',c:2,s:'⬜ 待办',d:2},{id:20,em:'🛍️',tx:'明洞逛街',c:2,s:'⬜ 待办',d:2},{id:21,em:'🍗',tx:'炸鸡60',c:2,s:'⬜ 待办',d:2},{id:22,em:'🎤',tx:'17:00演唱会⭐',c:2,s:'⬜ 待办',d:2},{id:23,em:'🍕',tx:'外卖炒年糕+披萨',c:2,s:'⬜ 待办',d:2},{id:24,em:'🐔',tx:'参鸡汤/Fritz',c:3,s:'⬜ 待办',d:3},{id:25,em:'🛍️',tx:'汝矣岛现代百货',c:3,s:'⬜ 待办',d:3},{id:26,em:'🐂',tx:'소곱창牛肠',c:3,s:'⬜ 待办',d:3},{id:27,em:'🌅',tx:'汉江公园日落',c:3,s:'⬜ 待办',d:3},{id:28,em:'🍻',tx:'Hansabal大排档',c:3,s:'⬜ 待办',d:3},{id:29,em:'💄',tx:'OliveYoung扫货',c:3,s:'⬜ 待办',d:3},{id:30,em:'🍔',tx:"Mom's Touch汉堡",c:4,s:'⬜ 待办',d:4},{id:31,em:'🛍️',tx:'圣水洞逛街',c:4,s:'⬜ 待办',d:4},{id:32,em:'🥩',tx:'水芹菜牛肉饭汤',c:4,s:'⬜ 待办',d:4},{id:33,em:'🛍️',tx:'狎鸥亭逛街',c:4,s:'⬜ 待办',d:4},{id:34,em:'🍖',tx:'脊骨汤(孔德)',c:4,s:'⬜ 待办',d:4},{id:35,em:'⏰',tx:'8:00起床',c:5,s:'⬜ 待办',d:5},{id:36,em:'🏪',tx:'CU/GS25便利店',c:5,s:'⬜ 待办',d:5},{id:37,em:'🚕',tx:'出发去机场',c:5,s:'⬜ 待办',d:5},{id:38,em:'🛍️',tx:'免税店+提货',c:5,s:'⬜ 待办',d:5},{id:39,em:'✈️',tx:'13:10起飞',c:5,s:'⬜ 待办',d:5},{id:40,em:'💳',tx:'刷汇率优惠',c:6,s:'⬜ 待办',d:0},{id:41,em:'📱',tx:'手机不离身',c:6,s:'⬜ 待办',d:0},{id:42,em:'🗑️',tx:'垃圾袋随身',c:6,s:'⬜ 待办',d:0},{id:43,em:'🧻',tx:'多拿抽纸',c:6,s:'⬜ 待办',d:0},{id:44,em:'📲',tx:'KakaoMap',c:6,s:'⬜ 待办',d:0}];
-
-let T=[];
-let recMap={};
 
 async function load(){
   document.getElementById('syncStat').textContent='⏳';
   try{
     let data=await feishu('/records?page_size=100');
-    T=data.data.items.map((item,i)=>({
-      id:i+1,
-      rid:item.record_id,
-      em:FALLBACK[i]?.em||'📌',
-      tx:item.fields['文本']||'',
-      c:CS.indexOf(item.fields['分类']||'准备'),
-      s:item.fields['状态']||'⬜ 待办',
-      d:FALLBACK[i]?.d||0,
+    let items=data.data.items;
+    // Map checklist items from Feishu
+    let flat=[];
+    CHECKS.forEach(g=>g.items.forEach((item,i)=>{
+      let feishuItem=items.find(it=>it.fields['文本']===item.tx);
+      flat.push({
+        ...item,
+        id:feishuItem?.record_id||null,
+        done:feishuItem?feishuItem.fields['状态']==='✅ 已完成':item.done||false,
+      });
     }));
-    recMap={};T.forEach(t=>recMap[t.id]=t);
-    document.getElementById('syncStat').textContent='🟢';
+    checklist=flat;
+    document.getElementById('syncStat').innerHTML='🟢 <span style=color:#2ed573>在线</span>';
   }catch(e){
-    T=FALLBACK;T.forEach((t,i)=>{t.rid='';recMap[i+1]=t;});
-    document.getElementById('syncStat').textContent='🔴离线';
+    CHECKS.forEach(g=>g.items.forEach(item=>checklist.push({...item,id:null,done:item.done||false})));
+    document.getElementById('syncStat').innerHTML='🔴 <span style=color:#ff6b8a>离线</span>';
   }
-  R();
+  renderAll();
 }
 
-async function chg(id,s){
-  let t=recMap[id];if(!t)return;
-  t.s=s;R();
-  if(!t.rid)return;
+async function toggleCheck(idx){
+  let item=checklist[idx];
+  item.done=!item.done;
+  renderAll();
+  if(!item.id)return;
   document.getElementById('syncStat').textContent='⏳';
   try{
-    await feishu('/records/'+t.rid,{method:'PUT',body:JSON.stringify({fields:{'状态':s}})});
-    document.getElementById('syncStat').textContent='🟢';
+    await feishu('/records/'+item.id,{
+      method:'PUT',
+      body:JSON.stringify({fields:{'状态':item.done?'✅ 已完成':'⬜ 待办'}})
+    });
+    document.getElementById('syncStat').innerHTML='🟢 <span style=color:#2ed573>在线</span>';
   }catch(e){
-    document.getElementById('syncStat').textContent='🔴';
+    document.getElementById('syncStat').innerHTML='🔴 <span style=color:#ff6b8a>离线</span>';
   }
 }
 
-function up(){
-  let d=T.filter(t=>t.s==='✅ 已完成').length,p=T.filter(t=>t.s==='🔄 进行中').length,td=T.filter(t=>t.s==='⬜ 待办').length;
-  document.getElementById('zD').textContent='✅'+d;
-  document.getElementById('zP').textContent='🔄'+p;
-  document.getElementById('zT').textContent='⬜'+td;
-  document.getElementById('pBar').style.width=Math.round((d/T.length)*100)+'%';
+function renderAll(){
+  renderDays();
+  renderChecks();
+  updateStats();
 }
 
-function kc(st){
-  let it=T.filter(t=>t.s===st),h='';
-  CS.forEach(cat=>{
-    let ci=it.filter(t=>t.c===CS.indexOf(cat));
-    if(!ci.length)return;
-    h+=`<div class="cg"><div class="cl">${CI[cat]} ${cat}</div>`;
-    ci.forEach(t=>{
-      h+=`<div class="cd"><span class="em">${t.em}</span><span class="tx">${t.tx}</span>
-        <select onchange="chg(${t.id},this.value)">
-          <option value="⬜ 待办" ${st==='⬜ 待办'?'selected':''}>⬜</option>
-          <option value="🔄 进行中" ${st==='🔄 进行中'?'selected':''}>🔄</option>
-          <option value="✅ 已完成" ${st==='✅ 已完成'?'selected':''}>✅</option>
-        </select></div>`;
+function renderDays(){
+  let h='';
+  DAYS.forEach(day=>{
+    h+=`<div class="day" id="day${day.d}">
+      <div class="day-top" onclick="document.getElementById('day${day.d}').classList.toggle('open')">
+        <div class="day-num">${String(day.d).padStart(2,'0')}</div>
+        <div class="day-hd"><h3>${day.title}</h3><div class="date">${day.date}</div><div class="tag">${day.tag}</div></div>
+        <div class="day-arrow">▼</div>
+      </div>
+      <div class="day-body">
+        <div class="day-img" style="background-image:url(${day.img})"></div>`;
+    day.items.forEach(it=>{
+      h+=`<div class="tl-item">
+        <div class="tl-icon">${it.icon}</div>
+        <div class="tl-txt">${it.txt}</div>
+        <div class="tl-tag ${it.tag}">${it.tagT}</div>
+      </div>`;
+    });
+    h+='</div></div>';
+  });
+  document.getElementById('daysC').innerHTML=h;
+}
+
+function renderChecks(){
+  let h='';
+  CHECKS.forEach((g,gi)=>{
+    let items=checklist.filter((_,i)=>{
+      let offset=0;
+      for(let j=0;j<gi;j++)offset+=CHECKS[j].items.length;
+      return i>=offset&&i<offset+g.items.length;
+    });
+    let done=items.filter(i=>i.done).length;
+    h+=`<div class="ck-group"><h3>${g.icon} ${g.g} <span class="cnt">${done}/${items.length}</span></h3>`;
+    items.forEach((item,i)=>{
+      let idx=checklist.indexOf(item);
+      h+=`<div class="ck-item${item.done?' done':''}" onclick="toggleCheck(${idx})">
+        <div class="cb"></div>
+        <div class="em">${item.em}</div>
+        <div class="tx">${item.tx}</div>
+        ${item.note?`<div class="note">${item.note}</div>`:''}
+      </div>`;
     });
     h+='</div>';
   });
-  return h||'<div style="padding:20px;color:#333;text-align:center;font-size:12px">— 空 —</div>';
+  document.getElementById('checkC').innerHTML=h;
 }
 
-function R(){
-  document.getElementById('kT').innerHTML=kc('⬜ 待办');
-  document.getElementById('kP').innerHTML=kc('🔄 进行中');
-  document.getElementById('kD').innerHTML=kc('✅ 已完成');
-  document.getElementById('cT').textContent=T.filter(t=>t.s==='⬜ 待办').length;
-  document.getElementById('cP').textContent=T.filter(t=>t.s==='🔄 进行中').length;
-  document.getElementById('cD').textContent=T.filter(t=>t.s==='✅ 已完成').length;
-
-  let gh='';CS.forEach(cat=>{let ct=T.filter(t=>t.c===CS.indexOf(cat));if(!ct.length)return;gh+=`<div class="gt-cat"><div class="gt-cat-icon">${CI[cat]}</div><div class="gt-cat-name">${cat}</div></div>`;ct.forEach(t=>{let cl=t.s==='✅ 已完成'?'done':t.s==='🔄 进行中'?'prog':'';gh+=`<div class="gt-r ${cl}"><div class="gt-em">${t.em}</div><div class="gt-tx">${t.tx}</div><div class="gt-st">${t.s.replace('⬜ 待办','⬜').replace('🔄 进行中','🔄').replace('✅ 已完成','✅')}</div></div>`;});});document.getElementById('gC').innerHTML=gh;
-
-  let ch='';[{t:'✅ 已完成',f:'✅ 已完成'},{t:'⬜ 出发前待办',c:'准备',nf:'✅ 已完成'},{t:'🗺️ Day1-5',c:'Day1|Day2|Day3|Day4|Day5'},{t:'🚨 重要提醒',c:'提醒'}].forEach(s=>{let cats=s.c?s.c.split('|'):CS;let items=T.filter(t=>cats.includes(CS[t.c])&&((s.f&&t.s===s.f)||(s.nf&&t.s!==s.nf)||(!s.f&&!s.nf)));if(!items.length)return;ch+=`<div class="ck"><h3>${s.t}</h3>`;items.forEach(t=>{ch+=`<label class="ck-item ${t.s==='✅ 已完成'?'done':''}"><input type="checkbox" ${t.s==='✅ 已完成'?'checked':''} onchange="chg(${t.id},this.checked?'✅ 已完成':'⬜ 待办')"><span>${t.em} ${t.tx}</span></label>`;});ch+='</div>';});document.getElementById('ckC').innerHTML=ch;
-
-  let ih='';[1,2,3,4,5].forEach(d=>{let items=T.filter(t=>t.d===d);let meals=items.map(t=>{let cl=t.tx.includes('早餐')||t.tx.includes('雪浓')||t.tx.includes('参鸡')||t.tx.includes('汉堡')||t.tx.includes('便利店')?'bf':t.tx.includes('午餐')||t.tx.includes('炸鸡')||t.tx.includes('牛肠')||t.tx.includes('饭汤')?'lu':t.tx.includes('晚餐')||t.tx.includes('烤肉')||t.tx.includes('大排档')||t.tx.includes('脊骨')||t.tx.includes('外卖')||t.tx.includes('披萨')?'di':'ac';return`<div class="${cl}">${t.em} ${t.tx}</div>`;}).join('');ih+=`<div class="dy"><h3>🌴 Day ${d} · ${DN[d]}</h3><div class="ml">${meals}</div></div>`;});document.getElementById('iC').innerHTML=ih;
-  up();
+function updateStats(){
+  let total=checklist.length;
+  let done=checklist.filter(i=>i.done).length;
+  let todo=total-done;
+  let pct=total?Math.round(done/total*100):0;
+  document.getElementById('stTasks').textContent=todo;
+  document.getElementById('stDone').textContent=done;
+  document.getElementById('stPct').textContent=pct+'%';
+  document.getElementById('progFill').style.width=pct+'%';
 }
 
-function sw(n){
-  ['pK','pG','pC','pI'].forEach(id=>document.getElementById(id).classList.remove('on'));
-  ['nK','nG','nC','nI'].forEach(id=>document.getElementById(id).classList.remove('on'));
-  document.getElementById('p'+{kanban:'K',gantt:'G',checklist:'C',itinerary:'I'}[n]).classList.add('on');
-  document.getElementById('n'+{kanban:'K',gantt:'G',checklist:'C',itinerary:'I'}[n]).classList.add('on');
+function swTab(t){
+  ['pDays','pCheck','pGallery'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('p'+{days:'Days',check:'Check',gallery:'Gallery'}[t]).classList.add('on');
+  document.querySelectorAll('.tab')[{days:0,check:1,gallery:2}[t]].classList.add('on');
+  if(t==='gallery'&&!document.getElementById('galC').innerHTML)searchGallery();
 }
+
+// ═══ GALLERY ═══
+async function searchGallery(){
+  let q=document.getElementById('galQuery').value||'Seoul Korea';
+  document.getElementById('galC').innerHTML='<div class="spin"><div></div></div>';
+  try{
+    let r=await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(q)}&per_page=12&orientation=squarish&client_id=Jjx4NKDKgeP2kRJNcbW6Jm-X2dBW1NyJMTmJhIi2bSU`);
+    let d=await r.json();
+    let h='';
+    d.results.forEach(p=>{
+      h+=`<div class="gal-card" style="background-image:url(${p.urls.small})" onclick="window.open('${p.links.html}')">
+        <div class="cap">📷 ${p.user.name}</div>
+      </div>`;
+    });
+    document.getElementById('galC').innerHTML=h;
+  }catch(e){
+    document.getElementById('galC').innerHTML='<div class="gal-load">加载失败，请重试</div>';
+  }
+}
+document.getElementById('galQuery').addEventListener('keydown',e=>{if(e.key==='Enter')searchGallery()});
 
 load();
 </script>
