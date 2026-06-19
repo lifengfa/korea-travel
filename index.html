@@ -207,6 +207,22 @@ function sw(n){
   document.getElementById('n'+{kanban:'K',gantt:'G',checklist:'C',itinerary:'I'}[n]).classList.add('on');
 }
 
+async function syncFromCloud(){
+  try{
+    let data=await feishu('/records?page_size=100');
+    let changed=false;
+    data.data.items.forEach(item=>{
+      let local=Object.values(recMap).find(t=>t.rid===item.record_id);
+      if(local){
+        let s=item.fields['状态']||'⬜ 待办';
+        if(local.s!==s){local.s=s;changed=true;}
+      }
+    });
+    if(changed)R();
+  }catch(e){}
+}
+setInterval(syncFromCloud,30000);
+
 load();
 </script>
 </body>
