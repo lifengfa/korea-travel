@@ -250,6 +250,7 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
     <div class="bfab">
       <input id="bAmt" type="number" placeholder="₩金额" autocomplete="off">
       <select id="bPayer"><option value="ff">ff</option><option value="小韩">小韩</option><option value="老三">老三</option><option value="老四">老四</option></select>
+      <select id="bCat" style="max-width:60px"><option value="餐饮">🍴</option><option value="交通">🚇</option><option value="购物">🛍️</option><option value="其他">📦</option></select>
       <input id="bNote" placeholder="备注" autocomplete="off" style="max-width:70px">
       <button class="ba" onclick="addExp()">+</button>
     </div>
@@ -587,9 +588,9 @@ function renB(){
  document.getElementById('bSum').innerHTML=`<div class="bsc"><div class="bv">₩${total.toLocaleString()}</div><div class="bl">总花费</div></div><div class="bsc"><div class="bv">₩${pp.toLocaleString()}</div><div class="bl">人均 ₩</div></div><div class="bsc"><div class="bv">¥${Math.round(pp/185)}</div><div class="bl">人均 ¥(~185)</div></div>`;
  let h='';[...bl].reverse().forEach(e=>{let n=e.note.split('|'),payer=n[0]||'?',cat=n[1]||'其他',detail=n[2]||'';h+=`<div class="bex"><div class="bea">₩${e.amt.toLocaleString()}</div><div class="beinfo"><div class="betitle">${e.tx}</div><div class="bemeta">${payer} · ${cat}${detail?' · '+detail:''}</div></div><button class="bedel" onclick="delExp('${e.id}')">×</button></div>`;});document.getElementById('bList').innerHTML=h||'<div style="text-align:center;color:var(--s);padding:30px">还没有记账 📝</div>';}
 async function addExp(){
- let amt=parseInt(document.getElementById('bAmt').value),payer=document.getElementById('bPayer').value,note=document.getElementById('bNote').value.trim();
+ let amt=parseInt(document.getElementById('bAmt').value),payer=document.getElementById('bPayer').value,cat=document.getElementById('bCat').value,note=document.getElementById('bNote').value.trim();
  if(!amt||amt<0)return toast('请输入金额');
- let tx=note||'消费',fullNote=[payer,'餐饮'].join('|'),fields={'文本':tx,'分类':'预算','状态':String(amt),'备注':fullNote};
+ let tx=note||'消费',fullNote=[payer,cat].join('|'),fields={'文本':tx,'分类':'预算','状态':String(amt),'备注':fullNote};
  try{await fs('/records',{method:'POST',body:JSON.stringify({fields})});document.getElementById('bAmt').value='';document.getElementById('bNote').value='';await ld2();toast('✅ 已记账');}catch(e){console.log('add err',e);toast('❌ 记账失败')}}
 async function delExp(id){if(!confirm('删除此记录？'))return;try{await fs('/records/'+id,{method:'DELETE'});await ld2();toast('🗑️ 已删除')}catch(e){toast('❌ 删除失败')}}
 
