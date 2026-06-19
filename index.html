@@ -282,7 +282,7 @@ async function fs(p,o={}){
 
 async function ld(){
  if(!PX){
-  PX='https://6ce78054bb404b.lhr.life/'; // auto-updated by cron
+  PX='https://d406d19b6bfa2f.lhr.life/'; // auto-updated by cron
   try{let r=await fetch('proxy.txt?t='+Date.now(),{cache:'no-store'});PX=(await r.text()).trim()+'/';}catch(e){}
  }
  document.getElementById('sync').innerHTML='<span class="dot bad"></span>同步中';
