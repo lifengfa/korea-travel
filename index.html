@@ -1,286 +1,285 @@
-     1|<!DOCTYPE html>
-     2|<html lang="zh-CN">
-     3|<head>
-     4|<meta charset="UTF-8">
-     5|<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-     6|<title>🇰🇷 韩国gogogo</title>
-     7|<style>
-     8|@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap');
-     9|*{margin:0;padding:0;box-sizing:border-box}
-    10|:root{--b:#08080f;--c:#0f0f18;--br:rgba(255,255,255,.05);--t:#d4cec8;--s:#5c5660;--a:#f0a058;--pink:#e07080;--blu:#78b0e0;--grn:#60c878;--pur:#b890e0;--yel:#e0c060;--r:10px}
-    11|body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);font-size:14px;min-height:100dvh;-webkit-tap-highlight-color:transparent}
-    12|
-    13|/* ── HEADER ── */
-    14|.h{position:sticky;top:0;z-index:99;background:rgba(8,8,15,.95);backdrop-filter:blur(20px);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br)}
-    15|.h .logo{font-size:17px;font-weight:900;background:linear-gradient(135deg,var(--a),var(--pink),var(--pur));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    16|.h .st{font-size:11px;display:flex;align-items:center;gap:6px;color:var(--s)}
-    17|.h .st .dot{width:6px;height:6px;border-radius:50%}
-    18|.dot.ok{background:var(--grn);box-shadow:0 0 6px rgba(96,200,120,.4)}
-    19|.dot.bad{background:var(--pink);box-shadow:0 0 6px rgba(224,112,128,.4)}
-    20|
-    21|/* ── STATS ROW ── */
-    22|.stats{display:flex;gap:8px;padding:12px 14px}
-    23|.stats .stc{flex:1;background:var(--c);border:1px solid var(--br);border-radius:var(--r);padding:12px;text-align:center}
-    24|.stc .sv{font-size:22px;font-weight:700}
-    25|.stc .sl{font-size:10px;color:var(--s);margin-top:2px}
-    26|.stats .stc:nth-child(1) .sv{color:var(--a)}
-    27|.stats .stc:nth-child(2) .sv{color:var(--blu)}
-    28|.stats .stc:nth-child(3) .sv{color:var(--grn)}
-    29|
-    30|/* ── PROGRESS ── */
-    31|.pbar{padding:0 14px 14px}
-    32|.pbar .plbl{display:flex;justify-content:space-between;font-size:11px;color:var(--s);margin-bottom:6px}
-    33|.pbar .ptrk{height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
-    34|.pbar .pfil{height:100%;background:linear-gradient(90deg,var(--grn),var(--a));border-radius:2px;transition:width .5s}
-    35|
-    36|/* ── GANTT ── */
-    37|.gantt{padding:0 14px}
-    38|.gantt .gh{display:flex;gap:0;margin-bottom:10px;position:sticky;top:56px;z-index:10;background:var(--b)}
-    39|.gh .gl{width:64px;flex-shrink:0}
-    40|.gh .gd{flex:1;text-align:center;font-size:10px;color:var(--s);padding:6px 0;font-weight:600;letter-spacing:.3px}
-    41|.gantt .grow{display:flex;align-items:stretch;margin-bottom:6px;background:var(--c);border:1px solid var(--br);border-radius:var(--r);overflow:hidden;min-height:42px}
-    42|.grow .grp{width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding:8px;font-size:11px;font-weight:600;color:var(--a);gap:4px}
-    43|.grow .gcols{flex:1;display:flex;position:relative}
-    44|.gcols .gc{flex:1;border-left:1px solid var(--br);position:relative;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;align-content:center;gap:2px;padding:4px 2px}
-    45|.gcols .gc:first-child{border-left:none}
-    46|.gc .gb{font-size:10px;padding:3px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-    47|.gb.pre{background:rgba(160,140,200,.15);color:#b8a8d8}
-    48|.gb.d1{background:rgba(240,160,88,.12);color:var(--a)}
-    49|.gb.d2{background:rgba(224,112,128,.12);color:var(--pink)}
-    50|.gb.d3{background:rgba(120,176,224,.12);color:var(--blu)}
-    51|.gb.d4{background:rgba(96,200,120,.12);color:var(--grn)}
-    52|.gb.d5{background:rgba(224,192,96,.12);color:var(--yel)}
-    53|
-    54|/* ── DAY CARDS ── */
-    55|.days{padding:0 14px 90px}
-    56|.dayc{background:var(--c);border:1px solid var(--br);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
-    57|.dayc .dt{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
-    58|.dayc .dn{font-size:30px;font-weight:900;min-width:40px;text-align:center;line-height:1;background:linear-gradient(180deg,var(--a),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-    59|.dayc .di{flex:1;min-width:0}
-    60|.dayc .di h3{font-size:15px;font-weight:600}
-    61|.dayc .di .dd{font-size:11px;color:var(--s);margin-top:2px}
-    62|.dayc .di .dg{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:3px;font-weight:500}
-    63|.dg.red{background:rgba(224,112,128,.1);color:var(--pink)}
-    64|.dg.org{background:rgba(240,160,88,.1);color:var(--a)}
-    65|.dg.blu{background:rgba(120,176,224,.1);color:var(--blu)}
-    66|.dg.grn{background:rgba(96,200,120,.1);color:var(--grn)}
-    67|.dayc .arr{margin-left:auto;color:#333;font-size:12px;transition:.3s}
-    68|.dayc.open .arr{transform:rotate(180deg)}
-    69|.dayc .db{display:none;padding:0 16px 16px 70px}
-    70|.dayc.open .db{display:block}
-    71|.db .tl{position:relative;padding-left:18px;border-left:1.5px solid rgba(255,255,255,.05)}
-    72|.tl .item{padding:9px 0;position:relative;font-size:13px;display:flex;align-items:center;gap:8px}
-    73|.tl .item::before{content:'';position:absolute;left:-25px;top:14px;width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.08)}
-    74|.tl .item.m::before{border-color:rgba(240,160,88,.4);background:rgba(240,160,88,.12)}
-    75|.tl .item.a::before{border-color:rgba(120,176,224,.4);background:rgba(120,176,224,.12)}
-    76|.tl .item.k::before{border-color:rgba(224,112,128,.4);background:rgba(224,112,128,.12)}
-    77|.tl .item .ic{font-size:16px;flex-shrink:0}
-    78|.tl .item .tx{flex:1;line-height:1.4}
-    79|.tl .item .lb{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:500;flex-shrink:0}
-    80|.lb.ml{background:rgba(240,160,88,.1);color:var(--a)}
-    81|.lb.al{background:rgba(120,176,224,.1);color:var(--blu)}
-    82|.lb.kl{background:rgba(224,112,128,.1);color:var(--pink)}
-    83|
-    84|/* ── CHECKLIST ── */
-    85|.chks{padding:0 14px 90px}
-    86|.ckg{margin-bottom:16px}
-    87|.ckg .ckh{font-size:12px;color:var(--s);margin-bottom:8px;display:flex;align-items:center;gap:6px;letter-spacing:.3px}
-    88|.ckg .ckh::after{content:'';flex:1;height:1px;background:var(--br)}
-    89|.ckh .cnt{font-size:10px;background:rgba(240,160,88,.1);color:var(--a);padding:2px 8px;border-radius:10px}
-    90|.ckit{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--c);border:1px solid var(--br);border-radius:8px;margin-bottom:5px;cursor:pointer;transition:all .15s}
-    91|.ckit:active{transform:scale(.99)}
-    92|.ckit.done{opacity:.35}
-    93|.ckit.done .cktx{text-decoration:line-through}
-    94|.ckit .cb{width:20px;height:20px;border:2px solid #2a2a33;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
-    95|.ckit.done .cb{border-color:var(--grn);background:var(--grn)}
-    96|.ckit.done .cb::after{content:'✓';color:var(--b);font-weight:700;font-size:11px;animation:pop .2s}
-    97|@keyframes pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
-    98|.ckit .ckem{font-size:16px;flex-shrink:0}
-    99|.ckit .cktx{flex:1;font-size:13px}
-   100|.ckit .cknb{font-size:10px;color:var(--s);flex-shrink:0}
-   101|
-   102|/* ── TABS ── */
-   103|.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,15,.97);backdrop-filter:blur(20px);border-top:1px solid var(--br);display:flex;z-index:99;padding-bottom:env(safe-area-inset-bottom)}
-   104|.nav button{flex:1;padding:10px 4px 8px;border:none;background:none;color:var(--s);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;transition:.2s}
-   105|.nav button .ni{font-size:18px}
-   106|.nav button.on{color:var(--a)}
-   107|.pan{display:none;padding-top:4px}
-   108|.pan.on{display:block}
-   109|</style>
-   110|</head>
-   111|<body>
-   112|
-   113|<div class="h">
-   114|  <div class="logo">🇰🇷 한국고고고</div>
-   115|  <div class="st" id="sync">⏳</div>
-   116|</div>
-   117|
-   118|<div class="stats">
-   119|  <div class="stc"><div class="sv">5</div><div class="sl">总天数</div></div>
-   120|  <div class="stc"><div class="sv" id="sTodo">-</div><div class="sl">待办项</div></div>
-   121|  <div class="stc"><div class="sv" id="sPct">-</div><div class="sl">完成率</div></div>
-   122|</div>
-   123|
-   124|<div class="pbar"><div class="plbl"><span>准备进度</span><span id="pTxt">-</span></div><div class="ptrk"><div class="pfil" id="pFil"></div></div></div>
-   125|
-   126|<div id="panG" class="pan on">
-   127|  <!-- GANTT -->
-   128|  <div class="gantt">
-   129|    <div class="gh"><div class="gl"></div><div class="gd">准备</div><div class="gd">Day1</div><div class="gd">Day2</div><div class="gd">Day3</div><div class="gd">Day4</div><div class="gd">Day5</div></div>
-   130|    <div id="ganttC"></div>
-   131|  </div>
-   132|  <!-- Day cards -->
-   133|  <div class="days" id="daysC"></div>
-   134|</div>
-   135|
-   136|<div id="panC" class="pan"><div class="chks" id="checkC"></div></div>
-   137|
-   138|<div class="nav">
-   139|  <button class="on" onclick="sw('g')"><span class="ni">📅</span>甘特图</button>
-   140|  <button onclick="sw('c')"><span class="ni">✅</span>清单</button>
-   141|</div>
-   142|
-   143|<script>
-   144|// ═══ CONFIG ═══
-   145|let PX='';// loaded from proxy.txt
-   146|const BA='C28eb6d4VaGDtmsnACOc59ianOf',TB='tbl9716rt5k5b37e';
-   147|const AI='cli_aabfb6e658789be8',AS='Bu1YYA1VseQefwB4UQJhleSIEN7UtaAr';
-   148|
-   149|// ═══ DATA ═══
-   150|const DAYS=[
-   151| {d:1,dt:'7.9 周四',tt:'抵达首尔',tag:'🛬 18:45 仁川T1',tc:'red',tl:[
-   152|  {ic:'✈️',tx:'18:45 仁川T1到达',tp:'k',lb:'关键'},
-   153|  {ic:'🥩',tx:'🥩 晚餐-Gop烤肉',tp:'m',lb:'晚餐'},
-   154|  {ic:'🏨',tx:'入住酒店休息',tp:'a',lb:'休息'}]},
-   155| {d:2,dt:'7.10 周五',tt:'明洞+演唱会',tag:'🎤 17:00入场⭐',tc:'org',tl:[
-   156|  {ic:'🍲',tx:'麻浦阳地雪浓汤',tp:'m',lb:'早餐'},{ic:'🛍️',tx:'明洞逛街',tp:'a',lb:'购物'},
-   157|  {ic:'🍗',tx:'炸鸡60',tp:'m',lb:'午餐'},{ic:'🎤',tx:'🎤 演唱会!!!',tp:'k',lb:'重点'},
-   158|  {ic:'🍕',tx:'🍕 外卖-炒年糕+披萨',tp:'m',lb:'晚餐'}]},
-   159| {d:3,dt:'7.11 周六',tt:'汝矣岛+弘大',tag:'🌅 汉江日落',tc:'blu',tl:[
-   160|  {ic:'🐔',tx:'🐔 参鸡汤/Fritz',tp:'m',lb:'早餐'},{ic:'🛍️',tx:'汝矣岛现代百货',tp:'a',lb:'购物'},
-   161|  {ic:'🐂',tx:'🐂 소곱창牛肠',tp:'m',lb:'午餐'},{ic:'🌅',tx:'🌅 汉江公园日落',tp:'a',lb:'景点'},
-   162|  {ic:'🍻',tx:'Hansabal大排档',tp:'m',lb:'晚餐'},{ic:'💄',tx:'Olive Young扫货',tp:'a',lb:'购物'}]},
-   163| {d:4,dt:'7.12 周日',tt:'圣水洞+狎鸥亭',tag:'☕ 网红咖啡',tc:'grn',tl:[
-   164|  {ic:'🍔',tx:"🍔 Mom's Touch汉堡",tp:'m',lb:'早餐'},{ic:'🛍️',tx:'🛍️ 圣水洞逛街',tp:'a',lb:'购物'},
-   165|  {ic:'🥩',tx:'水芹菜牛肉饭汤',tp:'m',lb:'午餐'},{ic:'🛍️',tx:'🛍️ 狎鸥亭逛街',tp:'a',lb:'购物'},
-   166|  {ic:'🍖',tx:'🍖 脊骨汤',tp:'m',lb:'晚餐'}]},
-   167| {d:5,dt:'7.13 周一',tt:'返程回家',tag:'✈️ 13:10起飞',tc:'org',tl:[
-   168|  {ic:'⏰',tx:'8:00起床',tp:'a',lb:'起床'},{ic:'🏪',tx:'🏪 CU/GS25便利店',tp:'m',lb:'早餐'},
-   169|  {ic:'🚕',tx:'出发去机场',tp:'k',lb:'交通'},{ic:'🛍️',tx:'🛍️ 免税店+提货',tp:'a',lb:'购物'},
-   170|  {ic:'✈️',tx:'13:10 仁川T1起飞',tp:'k',lb:'回家'}]},
-   171|];
-   172|
-   173|const CHKS=[
-   174| {g:'出发前必备',ic:'🥳',items:[
-   175|  {em:'📱',tx:'📱 LG U+ 电话卡',done:1},{em:'🪥',tx:'🪥 牙刷+卫生蓝膜',done:1},
-   176|  {em:'💰',tx:'现金 ₩',done:1},{em:'🔋',tx:'充电宝',done:1},
-   177|  {em:'🔌',tx:'🔌 充电转换头',done:1},{em:'🛏️',tx:'充气U形枕',done:1},
-   178|  {em:'🚊',tx:'🚊 T-money气候卡',nb:'地铁站买'},{em:'🧤',tx:'一次性手套'},
-   179|  {em:'🧻',tx:'卫生纸/抽纸',nb:'多拿'},{em:'🗑️',tx:'垃圾袋×5',nb:'没有垃圾桶'},
-   180|  {em:'💳',tx:'Visa卡'},{em:'📿',tx:'手机挂绳',nb:'防盗'},
-   181|  {em:'🚕',tx:'预定接送机',nb:'仁川⇄酒店'},{em:'📱',tx:'📱 必备APP下载',nb:'Uber/Kakao/Papago'},
-   182|  {em:'🛍️',tx:'新罗免税店APP',nb:'提前买机场提'},
-   183| ]},
-   184| {g:'重要提醒',ic:'🚨',items:[
-   185|  {em:'💳',tx:'刷支付宝/微信汇率优惠',nb:'Visa+现金保底'},
-   186|  {em:'📱',tx:'手机挂绳不离身'},{em:'🗑️',tx:'垃圾袋随身带'},
-   187|  {em:'🧻',tx:'多拿抽纸',nb:'餐厅纸很少'},{em:'📲',tx:'用KakaoMap别用Google'},
-   188| ]},
-   189|];
-   190|
-   191|// ═══ STATE ═══
-   192|let cl=[],ft='';
-   193|
-   194|async function fs(p,o={}){
-   195| if(!ft){let r=await fetch(PX+'auth/v3/tenant_access_token/internal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_id:AI,app_secret:AS})});ft=(await r.json()).tenant_access_token}
-   196| return(await fetch(PX+'bitable/v1/apps/'+BA+'/tables/'+TB+p,{headers:{Authorization:'Bearer '+ft,'Content-Type':'application/json; charset=utf-8'},...o})).json();
-   197|}
-   198|
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>🇰🇷 韩国gogogo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--b:#08080f;--c:#0f0f18;--br:rgba(255,255,255,.05);--t:#d4cec8;--s:#5c5660;--a:#f0a058;--pink:#e07080;--blu:#78b0e0;--grn:#60c878;--pur:#b890e0;--yel:#e0c060;--r:10px}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);font-size:14px;min-height:100dvh;-webkit-tap-highlight-color:transparent}
+
+/* ── HEADER ── */
+.h{position:sticky;top:0;z-index:99;background:rgba(8,8,15,.95);backdrop-filter:blur(20px);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br)}
+.h .logo{font-size:17px;font-weight:900;background:linear-gradient(135deg,var(--a),var(--pink),var(--pur));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.h .st{font-size:11px;display:flex;align-items:center;gap:6px;color:var(--s)}
+.h .st .dot{width:6px;height:6px;border-radius:50%}
+.dot.ok{background:var(--grn);box-shadow:0 0 6px rgba(96,200,120,.4)}
+.dot.bad{background:var(--pink);box-shadow:0 0 6px rgba(224,112,128,.4)}
+
+/* ── STATS ROW ── */
+.stats{display:flex;gap:8px;padding:12px 14px}
+.stats .stc{flex:1;background:var(--c);border:1px solid var(--br);border-radius:var(--r);padding:12px;text-align:center}
+.stc .sv{font-size:22px;font-weight:700}
+.stc .sl{font-size:10px;color:var(--s);margin-top:2px}
+.stats .stc:nth-child(1) .sv{color:var(--a)}
+.stats .stc:nth-child(2) .sv{color:var(--blu)}
+.stats .stc:nth-child(3) .sv{color:var(--grn)}
+
+/* ── PROGRESS ── */
+.pbar{padding:0 14px 14px}
+.pbar .plbl{display:flex;justify-content:space-between;font-size:11px;color:var(--s);margin-bottom:6px}
+.pbar .ptrk{height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
+.pbar .pfil{height:100%;background:linear-gradient(90deg,var(--grn),var(--a));border-radius:2px;transition:width .5s}
+
+/* ── GANTT ── */
+.gantt{padding:0 14px}
+.gantt .gh{display:flex;gap:0;margin-bottom:10px;position:sticky;top:56px;z-index:10;background:var(--b)}
+.gh .gl{width:64px;flex-shrink:0}
+.gh .gd{flex:1;text-align:center;font-size:10px;color:var(--s);padding:6px 0;font-weight:600;letter-spacing:.3px}
+.gantt .grow{display:flex;align-items:stretch;margin-bottom:6px;background:var(--c);border:1px solid var(--br);border-radius:var(--r);overflow:hidden;min-height:42px}
+.grow .grp{width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding:8px;font-size:11px;font-weight:600;color:var(--a);gap:4px}
+.grow .gcols{flex:1;display:flex;position:relative}
+.gcols .gc{flex:1;border-left:1px solid var(--br);position:relative;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;align-content:center;gap:2px;padding:4px 2px}
+.gcols .gc:first-child{border-left:none}
+.gc .gb{font-size:10px;padding:3px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.gb.pre{background:rgba(160,140,200,.15);color:#b8a8d8}
+.gb.d1{background:rgba(240,160,88,.12);color:var(--a)}
+.gb.d2{background:rgba(224,112,128,.12);color:var(--pink)}
+.gb.d3{background:rgba(120,176,224,.12);color:var(--blu)}
+.gb.d4{background:rgba(96,200,120,.12);color:var(--grn)}
+.gb.d5{background:rgba(224,192,96,.12);color:var(--yel)}
+
+/* ── DAY CARDS ── */
+.days{padding:0 14px 90px}
+.dayc{background:var(--c);border:1px solid var(--br);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.dayc .dt{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.dayc .dn{font-size:30px;font-weight:900;min-width:40px;text-align:center;line-height:1;background:linear-gradient(180deg,var(--a),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dayc .di{flex:1;min-width:0}
+.dayc .di h3{font-size:15px;font-weight:600}
+.dayc .di .dd{font-size:11px;color:var(--s);margin-top:2px}
+.dayc .di .dg{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:3px;font-weight:500}
+.dg.red{background:rgba(224,112,128,.1);color:var(--pink)}
+.dg.org{background:rgba(240,160,88,.1);color:var(--a)}
+.dg.blu{background:rgba(120,176,224,.1);color:var(--blu)}
+.dg.grn{background:rgba(96,200,120,.1);color:var(--grn)}
+.dayc .arr{margin-left:auto;color:#333;font-size:12px;transition:.3s}
+.dayc.open .arr{transform:rotate(180deg)}
+.dayc .db{display:none;padding:0 16px 16px 70px}
+.dayc.open .db{display:block}
+.db .tl{position:relative;padding-left:18px;border-left:1.5px solid rgba(255,255,255,.05)}
+.tl .item{padding:9px 0;position:relative;font-size:13px;display:flex;align-items:center;gap:8px}
+.tl .item::before{content:'';position:absolute;left:-25px;top:14px;width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.08)}
+.tl .item.m::before{border-color:rgba(240,160,88,.4);background:rgba(240,160,88,.12)}
+.tl .item.a::before{border-color:rgba(120,176,224,.4);background:rgba(120,176,224,.12)}
+.tl .item.k::before{border-color:rgba(224,112,128,.4);background:rgba(224,112,128,.12)}
+.tl .item .ic{font-size:16px;flex-shrink:0}
+.tl .item .tx{flex:1;line-height:1.4}
+.tl .item .lb{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:500;flex-shrink:0}
+.lb.ml{background:rgba(240,160,88,.1);color:var(--a)}
+.lb.al{background:rgba(120,176,224,.1);color:var(--blu)}
+.lb.kl{background:rgba(224,112,128,.1);color:var(--pink)}
+
+/* ── CHECKLIST ── */
+.chks{padding:0 14px 90px}
+.ckg{margin-bottom:16px}
+.ckg .ckh{font-size:12px;color:var(--s);margin-bottom:8px;display:flex;align-items:center;gap:6px;letter-spacing:.3px}
+.ckg .ckh::after{content:'';flex:1;height:1px;background:var(--br)}
+.ckh .cnt{font-size:10px;background:rgba(240,160,88,.1);color:var(--a);padding:2px 8px;border-radius:10px}
+.ckit{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--c);border:1px solid var(--br);border-radius:8px;margin-bottom:5px;cursor:pointer;transition:all .15s}
+.ckit:active{transform:scale(.99)}
+.ckit.done{opacity:.35}
+.ckit.done .cktx{text-decoration:line-through}
+.ckit .cb{width:20px;height:20px;border:2px solid #2a2a33;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ckit.done .cb{border-color:var(--grn);background:var(--grn)}
+.ckit.done .cb::after{content:'✓';color:var(--b);font-weight:700;font-size:11px;animation:pop .2s}
+@keyframes pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+.ckit .ckem{font-size:16px;flex-shrink:0}
+.ckit .cktx{flex:1;font-size:13px}
+.ckit .cknb{font-size:10px;color:var(--s);flex-shrink:0}
+
+/* ── TABS ── */
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,15,.97);backdrop-filter:blur(20px);border-top:1px solid var(--br);display:flex;z-index:99;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;padding:10px 4px 8px;border:none;background:none;color:var(--s);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;transition:.2s}
+.nav button .ni{font-size:18px}
+.nav button.on{color:var(--a)}
+.pan{display:none;padding-top:4px}
+.pan.on{display:block}
+</style>
+</head>
+<body>
+
+<div class="h">
+  <div class="logo">🇰🇷 한국고고고</div>
+  <div class="st" id="sync">⏳</div>
+</div>
+
+<div class="stats">
+  <div class="stc"><div class="sv">5</div><div class="sl">总天数</div></div>
+  <div class="stc"><div class="sv" id="sTodo">-</div><div class="sl">待办项</div></div>
+  <div class="stc"><div class="sv" id="sPct">-</div><div class="sl">完成率</div></div>
+</div>
+
+<div class="pbar"><div class="plbl"><span>准备进度</span><span id="pTxt">-</span></div><div class="ptrk"><div class="pfil" id="pFil"></div></div></div>
+
+<div id="panG" class="pan on">
+  <!-- GANTT -->
+  <div class="gantt">
+    <div class="gh"><div class="gl"></div><div class="gd">准备</div><div class="gd">Day1</div><div class="gd">Day2</div><div class="gd">Day3</div><div class="gd">Day4</div><div class="gd">Day5</div></div>
+    <div id="ganttC"></div>
+  </div>
+  <!-- Day cards -->
+  <div class="days" id="daysC"></div>
+</div>
+
+<div id="panC" class="pan"><div class="chks" id="checkC"></div></div>
+
+<div class="nav">
+  <button class="on" onclick="sw('g')"><span class="ni">📅</span>甘特图</button>
+  <button onclick="sw('c')"><span class="ni">✅</span>清单</button>
+</div>
+
+<script>
+// ═══ CONFIG ═══
+let PX='';// loaded from proxy.txt
+const BA='C28eb6d4VaGDtmsnACOc59ianOf',TB='tbl9716rt5k5b37e';
+const AI='cli_aabfb6e658789be8',AS='Bu1YYA1VseQefwB4UQJhleSIEN7UtaAr';
+
+// ═══ DATA ═══
+const DAYS=[
+ {d:1,dt:'7.9 周四',tt:'抵达首尔',tag:'🛬 18:45 仁川T1',tc:'red',tl:[
+  {ic:'✈️',tx:'18:45 仁川T1到达',tp:'k',lb:'关键'},
+  {ic:'🥩',tx:'🥩 晚餐-Gop烤肉',tp:'m',lb:'晚餐'},
+  {ic:'🏨',tx:'入住酒店休息',tp:'a',lb:'休息'}]},
+ {d:2,dt:'7.10 周五',tt:'明洞+演唱会',tag:'🎤 17:00入场⭐',tc:'org',tl:[
+  {ic:'🍲',tx:'麻浦阳地雪浓汤',tp:'m',lb:'早餐'},{ic:'🛍️',tx:'明洞逛街',tp:'a',lb:'购物'},
+  {ic:'🍗',tx:'炸鸡60',tp:'m',lb:'午餐'},{ic:'🎤',tx:'🎤 演唱会!!!',tp:'k',lb:'重点'},
+  {ic:'🍕',tx:'🍕 外卖-炒年糕+披萨',tp:'m',lb:'晚餐'}]},
+ {d:3,dt:'7.11 周六',tt:'汝矣岛+弘大',tag:'🌅 汉江日落',tc:'blu',tl:[
+  {ic:'🐔',tx:'🐔 参鸡汤/Fritz',tp:'m',lb:'早餐'},{ic:'🛍️',tx:'汝矣岛现代百货',tp:'a',lb:'购物'},
+  {ic:'🐂',tx:'🐂 소곱창牛肠',tp:'m',lb:'午餐'},{ic:'🌅',tx:'🌅 汉江公园日落',tp:'a',lb:'景点'},
+  {ic:'🍻',tx:'Hansabal大排档',tp:'m',lb:'晚餐'},{ic:'💄',tx:'Olive Young扫货',tp:'a',lb:'购物'}]},
+ {d:4,dt:'7.12 周日',tt:'圣水洞+狎鸥亭',tag:'☕ 网红咖啡',tc:'grn',tl:[
+  {ic:'🍔',tx:"🍔 Mom's Touch汉堡",tp:'m',lb:'早餐'},{ic:'🛍️',tx:'🛍️ 圣水洞逛街',tp:'a',lb:'购物'},
+  {ic:'🥩',tx:'水芹菜牛肉饭汤',tp:'m',lb:'午餐'},{ic:'🛍️',tx:'🛍️ 狎鸥亭逛街',tp:'a',lb:'购物'},
+  {ic:'🍖',tx:'🍖 脊骨汤',tp:'m',lb:'晚餐'}]},
+ {d:5,dt:'7.13 周一',tt:'返程回家',tag:'✈️ 13:10起飞',tc:'org',tl:[
+  {ic:'⏰',tx:'8:00起床',tp:'a',lb:'起床'},{ic:'🏪',tx:'🏪 CU/GS25便利店',tp:'m',lb:'早餐'},
+  {ic:'🚕',tx:'出发去机场',tp:'k',lb:'交通'},{ic:'🛍️',tx:'🛍️ 免税店+提货',tp:'a',lb:'购物'},
+  {ic:'✈️',tx:'13:10 仁川T1起飞',tp:'k',lb:'回家'}]},
+];
+
+const CHKS=[
+ {g:'出发前必备',ic:'🥳',items:[
+  {em:'📱',tx:'📱 LG U+ 电话卡',done:1},{em:'🪥',tx:'🪥 牙刷+卫生蓝膜',done:1},
+  {em:'💰',tx:'现金 ₩',done:1},{em:'🔋',tx:'充电宝',done:1},
+  {em:'🔌',tx:'🔌 充电转换头',done:1},{em:'🛏️',tx:'充气U形枕',done:1},
+  {em:'🚊',tx:'🚊 T-money气候卡',nb:'地铁站买'},{em:'🧤',tx:'一次性手套'},
+  {em:'🧻',tx:'卫生纸/抽纸',nb:'多拿'},{em:'🗑️',tx:'垃圾袋×5',nb:'没有垃圾桶'},
+  {em:'💳',tx:'Visa卡'},{em:'📿',tx:'手机挂绳',nb:'防盗'},
+  {em:'🚕',tx:'预定接送机',nb:'仁川⇄酒店'},{em:'📱',tx:'📱 必备APP下载',nb:'Uber/Kakao/Papago'},
+  {em:'🛍️',tx:'新罗免税店APP',nb:'提前买机场提'},
+ ]},
+ {g:'重要提醒',ic:'🚨',items:[
+  {em:'💳',tx:'刷支付宝/微信汇率优惠',nb:'Visa+现金保底'},
+  {em:'📱',tx:'手机挂绳不离身'},{em:'🗑️',tx:'垃圾袋随身带'},
+  {em:'🧻',tx:'多拿抽纸',nb:'餐厅纸很少'},{em:'📲',tx:'用KakaoMap别用Google'},
+ ]},
+];
+
+// ═══ STATE ═══
+let cl=[],ft='';
+
+async function fs(p,o={}){
+ if(!ft){let r=await fetch(PX+'auth/v3/tenant_access_token/internal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_id:AI,app_secret:AS})});ft=(await r.json()).tenant_access_token}
+ return(await fetch(PX+'bitable/v1/apps/'+BA+'/tables/'+TB+p,{headers:{Authorization:'Bearer '+ft,'Content-Type':'application/json; charset=utf-8'},...o})).json();
+}
+
 async function ld(){
  if(!PX){try{let r=await fetch('proxy.txt');PX=(await r.text()).trim()+'/';}catch(e){PX='https://6715b14bff74cb.lhr.life/';}}
  document.getElementById('sync').innerHTML='<span class="dot bad"></span>同步中';
  try{
-   202|  let data=await fs('/records?page_size=100');let items=data.data.items;cl=[];
+  let data=await fs('/records?page_size=100');let items=data.data.items;cl=[];
   CHKS.forEach(g=>g.items.forEach(it=>{
    let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00-\u9fff]+/,'')===it.tx);
    cl.push({...it,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':!!it.done});
-   206|  }));
-   207|  document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
-   208| }catch(e){
-   209|  CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));
-   210|  document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线';
-   211| }
-   212| ren();
-   213|}
-   214|
-   215|async function tg(i){
-   216| cl[i].done=!cl[i].done;ren();
-   217| if(!cl[i].id)return;
-   218| document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
-   219| try{await fs('/records/'+cl[i].id,{method:'PUT',body:JSON.stringify({fields:{'状态':cl[i].done?'✅ 已完成':'⬜ 待办'}})});
-   220|  document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
-   221| }catch(e){document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线'}
-   222|}
-   223|
-   224|function ren(){
-   225| // Gantt
-   226| let gh='';
-   227| [{g:'🎒 准备',c:'pre',d:0},{g:'🌴 Day1',c:'d1',d:1},{g:'🎵 Day2',c:'d2',d:2},{g:'🌅 Day3',c:'d3',d:3},{g:'☕ Day4',c:'d4',d:4},{g:'✈️ Day5',c:'d5',d:5}].forEach(row=>{
-   228|  let items=[];
-   229|  if(row.d===0) CHKS[0].items.forEach(it=>items.push({em:it.em,tx:it.tx,done:cl.find(x=>x.tx===it.tx)?.done}));
-   230|  else{let day=DAYS.find(d=>d.d===row.d);if(day)day.tl.forEach(t=>items.push({em:t.ic,tx:t.tx}));}
-   231|  if(!items.length)return;
-   232|  gh+=`<div class="grow"><div class="grp">${row.g}</div><div class="gcols">`;
-   233|  for(let i=0;i<6;i++){
-   234|   let cls=i===0?'pre':`d${i}`;
-   235|   let cell=items.filter(it=>{
-   236|    if(row.d===0)return i===0;
-   237|    return i===row.d;
-   238|   });
-   239|   gh+=`<div class="gc">`;
-   240|   cell.forEach(it=>gh+=`<div class="gb ${cls}">${it.em} ${it.tx.slice(0,8)}</div>`);
-   241|   gh+=`</div>`;
-   242|  }
-   243|  gh+=`</div></div>`;
-   244| });
-   245| document.getElementById('ganttC').innerHTML=gh;
-   246|
-   247| // Day cards
-   248| let dh='';DAYS.forEach(d=>{
-   249|  dh+=`<div class="dayc" id="dy${d.d}"><div class="dt" onclick="document.getElementById('dy${d.d}').classList.toggle('open')"><div class="dn">${String(d.d).padStart(2,'0')}</div><div class="di"><h3>${d.tt}</h3><div class="dd">${d.dt}</div><div class="dg ${d.tc}">${d.tag}</div></div><div class="arr">▼</div></div><div class="db"><div class="tl">`;
-   250|  d.tl.forEach(t=>dh+=`<div class="item ${t.tp}"><span class="ic">${t.ic}</span><span class="tx">${t.tx}</span><span class="lb ${t.tp}l">${t.lb}</span></div>`);
-   251|  dh+=`</div></div></div>`;
-   252| });
-   253| document.getElementById('daysC').innerHTML=dh;
-   254|
-   255| // Checklist
-   256| let ch='';CHKS.forEach((g,gi)=>{
-   257|  let ofs=CHKS.slice(0,gi).reduce((a,c)=>a+c.items.length,0);
-   258|  let items=cl.slice(ofs,ofs+g.items.length);
-   259|  let done=items.filter(i=>i.done).length;
-   260|  ch+=`<div class="ckg"><div class="ckh">${g.ic} ${g.g}<span class="cnt">${done}/${items.length}</span></div>`;
-   261|  items.forEach((it,i)=>{let idx=ofs+i;
-   262|   ch+=`<div class="ckit${it.done?' done':''}" onclick="tg(${idx})"><div class="cb"></div><div class="ckem">${it.em}</div><div class="cktx">${it.tx}</div>${it.nb?`<div class="cknb">${it.nb}</div>`:''}</div>`});
-   263|  ch+='</div>';
-   264| });
-   265| document.getElementById('checkC').innerHTML=ch;
-   266|
-   267| // Stats
-   268| let td=cl.length,dn=cl.filter(i=>i.done).length,pc=td?Math.round(dn/td*100):0;
-   269| document.getElementById('sTodo').textContent=td-dn;
-   270| document.getElementById('sPct').textContent=pc+'%';
-   271| document.getElementById('pFil').style.width=pc+'%';
-   272| document.getElementById('pTxt').textContent=dn+'/'+td+' 项完成';
-   273|}
-   274|
-   275|function sw(n){
-   276| document.getElementById('panG').classList.toggle('on',n==='g');
-   277| document.getElementById('panC').classList.toggle('on',n==='c');
-   278| document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('on',(n==='g'&&i===0)||(n==='c'&&i===1)));
-   279|}
-   280|
-   281|ld();
-   282|</script>
-   283|</body>
-   284|</html>
-   285|
+  }));
+  document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
+ }catch(e){
+  CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));
+  document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线';
+ }
+ ren();
+}
+
+async function tg(i){
+ cl[i].done=!cl[i].done;ren();
+ if(!cl[i].id)return;
+ document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
+ try{await fs('/records/'+cl[i].id,{method:'PUT',body:JSON.stringify({fields:{'状态':cl[i].done?'✅ 已完成':'⬜ 待办'}})});
+  document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
+ }catch(e){document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线'}
+}
+
+function ren(){
+ // Gantt
+ let gh='';
+ [{g:'🎒 准备',c:'pre',d:0},{g:'🌴 Day1',c:'d1',d:1},{g:'🎵 Day2',c:'d2',d:2},{g:'🌅 Day3',c:'d3',d:3},{g:'☕ Day4',c:'d4',d:4},{g:'✈️ Day5',c:'d5',d:5}].forEach(row=>{
+  let items=[];
+  if(row.d===0) CHKS[0].items.forEach(it=>items.push({em:it.em,tx:it.tx,done:cl.find(x=>x.tx===it.tx)?.done}));
+  else{let day=DAYS.find(d=>d.d===row.d);if(day)day.tl.forEach(t=>items.push({em:t.ic,tx:t.tx}));}
+  if(!items.length)return;
+  gh+=`<div class="grow"><div class="grp">${row.g}</div><div class="gcols">`;
+  for(let i=0;i<6;i++){
+   let cls=i===0?'pre':`d${i}`;
+   let cell=items.filter(it=>{
+    if(row.d===0)return i===0;
+    return i===row.d;
+   });
+   gh+=`<div class="gc">`;
+   cell.forEach(it=>gh+=`<div class="gb ${cls}">${it.em} ${it.tx.slice(0,8)}</div>`);
+   gh+=`</div>`;
+  }
+  gh+=`</div></div>`;
+ });
+ document.getElementById('ganttC').innerHTML=gh;
+
+ // Day cards
+ let dh='';DAYS.forEach(d=>{
+  dh+=`<div class="dayc" id="dy${d.d}"><div class="dt" onclick="document.getElementById('dy${d.d}').classList.toggle('open')"><div class="dn">${String(d.d).padStart(2,'0')}</div><div class="di"><h3>${d.tt}</h3><div class="dd">${d.dt}</div><div class="dg ${d.tc}">${d.tag}</div></div><div class="arr">▼</div></div><div class="db"><div class="tl">`;
+  d.tl.forEach(t=>dh+=`<div class="item ${t.tp}"><span class="ic">${t.ic}</span><span class="tx">${t.tx}</span><span class="lb ${t.tp}l">${t.lb}</span></div>`);
+  dh+=`</div></div></div>`;
+ });
+ document.getElementById('daysC').innerHTML=dh;
+
+ // Checklist
+ let ch='';CHKS.forEach((g,gi)=>{
+  let ofs=CHKS.slice(0,gi).reduce((a,c)=>a+c.items.length,0);
+  let items=cl.slice(ofs,ofs+g.items.length);
+  let done=items.filter(i=>i.done).length;
+  ch+=`<div class="ckg"><div class="ckh">${g.ic} ${g.g}<span class="cnt">${done}/${items.length}</span></div>`;
+  items.forEach((it,i)=>{let idx=ofs+i;
+   ch+=`<div class="ckit${it.done?' done':''}" onclick="tg(${idx})"><div class="cb"></div><div class="ckem">${it.em}</div><div class="cktx">${it.tx}</div>${it.nb?`<div class="cknb">${it.nb}</div>`:''}</div>`});
+  ch+='</div>';
+ });
+ document.getElementById('checkC').innerHTML=ch;
+
+ // Stats
+ let td=cl.length,dn=cl.filter(i=>i.done).length,pc=td?Math.round(dn/td*100):0;
+ document.getElementById('sTodo').textContent=td-dn;
+ document.getElementById('sPct').textContent=pc+'%';
+ document.getElementById('pFil').style.width=pc+'%';
+ document.getElementById('pTxt').textContent=dn+'/'+td+' 项完成';
+}
+
+function sw(n){
+ document.getElementById('panG').classList.toggle('on',n==='g');
+ document.getElementById('panC').classList.toggle('on',n==='c');
+ document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('on',(n==='g'&&i===0)||(n==='c'&&i===1)));
+}
+
+ld();
+</script>
+</body>
+</html>
