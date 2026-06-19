@@ -403,6 +403,47 @@ async function tgd(i){
  }catch(e){document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线'}
 }
 
+// Long-press / context menu for gantt blocks
+let _cmTarget=null;
+document.addEventListener('click',()=>{document.getElementById('cm').classList.remove('show');_cmTarget=null});
+
+function showCM(e,type,idx){
+ e.preventDefault();e.stopPropagation();
+ _cmTarget={type,idx};
+ let cm=document.getElementById('cm');
+ cm.style.left=Math.min(e.clientX||200,window.innerWidth-150)+'px';
+ cm.style.top=Math.min(e.clientY||200,window.innerHeight-120)+'px';
+ cm.classList.add('show');
+}
+
+function cmEdit(){
+ let t=_cmTarget;if(!t)return;
+ document.getElementById('cm').classList.remove('show');
+ if(t.type==='dl')showAdd(t.idx,'dl');
+ else showAdd(t.idx,'cl');
+}
+
+function cmDel(){
+ let t=_cmTarget;if(!t)return;
+ document.getElementById('cm').classList.remove('show');
+ delItem(t.type,t.idx);
+}
+
+// Attach long-press to gantt blocks
+let _pressTimer=null;
+document.addEventListener('touchstart',e=>{
+ let gb=e.target.closest('.gb');
+ if(!gb||!gb.dataset.dlidx)return;
+ _pressTimer=setTimeout(()=>showCM(e,'dl',parseInt(gb.dataset.dlidx)),500);
+},{passive:false});
+document.addEventListener('touchend',()=>clearTimeout(_pressTimer));
+document.addEventListener('touchmove',()=>clearTimeout(_pressTimer));
+document.addEventListener('contextmenu',e=>{
+ let gb=e.target.closest('.gb');
+ if(!gb||!gb.dataset.dlidx)return;
+ showCM(e,'dl',parseInt(gb.dataset.dlidx));
+});
+
 let _editing=null;
 function showAdd(editIdx,editType){
  _editing=editType?{idx:editIdx,type:editType}:null;
