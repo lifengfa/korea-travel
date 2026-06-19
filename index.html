@@ -43,7 +43,9 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
 .grow .gcols{flex:1;display:flex;position:relative}
 .gcols .gc{flex:1;border-left:1px solid var(--br);position:relative;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;align-content:center;gap:2px;padding:4px 2px}
 .gcols .gc:first-child{border-left:none}
-.gc .gb{font-size:10px;padding:3px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.gc .gb{font-size:10px;padding:3px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;cursor:pointer;transition:all .2s ease-out}
+.gb:active{transform:scale(.95)}
+.gb.done{opacity:.35;text-decoration:line-through;background:rgba(96,200,120,.08)!important}
 .gb.pre{background:rgba(160,140,200,.15);color:#b8a8d8}
 .gb.d1{background:rgba(240,160,88,.12);color:var(--a)}
 .gb.d2{background:rgba(224,112,128,.12);color:var(--pink)}
@@ -106,6 +108,45 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
 .nav button.on{color:var(--a)}
 .pan{display:none;padding-top:4px}
 .pan.on{display:block}
+
+/* ── FAB ── */
+.fab{position:fixed;bottom:80px;right:18px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--pink));color:#fff;font-size:24px;border:none;box-shadow:0 4px 20px rgba(240,160,88,.35);z-index:100;cursor:pointer;transition:transform .2s;display:flex;align-items:center;justify-content:center}
+.fab:active{transform:scale(.9)}
+
+/* ── MODAL ── */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.mo.show{display:flex}
+.md{width:100%;max-width:480px;background:var(--c);border-radius:16px 16px 0 0;padding:20px 18px 28px;border-top:1px solid var(--br);animation:slideUp .25s ease-out}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.md h3{font-size:16px;font-weight:600;margin-bottom:14px}
+.md input,.md select,.md textarea{width:100%;padding:10px 12px;margin:6px 0;background:rgba(255,255,255,.04);border:1px solid var(--br);border-radius:8px;color:var(--t);font-size:14px;font-family:inherit;outline:none}
+.md input:focus,.md select:focus,.md textarea:focus{border-color:var(--a)}
+.md select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23d4cec8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.md textarea{resize:none;min-height:60px}
+.ma{display:flex;gap:8px;margin-top:14px}
+.ma button{flex:1;padding:11px;border-radius:8px;border:1px solid var(--br);background:transparent;color:var(--t);font-size:14px;cursor:pointer;font-family:inherit;transition:all .15s}
+.ma .bp{background:var(--a);border:none;color:#000;font-weight:600}
+.ma .bp:active{opacity:.8}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--c);border:1px solid var(--br);border-radius:20px;padding:10px 22px;font-size:13px;color:var(--t);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.show{opacity:1}
+
+/* ── DAY CARD DETAIL ANIMATION ── */
+.dayc .db{display:block;max-height:0;overflow:hidden;transition:max-height .35s ease-out;padding:0 16px 0 70px}
+.dayc.open .db{max-height:500px;padding-bottom:16px}
+.dayc .arr{transition:transform .25s}
+.dayc.open .arr{transform:rotate(180deg)}
+
+/* ── GANTT STAGGER ── */
+.grow{animation:fadeIn .3s ease-out both}
+.grow:nth-child(1){animation-delay:0s}
+.grow:nth-child(2){animation-delay:.04s}
+.grow:nth-child(3){animation-delay:.08s}
+.grow:nth-child(4){animation-delay:.12s}
+.grow:nth-child(5){animation-delay:.16s}
+.grow:nth-child(6){animation-delay:.2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -134,6 +175,34 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
 </div>
 
 <div id="panC" class="pan"><div class="chks" id="checkC"></div></div>
+
+<!-- FAB -->
+<button class="fab" onclick="showAdd()">+</button>
+
+<!-- Modal -->
+<div class="mo" id="mo" onclick="if(event.target===this)hideAdd()">
+  <div class="md">
+    <h3>➕ 添加新项目</h3>
+    <input id="atx" placeholder="名称（如：🍜 冷面）" maxlength="50" autocomplete="off">
+    <select id="acat">
+      <option value="出发前准备">🎒 出发前准备</option>
+      <option value="Day1·抵达">🌴 Day1·抵达</option>
+      <option value="Day2·明洞+演唱会">🎵 Day2·明洞+演唱会</option>
+      <option value="Day3·汝矣岛+弘大">🌅 Day3·汝矣岛+弘大</option>
+      <option value="Day4·圣水洞+狎鸥亭">☕ Day4·圣水洞+狎鸥亭</option>
+      <option value="Day5·返程">✈️ Day5·返程</option>
+      <option value="重要提醒">🚨 重要提醒</option>
+    </select>
+    <textarea id="ant" placeholder="备注（选填）" rows="2"></textarea>
+    <div class="ma">
+      <button onclick="hideAdd()">取消</button>
+      <button class="bp" onclick="doAdd()">添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
 
 <div class="nav">
   <button class="on" onclick="sw('g')"><span class="ni">📅</span>甘特图</button>
@@ -189,7 +258,7 @@ const CHKS=[
 ];
 
 // ═══ STATE ═══
-let cl=[],ft='';
+let cl=[],dl=[],ft='';
 
 async function fs(p,o={}){
  if(!ft){let r=await fetch(PX+'auth/v3/tenant_access_token/internal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_id:AI,app_secret:AS})});ft=(await r.json()).tenant_access_token}
@@ -205,9 +274,14 @@ async function ld(){
 let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00-\u9fff]+/,'')===it.tx.replace(/^[^\w\u4e00-\u9fff]+/,''));
    cl.push({...it,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':!!it.done});
   }));
+  dl=[];DAYS.forEach(d=>d.tl.forEach(t=>{
+   let strip=t.tx.replace(/^[^\w\u4e00-\u9fff]+/,'');
+   let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00-\u9fff]+/,'')===strip);
+   dl.push({...t,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':false,day:d.d});
+  }));
   document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
  }catch(e){
-  CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));
+  CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));DAYS.forEach(d=>d.tl.forEach(t=>dl.push({...t,id:null,done:false,day:d.d})));
   document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线';
  }
  ren();
@@ -228,7 +302,10 @@ function ren(){
  [{g:'🎒 准备',c:'pre',d:0},{g:'🌴 Day1',c:'d1',d:1},{g:'🎵 Day2',c:'d2',d:2},{g:'🌅 Day3',c:'d3',d:3},{g:'☕ Day4',c:'d4',d:4},{g:'✈️ Day5',c:'d5',d:5}].forEach(row=>{
   let items=[];
   if(row.d===0) CHKS[0].items.forEach(it=>items.push({em:it.em,tx:it.tx,done:cl.find(x=>x.tx===it.tx)?.done}));
-  else{let day=DAYS.find(d=>d.d===row.d);if(day)day.tl.forEach(t=>items.push({em:t.ic,tx:t.tx}));}
+  else{
+   let dls=dl.filter(x=>x.day===row.d);
+   dls.forEach(t=>items.push({em:t.ic,tx:t.tx,done:t.done,id:t.id,idx:dl.indexOf(t)}));
+  }
   if(!items.length)return;
   gh+=`<div class="grow"><div class="grp">${row.g}</div><div class="gcols">`;
   for(let i=0;i<6;i++){
@@ -238,7 +315,11 @@ function ren(){
     return i===row.d;
    });
    gh+=`<div class="gc">`;
-   cell.forEach(it=>gh+=`<div class="gb ${cls}">${it.em} ${it.tx.slice(0,8)}</div>`);
+   cell.forEach(it=>{
+    let dx=it.done?' done':'';
+    let ocl=typeof it.idx!=='undefined'?` onclick="tgd(${it.idx})"`:``;
+    gh+=`<div class="gb ${cls}${dx}"${ocl}>${it.em} ${it.tx.slice(0,8)}</div>`;
+   });
    gh+=`</div>`;
   }
   gh+=`</div></div>`;
@@ -248,7 +329,11 @@ function ren(){
  // Day cards
  let dh='';DAYS.forEach(d=>{
   dh+=`<div class="dayc" id="dy${d.d}"><div class="dt" onclick="document.getElementById('dy${d.d}').classList.toggle('open')"><div class="dn">${String(d.d).padStart(2,'0')}</div><div class="di"><h3>${d.tt}</h3><div class="dd">${d.dt}</div><div class="dg ${d.tc}">${d.tag}</div></div><div class="arr">▼</div></div><div class="db"><div class="tl">`;
-  d.tl.forEach(t=>dh+=`<div class="item ${t.tp}"><span class="ic">${t.ic}</span><span class="tx">${t.tx}</span><span class="lb ${t.tp}l">${t.lb}</span></div>`);
+  d.tl.forEach((t,i)=>{
+  let di=dl.find(x=>x.day===d.d&&x.tx===t.tx);
+  let dn=di&&di.done?' style="opacity:.4;text-decoration:line-through"':` onclick="event.stopPropagation();let idx=dl.findIndex(x=>x.day===${d.d}&&x.tx==='${t.tx.replace(/'/g,"\\'")}');if(idx>=0)tgd(idx)" style="cursor:pointer"`;
+  dh+=`<div class="item ${t.tp}"${dn}><span class="ic">${t.ic}</span><span class="tx">${t.tx}</span><span class="lb ${t.tp}l">${t.lb}</span></div>`;
+ });
   dh+=`</div></div></div>`;
  });
  document.getElementById('daysC').innerHTML=dh;
@@ -266,7 +351,7 @@ function ren(){
  document.getElementById('checkC').innerHTML=ch;
 
  // Stats
- let td=cl.length,dn=cl.filter(i=>i.done).length,pc=td?Math.round(dn/td*100):0;
+ let td=cl.length+dl.length,dn=cl.filter(i=>i.done).length+dl.filter(i=>i.done).length,pc=td?Math.round(dn/td*100):0;
  document.getElementById('sTodo').textContent=td-dn;
  document.getElementById('sPct').textContent=pc+'%';
  document.getElementById('pFil').style.width=pc+'%';
@@ -277,6 +362,46 @@ function sw(n){
  document.getElementById('panG').classList.toggle('on',n==='g');
  document.getElementById('panC').classList.toggle('on',n==='c');
  document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('on',(n==='g'&&i===0)||(n==='c'&&i===1)));
+}
+
+async function tgd(i){
+ dl[i].done=!dl[i].done;ren();
+ if(!dl[i].id)return toast('离线模式，无法同步');
+ document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
+ try{await fs('/records/'+dl[i].id,{method:'PUT',body:JSON.stringify({fields:{'状态':dl[i].done?'✅ 已完成':'⬜ 待办'}})});
+  document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
+ }catch(e){document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线'}
+}
+
+function showAdd(){document.getElementById('mo').classList.add('show');document.getElementById('atx').focus()}
+function hideAdd(){document.getElementById('mo').classList.remove('show')}
+
+async function doAdd(){
+ let tx=document.getElementById('atx').value.trim(),cat=document.getElementById('acat').value,nt=document.getElementById('ant').value.trim();
+ if(!tx)return;
+ hideAdd();
+ document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
+ try{
+  await fs('/records',{method:'POST',body:JSON.stringify({fields:{'文本':tx,'分类':cat,'状态':'⬜ 待办','备注':nt}})});
+  toast('✅ 已添加');
+  document.getElementById('atx').value='';document.getElementById('ant').value='';
+  await ld();
+ }catch(e){toast('❌ 添加失败')}
+}
+
+async function delItem(type,idx){
+ if(!confirm('确定删除？此操作不可恢复'))return;
+ let item=type==='cl'?cl[idx]:dl[idx];
+ if(!item||!item.id)return;
+ try{await fs('/records/'+item.id,{method:'DELETE'});toast('🗑️ 已删除');await ld();}
+ catch(e){toast('❌ 删除失败')}
+}
+
+function toast(m){
+ let t=document.getElementById('toast');
+ if(t._tid)clearTimeout(t._tid);
+ t.textContent=m;t.classList.add('show');
+ t._tid=setTimeout(()=>t.classList.remove('show'),2000);
 }
 
 ld();
