@@ -7,81 +7,80 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Noto Sans SC',sans-serif;background:#0a0a0f;color:#e0d8d0;min-height:100vh;overflow-x:hidden}
+body{font-family:'Noto Sans SC',sans-serif;background:#0a0a0f;color:#e0d8d0;min-height:100vh}
 
-/* HEADER */
-.header{background:#111118;border-bottom:1px solid #1e1e2a;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
-.logo{font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,#ff6b8a,#ff9a56,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stats{display:flex;gap:1.5rem;font-size:.85rem}
-.stat{padding:.3rem .8rem;border-radius:20px;font-weight:500}
-.stat-done{background:rgba(46,213,115,.12);color:#2ed573}
-.stat-progress{background:rgba(88,166,255,.12);color:#58a6ff}
-.stat-todo{background:rgba(255,107,138,.12);color:#ff6b8a}
+.header{background:#111118;border-bottom:1px solid #1e1e2a;padding:.8rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,#ff6b8a,#ff9a56,#ffd93d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stats{display:flex;gap:1rem;font-size:.82rem}
+.stat{padding:.25rem .7rem;border-radius:15px;font-weight:500}
+.sd{background:rgba(46,213,115,.12);color:#2ed573}
+.sp{background:rgba(88,166,255,.12);color:#58a6ff}
+.st{background:rgba(255,107,138,.12);color:#ff6b8a}
 
-/* TABS */
-.tabs{display:flex;gap:0;border-bottom:1px solid #1e1e2a;background:#0d0d14}
-.tab{padding:.8rem 2rem;cursor:pointer;border:none;background:none;color:#6a6a7a;font-size:.9rem;font-weight:500;transition:all .3s;border-bottom:2px solid transparent;font-family:inherit}
-.tab:hover{color:#c0b8b0}
-.tab.active{color:#ff9a56;border-bottom-color:#ff9a56;background:rgba(255,154,86,.04)}
+.tabs{display:flex;border-bottom:1px solid #1e1e2a;background:#0d0d14}
+.tab{padding:.7rem 1.5rem;cursor:pointer;border:none;background:none;color:#5a5a6a;font-size:.85rem;font-weight:500;border-bottom:2px solid transparent;font-family:inherit;transition:all .2s}
+.tab:hover{color:#b0a8a0}
+.tab.active{color:#ff9a56;border-bottom-color:#ff9a56}
 
-/* CONTENT */
-.content{padding:1.5rem 2rem}
+.content{padding:1.2rem 1.5rem;max-width:100%}
 .panel{display:none}
 .panel.active{display:block}
 
 /* KANBAN */
-.kanban{display:flex;gap:1rem;overflow-x:auto;padding-bottom:1rem}
-.kanban-col{min-width:300px;flex:1;background:#111118;border:1px solid #1e1e2a;border-radius:12px}
-.col-header{padding:.8rem 1rem;font-weight:600;font-size:.9rem;border-bottom:1px solid #1e1e2a;display:flex;justify-content:space-between;align-items:center}
-.col-body{padding:.6rem;min-height:200px;display:flex;flex-direction:column;gap:.5rem}
-.card{background:#171722;border:1px solid #222230;border-radius:8px;padding:.75rem;cursor:grab;transition:all .2s;font-size:.85rem;display:flex;align-items:center;gap:.6rem}
-.card:hover{border-color:rgba(255,107,138,.3);transform:translateY(-1px)}
-.card .emoji{font-size:1.2rem;flex-shrink:0}
-.card .text{line-height:1.4}
-.card select{background:#222;color:#e0d8d0;border:1px solid #333;border-radius:4px;padding:.2rem .4rem;font-size:.75rem;margin-left:auto;cursor:pointer}
+.kanban{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;align-items:start}
+@media(max-width:900px){.kanban{grid-template-columns:1fr}}
+.kanban-col{background:#111118;border:1px solid #1e1e2a;border-radius:10px;overflow:hidden}
+.col-header{padding:.7rem 1rem;font-weight:600;font-size:.85rem;border-bottom:1px solid #1e1e2a;display:flex;justify-content:space-between;align-items:center}
+.col-header .count{font-size:.75rem;padding:.15rem .5rem;border-radius:10px;background:#1e1e2a}
+.col-body{padding:.5rem;max-height:70vh;overflow-y:auto}
+.cat-group{margin-bottom:.5rem}
+.cat-label{font-size:.7rem;color:#5a5a6a;padding:.3rem .6rem .1rem;text-transform:uppercase;letter-spacing:.05em;font-weight:500;display:flex;align-items:center;gap:.3rem}
+.cat-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.05)}
+.card{background:#171722;border:1px solid #222230;border-radius:7px;padding:.55rem .7rem;font-size:.82rem;display:flex;align-items:center;gap:.5rem;margin:.15rem 0;transition:all .15s}
+.card:hover{border-color:rgba(255,107,138,.25)}
+.card .em{font-size:1.1rem;flex-shrink:0;width:24px;text-align:center}
+.card .tx{flex:1;line-height:1.35}
+.card select{background:#1e1e2a;color:#aaa;border:1px solid #333;border-radius:4px;padding:.15rem .3rem;font-size:.7rem;cursor:pointer;opacity:0;transition:opacity .2s}
+.card:hover select{opacity:1}
 
 /* GANTT */
-.gantt{overflow-x:auto}
-.gantt-row{display:flex;align-items:center;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.03);font-size:.82rem}
-.gantt-label{width:240px;flex-shrink:0;padding-right:1rem}
-.gantt-track{flex:1;position:relative;height:32px;background:rgba(255,255,255,.02);border-radius:4px}
-.gantt-bar{position:absolute;top:4px;height:24px;border-radius:4px;opacity:.85;transition:opacity .2s;cursor:pointer;display:flex;align-items:center;padding:0 6px;font-size:.7rem;overflow:hidden;white-space:nowrap}
-.gantt-bar:hover{opacity:1}
-.gantt-bar.d1{background:linear-gradient(90deg,#667eea,#764ba2);left:0%;width:15%}
-.gantt-bar.d2{background:linear-gradient(90deg,#f093fb,#f5576c);left:15%;width:20%}
-.gantt-bar.d3{background:linear-gradient(90deg,#4facfe,#00f2fe);left:35%;width:20%}
-.gantt-bar.d4{background:linear-gradient(90deg,#43e97b,#38f9d7);left:55%;width:20%}
-.gantt-bar.d5{background:linear-gradient(90deg,#fa709a,#fee140);left:75%;width:20%}
-.gantt-bar.prep{background:linear-gradient(90deg,#a18cd1,#fbc2eb);left:0%;width:15%;opacity:.5}
-.gantt-header{display:flex;margin-bottom:.5rem;font-size:.7rem;color:#6a6a7a}
-.gantt-header span{flex:1;text-align:center}
+.gantt{overflow-x:auto;font-size:.8rem}
+.gantt-header{display:flex;margin-bottom:.5rem;color:#6a6a7a}
+.gantt-header span{text-align:center}
+.gantt-row{display:flex;align-items:center;padding:.35rem 0;border-bottom:1px solid rgba(255,255,255,.025)}
+.gantt-label{width:180px;flex-shrink:0;padding-right:.8rem;font-size:.78rem}
+.gantt-track{flex:1;position:relative;height:28px;background:rgba(255,255,255,.015);border-radius:4px}
+.gantt-bar{position:absolute;top:3px;height:22px;border-radius:3px;opacity:.8;transition:opacity .2s;cursor:pointer;display:flex;align-items:center;padding:0 4px;font-size:.65rem;overflow:hidden;white-space:nowrap}
+.gantt-bar:hover{opacity:1;z-index:2}
+.prep{background:rgba(161,140,209,.4)}
+.d1{background:rgba(102,126,234,.5)}
+.d2{background:rgba(240,147,251,.5)}
+.d3{background:rgba(79,172,254,.5)}
+.d4{background:rgba(67,233,123,.5)}
+.d5{background:rgba(250,112,154,.5)}
 
 /* CHECKLIST */
-.check-section{margin-bottom:2rem}
-.check-section h3{font-size:1.1rem;margin-bottom:.8rem;color:#ff9a56}
-.check-item{display:flex;align-items:center;gap:.7rem;padding:.5rem .8rem;border-radius:8px;transition:all .2s;cursor:pointer;font-size:.9rem}
-.check-item:hover{background:rgba(255,255,255,.03)}
-.check-item input[type=checkbox]{appearance:none;width:20px;height:20px;border:2px solid #444;border-radius:4px;cursor:pointer;flex-shrink:0;position:relative}
-.check-item input[type=checkbox]:checked{border-color:#2ed573;background:#2ed573}
-.check-item input[type=checkbox]:checked::after{content:'✓';position:absolute;top:-1px;left:4px;color:#0a0a0f;font-weight:700}
-.check-item.done{opacity:.5;text-decoration:line-through}
+.ck-sec{margin-bottom:1.5rem}
+.ck-sec h3{font-size:1rem;margin-bottom:.5rem;color:#ff9a56;font-weight:500}
+.ck-item{display:flex;align-items:center;gap:.6rem;padding:.4rem .6rem;border-radius:6px;cursor:pointer;font-size:.85rem;transition:background .2s}
+.ck-item:hover{background:rgba(255,255,255,.025)}
+.ck-item.done{opacity:.45;text-decoration:line-through}
+.ck-item input[type=checkbox]{appearance:none;width:18px;height:18px;border:2px solid #444;border-radius:4px;cursor:pointer;flex-shrink:0;position:relative}
+.ck-item input:checked{border-color:#2ed573;background:#2ed573}
+.ck-item input:checked::after{content:'✓';position:absolute;top:-1px;left:3px;color:#0a0a0f;font-weight:700;font-size:12px}
 
 /* ITINERARY */
-.day-card{background:#111118;border:1px solid #1e1e2a;border-radius:12px;padding:1.5rem;margin-bottom:1rem;transition:all .3s}
-.day-card:hover{border-color:rgba(255,107,138,.25)}
-.day-card h3{font-size:1.2rem;margin-bottom:.5rem}
-.day-card .meals{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.6rem;margin-top:.8rem}
-.meal{border-left:3px solid;padding:.4rem .8rem;font-size:.85rem;border-radius:0 6px 6px 0}
-.meal.breakfast{border-color:#ffd93d;background:rgba(255,217,61,.06)}
-.meal.lunch{border-color:#ff9a56;background:rgba(255,154,86,.06)}
-.meal.dinner{border-color:#8a4fff;background:rgba(138,79,255,.06)}
-.meal.activity{border-color:#58a6ff;background:rgba(88,166,255,.06)}
+.day-card{background:#111118;border:1px solid #1e1e2a;border-radius:10px;padding:1.2rem;margin-bottom:.8rem}
+.day-card h3{font-size:1.1rem;margin-bottom:.6rem}
+.day-card .meals{display:flex;flex-wrap:wrap;gap:.5rem}
+.meal{border-left:3px solid;padding:.3rem .7rem;font-size:.82rem;border-radius:0 6px 6px 0}
+.bf{border-color:#ffd93d;background:rgba(255,217,61,.06)}
+.lu{border-color:#ff9a56;background:rgba(255,154,86,.06)}
+.di{border-color:#8a4fff;background:rgba(138,79,255,.06)}
+.ac{border-color:#58a6ff;background:rgba(88,166,255,.06)}
 
-/* PROGRESS BAR */
-.progress-bar{height:4px;background:#1e1e2a;border-radius:2px;margin:1rem 0;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,#2ed573,#58a6ff,#ff6b8a);border-radius:2px;transition:width .5s}
-
-@media(max-width:768px){.kanban{flex-direction:column}.kanban-col{min-width:auto}.gantt-label{width:120px}}
+.progress-bar{height:3px;background:#1e1e2a;border-radius:2px;margin-bottom:1rem;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#2ed573,#58a6ff,#ff6b8a);border-radius:2px;transition:width .4s}
 </style>
 </head>
 <body>
@@ -89,9 +88,9 @@ body{font-family:'Noto Sans SC',sans-serif;background:#0a0a0f;color:#e0d8d0;min-
 <div class="header">
   <div class="logo">🇰🇷 한국고고고</div>
   <div class="stats">
-    <span class="stat stat-done" id="statDone">✅ 6</span>
-    <span class="stat stat-progress" id="statProgress">🔄 0</span>
-    <span class="stat stat-todo" id="statTodo">⬜ 38</span>
+    <span class="stat sd" id="sDone">✅ 0</span>
+    <span class="stat sp" id="sProg">🔄 0</span>
+    <span class="stat st" id="sTodo">⬜ 0</span>
   </div>
 </div>
 
@@ -103,246 +102,124 @@ body{font-family:'Noto Sans SC',sans-serif;background:#0a0a0f;color:#e0d8d0;min-
 </div>
 
 <div class="content">
-
-  <!-- ═══════ KANBAN ═══════ -->
-  <div class="panel active" id="panel-kanban">
-    <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:14%"></div></div>
-    <div class="kanban">
-      <div class="kanban-col">
-        <div class="col-header">⬜ 待办 <span id="todoCount" style="color:#ff6b8a">38</span></div>
-        <div class="col-body" id="colTodo"></div>
-      </div>
-      <div class="kanban-col">
-        <div class="col-header">🔄 进行中 <span id="inProgressCount" style="color:#58a6ff">0</span></div>
-        <div class="col-body" id="colProgress"></div>
-      </div>
-      <div class="kanban-col">
-        <div class="col-header">✅ 已完成 <span id="doneCount" style="color:#2ed573">6</span></div>
-        <div class="col-body" id="colDone"></div>
-      </div>
-    </div>
+<div class="panel active" id="panel-kanban">
+  <div class="progress-bar"><div class="progress-fill" id="pBar"></div></div>
+  <div class="kanban">
+    <div class="kanban-col"><div class="col-header">⬜ 待办 <span class="count" id="cTodo">0</span></div><div class="col-body" id="kanTodo"></div></div>
+    <div class="kanban-col"><div class="col-header">🔄 进行中 <span class="count" id="cProg">0</span></div><div class="col-body" id="kanProg"></div></div>
+    <div class="kanban-col"><div class="col-header">✅ 已完成 <span class="count" id="cDone">0</span></div><div class="col-body" id="kanDone"></div></div>
   </div>
-
-  <!-- ═══════ GANTT ═══════ -->
-  <div class="panel" id="panel-gantt">
-    <div class="gantt-header">
-      <span style="width:240px;flex-shrink:0"></span>
-      <span>准备</span><span>Day1 7.9</span><span>Day2 7.10</span><span>Day3 7.11</span><span>Day4 7.12</span><span>Day5 7.13</span>
-    </div>
-    <div id="ganttContent"></div>
-  </div>
-
-  <!-- ═══════ CHECKLIST ═══════ -->
-  <div class="panel" id="panel-checklist">
-    <div class="progress-bar"><div class="progress-fill" id="checkProgress" style="width:14%"></div></div>
-    <div id="checkContent"></div>
-  </div>
-
-  <!-- ═══════ ITINERARY ═══════ -->
-  <div class="panel" id="panel-itinerary">
-    <div id="itinContent"></div>
-  </div>
-
+</div>
+<div class="panel" id="panel-gantt"><div class="gantt-header"><span style="width:180px;flex-shrink:0"></span><span style="flex:1">准备</span><span style="flex:1">D1 7.9</span><span style="flex:1">D2 7.10</span><span style="flex:1">D3 7.11</span><span style="flex:1">D4 7.12</span><span style="flex:1">D5 7.13</span></div><div id="ganttC"></div></div>
+<div class="panel" id="panel-checklist"><div class="progress-bar"><div class="progress-fill" id="ckBar"></div></div><div id="checkC"></div></div>
+<div class="panel" id="panel-itinerary"><div id="itinC"></div></div>
 </div>
 
 <script>
-// ═══════ DATA ═══════
-const TASKS = [
-  {id:1, emoji:'📱', text:'LG U+ 电话卡', cat:'准备', status:'done', day:0},
-  {id:2, emoji:'🪥', text:'一次性牙刷 + 卫生蓝膜', cat:'准备', status:'done', day:0},
-  {id:3, emoji:'💰', text:'现金 ₩', cat:'准备', status:'done', day:0},
-  {id:4, emoji:'🔋', text:'充电宝', cat:'准备', status:'done', day:0},
-  {id:5, emoji:'🔌', text:'充电器转换头', cat:'准备', status:'done', day:0},
-  {id:6, emoji:'🛏️', text:'充气 U 形枕', cat:'准备', status:'done', day:0},
-  {id:7, emoji:'🚊', text:'T-money 气候卡', cat:'准备', status:'todo', day:0},
-  {id:8, emoji:'🧤', text:'一次性手套', cat:'准备', status:'todo', day:0},
-  {id:9, emoji:'🧻', text:'卫生纸 / 抽纸', cat:'准备', status:'todo', day:0},
-  {id:10, emoji:'🗑️', text:'垃圾袋 ×5', cat:'准备', status:'todo', day:0},
-  {id:11, emoji:'💳', text:'Visa 卡', cat:'准备', status:'todo', day:0},
-  {id:12, emoji:'📿', text:'手机挂绳', cat:'准备', status:'todo', day:0},
-  {id:13, emoji:'🚕', text:'预定接送机！', cat:'准备', status:'todo', day:0},
-  {id:14, emoji:'📱', text:'必备 APP', cat:'准备', status:'todo', day:0},
-  {id:15, emoji:'🛍️', text:'新罗免税店 APP', cat:'准备', status:'todo', day:0},
-  {id:16, emoji:'✈️', text:'18:45 仁川 T1 到达', cat:'Day1', status:'todo', day:1},
-  {id:17, emoji:'🥩', text:'Gop/高度食烤肉', cat:'Day1', status:'todo', day:1},
-  {id:18, emoji:'🏨', text:'入住酒店休息', cat:'Day1', status:'todo', day:1},
-  {id:19, emoji:'🍲', text:'麻浦阳地雪浓汤', cat:'Day2', status:'todo', day:2},
-  {id:20, emoji:'🛍️', text:'明洞逛街', cat:'Day2', status:'todo', day:2},
-  {id:21, emoji:'🍗', text:'炸鸡 60', cat:'Day2', status:'todo', day:2},
-  {id:22, emoji:'🎤', text:'17:00 演唱会!!! ⭐', cat:'Day2', status:'todo', day:2},
-  {id:23, emoji:'🍕', text:'外卖：炒年糕+披萨', cat:'Day2', status:'todo', day:2},
-  {id:24, emoji:'🐔', text:'参鸡汤 / Fritz', cat:'Day3', status:'todo', day:3},
-  {id:25, emoji:'🛍️', text:'汝矣岛现代百货', cat:'Day3', status:'todo', day:3},
-  {id:26, emoji:'🐂', text:'소곱창 牛肠', cat:'Day3', status:'todo', day:3},
-  {id:27, emoji:'🌅', text:'汉江公园日落', cat:'Day3', status:'todo', day:3},
-  {id:28, emoji:'🍻', text:'Hansabal 大排档', cat:'Day3', status:'todo', day:3},
-  {id:29, emoji:'💄', text:'Olive Young 扫货', cat:'Day3', status:'todo', day:3},
-  {id:30, emoji:'🍔', text:'Mom\'s Touch 汉堡', cat:'Day4', status:'todo', day:4},
-  {id:31, emoji:'🛍️', text:'圣水洞逛街', cat:'Day4', status:'todo', day:4},
-  {id:32, emoji:'🥩', text:'水芹菜牛肉饭汤', cat:'Day4', status:'todo', day:4},
-  {id:33, emoji:'🛍️', text:'狎鸥亭逛街', cat:'Day4', status:'todo', day:4},
-  {id:34, emoji:'🍖', text:'脊骨汤 (孔德)', cat:'Day4', status:'todo', day:4},
-  {id:35, emoji:'⏰', text:'8:00 起床', cat:'Day5', status:'todo', day:5},
-  {id:36, emoji:'🏪', text:'CU/GS25 便利店', cat:'Day5', status:'todo', day:5},
-  {id:37, emoji:'🚕', text:'出发去机场', cat:'Day5', status:'todo', day:5},
-  {id:38, emoji:'🛍️', text:'免税店+提货', cat:'Day5', status:'todo', day:5},
-  {id:39, emoji:'✈️', text:'13:10 仁川起飞', cat:'Day5', status:'todo', day:5},
-  {id:40, emoji:'💳', text:'刷汇率优惠', cat:'提醒', status:'todo', day:0},
-  {id:41, emoji:'📱', text:'手机挂绳不离身', cat:'提醒', status:'todo', day:0},
-  {id:42, emoji:'🗑️', text:'垃圾袋随身带', cat:'提醒', status:'todo', day:0},
-  {id:43, emoji:'🧻', text:'多拿抽纸', cat:'提醒', status:'todo', day:0},
-  {id:44, emoji:'📲', text:'KakaoMap > Google', cat:'提醒', status:'todo', day:0},
+const CATS = ['准备','Day1','Day2','Day3','Day4','Day5','提醒'];
+const CAT_ICON = {准备:'🎒',Day1:'🌴',Day2:'🎵',Day3:'🌅',Day4:'☕',Day5:'✈️',提醒:'🚨'};
+const DAY_NAMES = {1:'7.9 周四·抵达',2:'7.10 周五·明洞+演唱会',3:'7.11 周六·汝矣岛+弘大',4:'7.12 周日·圣水洞+狎鸥亭',5:'7.13 周一·返程'};
+
+const DEF = [
+{id:1,em:'📱',tx:'LG U+ 电话卡',cat:'准备',st:'done',d:0},{id:2,em:'🪥',tx:'牙刷+卫生蓝膜',cat:'准备',st:'done',d:0},{id:3,em:'💰',tx:'现金 ₩',cat:'准备',st:'done',d:0},{id:4,em:'🔋',tx:'充电宝',cat:'准备',st:'done',d:0},{id:5,em:'🔌',tx:'充电转换头',cat:'准备',st:'done',d:0},{id:6,em:'🛏️',tx:'充气U形枕',cat:'准备',st:'done',d:0},{id:7,em:'🚊',tx:'T-money 气候卡',cat:'准备',st:'todo',d:0},{id:8,em:'🧤',tx:'一次性手套',cat:'准备',st:'todo',d:0},{id:9,em:'🧻',tx:'卫生纸/抽纸',cat:'准备',st:'todo',d:0},{id:10,em:'🗑️',tx:'垃圾袋×5',cat:'准备',st:'todo',d:0},{id:11,em:'💳',tx:'Visa卡',cat:'准备',st:'todo',d:0},{id:12,em:'📿',tx:'手机挂绳',cat:'准备',st:'todo',d:0},{id:13,em:'🚕',tx:'预定接送机',cat:'准备',st:'todo',d:0},{id:14,em:'📱',tx:'必备APP',cat:'准备',st:'todo',d:0},{id:15,em:'🛍️',tx:'新罗免税店APP',cat:'准备',st:'todo',d:0},{id:16,em:'✈️',tx:'18:45 仁川T1到达',cat:'Day1',st:'todo',d:1},{id:17,em:'🥩',tx:'Gop/高度食烤肉',cat:'Day1',st:'todo',d:1},{id:18,em:'🏨',tx:'入住酒店休息',cat:'Day1',st:'todo',d:1},{id:19,em:'🍲',tx:'麻浦阳地雪浓汤',cat:'Day2',st:'todo',d:2},{id:20,em:'🛍️',tx:'明洞逛街',cat:'Day2',st:'todo',d:2},{id:21,em:'🍗',tx:'炸鸡60',cat:'Day2',st:'todo',d:2},{id:22,em:'🎤',tx:'17:00 演唱会⭐',cat:'Day2',st:'todo',d:2},{id:23,em:'🍕',tx:'外卖:炒年糕+披萨',cat:'Day2',st:'todo',d:2},{id:24,em:'🐔',tx:'参鸡汤/Fritz',cat:'Day3',st:'todo',d:3},{id:25,em:'🛍️',tx:'汝矣岛现代百货',cat:'Day3',st:'todo',d:3},{id:26,em:'🐂',tx:'소곱창牛肠',cat:'Day3',st:'todo',d:3},{id:27,em:'🌅',tx:'汉江公园日落',cat:'Day3',st:'todo',d:3},{id:28,em:'🍻',tx:'Hansabal大排档',cat:'Day3',st:'todo',d:3},{id:29,em:'💄',tx:'OliveYoung扫货',cat:'Day3',st:'todo',d:3},{id:30,em:'🍔',tx:"Mom's Touch汉堡",cat:'Day4',st:'todo',d:4},{id:31,em:'🛍️',tx:'圣水洞逛街',cat:'Day4',st:'todo',d:4},{id:32,em:'🥩',tx:'水芹菜牛肉饭汤',cat:'Day4',st:'todo',d:4},{id:33,em:'🛍️',tx:'狎鸥亭逛街',cat:'Day4',st:'todo',d:4},{id:34,em:'🍖',tx:'脊骨汤(孔德)',cat:'Day4',st:'todo',d:4},{id:35,em:'⏰',tx:'8:00起床',cat:'Day5',st:'todo',d:5},{id:36,em:'🏪',tx:'CU/GS25便利店',cat:'Day5',st:'todo',d:5},{id:37,em:'🚕',tx:'出发去机场',cat:'Day5',st:'todo',d:5},{id:38,em:'🛍️',tx:'免税店+提货',cat:'Day5',st:'todo',d:5},{id:39,em:'✈️',tx:'13:10 仁川起飞',cat:'Day5',st:'todo',d:5},{id:40,em:'💳',tx:'刷汇率优惠',cat:'提醒',st:'todo',d:0},{id:41,em:'📱',tx:'手机不离身',cat:'提醒',st:'todo',d:0},{id:42,em:'🗑️',tx:'垃圾袋随身',cat:'提醒',st:'todo',d:0},{id:43,em:'🧻',tx:'多拿抽纸',cat:'提醒',st:'todo',d:0},{id:44,em:'📲',tx:'KakaoMap＞Google',cat:'提醒',st:'todo',d:0},
 ];
 
-// Load from localStorage
-let tasks = JSON.parse(localStorage.getItem('koreaTasks')) || TASKS;
-
-function save(){ localStorage.setItem('koreaTasks', JSON.stringify(tasks)); updateStats(); }
-
-function updateStats(){
-  let d = tasks.filter(t=>t.status==='done').length;
-  let p = tasks.filter(t=>t.status==='progress').length;
-  let t = tasks.filter(t=>t.status==='todo').length;
-  document.getElementById('statDone').textContent = '✅ '+d;
-  document.getElementById('statProgress').textContent = '🔄 '+p;
-  document.getElementById('statTodo').textContent = '⬜ '+t;
-  let pct = Math.round((d/tasks.length)*100);
-  document.querySelectorAll('.progress-fill').forEach(el=>el.style.width=pct+'%');
+let T = JSON.parse(localStorage.getItem('kt2')) || DEF;
+function S(){localStorage.setItem('kt2',JSON.stringify(T));U()}
+function U(){
+  let d=T.filter(t=>t.st==='done').length,p=T.filter(t=>t.st==='progress').length,td=T.filter(t=>t.st==='todo').length;
+  document.getElementById('sDone').textContent='✅ '+d;
+  document.getElementById('sProg').textContent='🔄 '+p;
+  document.getElementById('sTodo').textContent='⬜ '+td;
+  let pct=Math.round((d/T.length)*100);
+  document.querySelectorAll('.progress-fill').forEach(e=>e.style.width=pct+'%');
 }
 
-function changeStatus(id, newStatus){
-  let t = tasks.find(t=>t.id===id);
-  if(t){ t.status = newStatus; save(); renderAll(); }
-}
+function C(id,s){let t=T.find(t=>t.id===id);if(t){t.st=s;S();R()}}
 
-// ═══════ RENDER ═══════
-function renderKanban(){
-  ['todo','progress','done'].forEach(s=>{
-    let col = document.getElementById(s==='todo'?'colTodo':s==='progress'?'colProgress':'colDone');
-    let items = tasks.filter(t=>t.status===s);
-    col.innerHTML = items.map(t=>`
-      <div class="card">
-        <span class="emoji">${t.emoji}</span>
-        <span class="text">${t.text}</span>
-        <select onchange="changeStatus(${t.id},this.value)">
-          <option value="todo" ${s==='todo'?'selected':''}>⬜</option>
-          <option value="progress" ${s==='progress'?'selected':''}>🔄</option>
-          <option value="done" ${s==='done'?'selected':''}>✅</option>
-        </select>
-      </div>`).join('');
-    document.getElementById(s==='todo'?'todoCount':s==='progress'?'inProgressCount':'doneCount').textContent = items.length;
-  });
-}
-
-function renderGantt(){
-  let days = ['','准备','Day1 7.9','Day2 7.10','Day3 7.11','Day4 7.12','Day5 7.13'];
-  let cats = ['准备','Day1','Day2','Day3','Day4','Day5','提醒'];
-  let html = '';
-  cats.forEach(cat=>{
-    let catTasks = tasks.filter(t=>t.cat===cat);
-    if(!catTasks.length) return;
-    html += '<div class="gantt-row">';
-    html += `<div class="gantt-label">${cat}</div>`;
-    html += '<div class="gantt-track">';
-    catTasks.forEach(t=>{
-      let day = t.day;
-      let cls = day===0?'prep':'d'+day;
-      let left = day===0?0:((day-1)*20+15);
-      html += `<div class="gantt-bar ${cls}" style="left:${left}%" title="${t.emoji} ${t.text}">${t.emoji} ${t.text.slice(0,8)}</div>`;
+function kanCol(st){
+  let items=T.filter(t=>t.st===st);
+  let html='';
+  CATS.forEach(cat=>{
+    let catItems=items.filter(t=>t.cat===cat);
+    if(!catItems.length)return;
+    html+=`<div class="cat-group"><div class="cat-label">${CAT_ICON[cat]} ${cat} (${catItems.length})</div>`;
+    catItems.forEach(t=>{
+      html+=`<div class="card"><span class="em">${t.em}</span><span class="tx">${t.tx}</span>
+        <select onchange="C(${t.id},this.value)">
+          <option value="todo" ${st==='todo'?'selected':''}>⬜</option>
+          <option value="progress" ${st==='progress'?'selected':''}>🔄</option>
+          <option value="done" ${st==='done'?'selected':''}>✅</option>
+        </select></div>`;
     });
-    html += '</div></div>';
+    html+='</div>';
   });
-  document.getElementById('ganttContent').innerHTML = html;
+  return html||'<div style="padding:1rem;color:#3a3a4a;text-align:center;font-size:.8rem">空</div>';
 }
 
-function renderChecklist(){
-  let sections = [
-    {title:'✅ 已完成 (出发前)', cat:'准备', filter:t=>t.status==='done'},
-    {title:'⬜ 出发前待办', cat:'准备', filter:t=>t.status!=='done'},
-    {title:'🗺️ Day 1-5 行程事项', cat:'Day1|Day2|Day3|Day4|Day5', filter:()=>true},
-    {title:'🚨 重要提醒', cat:'提醒', filter:()=>true},
-  ];
-  let html = '';
-  sections.forEach(sec=>{
-    let cats = sec.cat.split('|');
-    let items = tasks.filter(t=>cats.includes(t.cat) && sec.filter(t));
-    if(!items.length) return;
-    html += `<div class="check-section"><h3>${sec.title}</h3>`;
+function R(){
+  document.getElementById('kanTodo').innerHTML=kanCol('todo');
+  document.getElementById('kanProg').innerHTML=kanCol('progress');
+  document.getElementById('kanDone').innerHTML=kanCol('done');
+  document.getElementById('cTodo').textContent=T.filter(t=>t.st==='todo').length;
+  document.getElementById('cProg').textContent=T.filter(t=>t.st==='progress').length;
+  document.getElementById('cDone').textContent=T.filter(t=>t.st==='done').length;
+
+  // Gantt
+  let gh='';
+  CATS.forEach(cat=>{
+    let ct=T.filter(t=>t.cat===cat);
+    if(!ct.length)return;
+    gh+=`<div class="gantt-row"><div class="gantt-label">${CAT_ICON[cat]} ${cat}</div><div class="gantt-track">`;
+    ct.forEach(t=>{
+      let l=t.d===0?5:((t.d-1)*19+15);
+      let cl=t.d===0?'prep':'d'+t.d;
+      gh+=`<div class="gantt-bar ${cl}" style="left:${l}%" title="${t.em} ${t.tx}">${t.em} ${t.tx.slice(0,6)}</div>`;
+    });
+    gh+='</div></div>';
+  });
+  document.getElementById('ganttC').innerHTML=gh;
+
+  // Checklist
+  let ch='';
+  [{t:'✅ 已完成',f:'done'},{t:'⬜ 出发前待办',c:'准备',f:'todo'},{t:'🗺️ Day1-5',c:'Day1|Day2|Day3|Day4|Day5'},{t:'🚨 重要提醒',c:'提醒'}].forEach(s=>{
+    let cats=s.c?s.c.split('|'):CATS;
+    let items=T.filter(t=>cats.includes(t.cat)&&(!s.f||t.st===s.f));
+    if(!items.length)return;
+    ch+=`<div class="ck-sec"><h3>${s.t}</h3>`;
     items.forEach(t=>{
-      html += `<label class="check-item ${t.status==='done'?'done':''}">
-        <input type="checkbox" ${t.status==='done'?'checked':''} onchange="toggleTask(${t.id},this.checked)">
-        <span>${t.emoji} ${t.text}</span>
-      </label>`;
+      ch+=`<label class="ck-item ${t.st==='done'?'done':''}"><input type="checkbox" ${t.st==='done'?'checked':''} onchange="C(${t.id},this.checked?'done':'todo')"><span>${t.em} ${t.tx}</span></label>`;
     });
-    html += '</div>';
+    ch+='</div>';
   });
-  document.getElementById('checkContent').innerHTML = html;
+  document.getElementById('checkC').innerHTML=ch;
+
+  // Itinerary
+  let ih='';
+  [1,2,3,4,5].forEach(d=>{
+    let items=T.filter(t=>t.d===d);
+    let meals=items.map(t=>{
+      let cls=t.tx.includes('早餐')||t.tx.includes('雪浓汤')||t.tx.includes('参鸡汤')||t.tx.includes('汉堡')||t.tx.includes('便利店')?'bf':
+        t.tx.includes('午餐')||t.tx.includes('炸鸡')||t.tx.includes('牛肠')||t.tx.includes('饭汤')?'lu':
+        t.tx.includes('晚餐')||t.tx.includes('烤肉')||t.tx.includes('大排档')||t.tx.includes('脊骨汤')||t.tx.includes('外卖')||t.tx.includes('披萨')?'di':'ac';
+      return `<div class="meal ${cls}">${t.em} ${t.tx}</div>`;
+    }).join('');
+    ih+=`<div class="day-card"><h3>🌴 Day ${d} · ${DAY_NAMES[d]}</h3><div class="meals">${meals}</div></div>`;
+  });
+  document.getElementById('itinC').innerHTML=ih;
+
+  U();
 }
 
-function toggleTask(id, checked){
-  let t = tasks.find(t=>t.id===id);
-  if(t){ t.status = checked?'done':'todo'; save(); renderChecklist(); renderKanban(); }
-}
-
-function renderItinerary(){
-  let days = [
-    {n:1,date:'7.9 周四',title:'🌴 抵达首尔',items:[
-      {type:'activity',text:'✈️ 18:45 仁川 T1 到达'},
-      {type:'dinner',text:'🥩 Gop 烤肉 / 高度食烤肉'},
-      {type:'activity',text:'🏨 入住酒店 + 休息'},
-    ]},
-    {n:2,date:'7.10 周五',title:'🌴 明洞 + 🎵演唱会',items:[
-      {type:'breakfast',text:'🍲 麻浦阳地雪浓汤'},
-      {type:'activity',text:'🛍️ 明洞逛街'},
-      {type:'lunch',text:'🍗 炸鸡 60'},
-      {type:'activity',text:'🎤 17:00 演唱会!!! ⭐'},
-      {type:'dinner',text:'🍕 外卖：罗杰炒年糕+披萨'},
-    ]},
-    {n:3,date:'7.11 周六',title:'🌴 汝矣岛 + 汉江 + 弘大',items:[
-      {type:'breakfast',text:'🐔 参鸡汤 / Fritz 烘焙'},
-      {type:'activity',text:'🛍️ 汝矣岛现代百货'},
-      {type:'lunch',text:'🐂 소곱창 牛肠'},
-      {type:'activity',text:'🌅 汉江公园看日落'},
-      {type:'dinner',text:'🍻 Hansabal 大排档（弘大）'},
-      {type:'activity',text:'💄 Olive Young 扫货'},
-    ]},
-    {n:4,date:'7.12 周日',title:'🌴 圣水洞 + 狎鸥亭',items:[
-      {type:'breakfast',text:'🍔 Mom\'s Touch 汉堡'},
-      {type:'activity',text:'🛍️ 圣水洞（网红咖啡·买手店）'},
-      {type:'lunch',text:'🥩 水芹菜牛肉饭汤'},
-      {type:'activity',text:'🛍️ 狎鸥亭（设计师品牌）'},
-      {type:'dinner',text:'🍖 양천뼈다귀 脊骨汤'},
-    ]},
-    {n:5,date:'7.13 周一',title:'🌴 返程',items:[
-      {type:'activity',text:'⏰ 8:00 起床'},
-      {type:'breakfast',text:'🏪 CU/GS25 便利店'},
-      {type:'activity',text:'🚕 出发去仁川机场'},
-      {type:'activity',text:'🛍️ 免税店 + 提货'},
-      {type:'activity',text:'✈️ 13:10 仁川 T1 起飞'},
-    ]},
-  ];
-  document.getElementById('itinContent').innerHTML = days.map(d=>`
-    <div class="day-card">
-      <h3>${d.title} <span style="font-size:.8rem;color:#8b8b9a">${d.date}</span></h3>
-      <div class="meals">${d.items.map(i=>`
-        <div class="meal ${i.type}">${i.text}</div>
-      `).join('')}</div>
-    </div>
-  `).join('');
-}
-
-function renderAll(){ renderKanban(); renderGantt(); renderChecklist(); renderItinerary(); updateStats(); }
-
-// ═══════ TAB SWITCH ═══════
-function switchTab(name){
+function switchTab(n){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelector(`.tab:nth-child(${{kanban:1,gantt:2,checklist:3,itinerary:4}[name]})`).classList.add('active');
-  document.getElementById('panel-'+name).classList.add('active');
+  let idx={kanban:0,gantt:1,checklist:2,itinerary:3};
+  document.querySelectorAll('.tab')[idx[n]].classList.add('active');
+  document.getElementById('panel-'+n).classList.add('active');
 }
 
-// ═══════ INIT ═══════
-renderAll();
+R();
 </script>
 </body>
 </html>
