@@ -197,7 +197,7 @@ async function fs(p,o={}){
 }
 
 async function ld(){
- if(!PX){try{let r=await fetch('proxy.txt');PX=(await r.text()).trim()+'/';}catch(e){PX='https://6715b14bff74cb.lhr.life/';}}
+ if(!PX){try{let r=await fetch('proxy.txt',{cache:'no-store'});PX=(await r.text()).trim()+'/';}catch(e){PX='https://6715b14bff74cb.lhr.life/';}}
  document.getElementById('sync').innerHTML='<span class="dot bad"></span>同步中';
  try{
   let data=await fs('/records?page_size=100');let items=data.data.items;cl=[];
