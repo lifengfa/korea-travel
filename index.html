@@ -202,7 +202,7 @@ async function ld(){
  try{
   let data=await fs('/records?page_size=100');let items=data.data.items;cl=[];
   CHKS.forEach(g=>g.items.forEach(it=>{
-   let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00-\u9fff]+/,'')===it.tx);
+let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00-\u9fff]+/,'')===it.tx);
    cl.push({...it,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':!!it.done});
   }));
   document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
