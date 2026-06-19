@@ -3,234 +3,211 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>🇰🇷 首尔5天4夜</title>
+<title>🇰🇷 韩国gogogo</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#060609;--card:#0d0d16;--border:rgba(255,255,255,.05);--text:#c8c0b8;--sub:#5a5560;--acc:#f0a060;--acc2:#e07080;--acc3:#78b0e0;--acc4:#60c878;--r:12px}
-body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);font-size:15px;min-height:100dvh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+:root{--b:#08080f;--c:#0f0f18;--br:rgba(255,255,255,.05);--t:#d4cec8;--s:#5c5660;--a:#f0a058;--pink:#e07080;--blu:#78b0e0;--grn:#60c878;--pur:#b890e0;--yel:#e0c060;--r:10px}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);font-size:14px;min-height:100dvh;-webkit-tap-highlight-color:transparent}
 
 /* ── HEADER ── */
-.h{position:sticky;top:0;z-index:99;background:rgba(6,6,9,.94);backdrop-filter:blur(24px);padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
-.h .tt{font-size:18px;font-weight:700;letter-spacing:-.3px}
-.h .tt span{background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.h .ss{font-size:11px;color:var(--sub);display:flex;align-items:center;gap:5px}
-.ss .d{width:6px;height:6px;border-radius:50%}
-.ss .d.ok{background:var(--acc4);box-shadow:0 0 6px rgba(96,200,120,.4)}
-.ss .d.off{background:var(--acc2);box-shadow:0 0 6px rgba(224,112,128,.4)}
+.h{position:sticky;top:0;z-index:99;background:rgba(8,8,15,.95);backdrop-filter:blur(20px);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--br)}
+.h .logo{font-size:17px;font-weight:900;background:linear-gradient(135deg,var(--a),var(--pink),var(--pur));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.h .st{font-size:11px;display:flex;align-items:center;gap:6px;color:var(--s)}
+.h .st .dot{width:6px;height:6px;border-radius:50%}
+.dot.ok{background:var(--grn);box-shadow:0 0 6px rgba(96,200,120,.4)}
+.dot.bad{background:var(--pink);box-shadow:0 0 6px rgba(224,112,128,.4)}
 
-/* ── META ── */
-.meta{display:flex;gap:10px;padding:8px 16px 16px}
-.meta .m{flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
-.m .mv{font-size:22px;font-weight:700}
-.m .ml{font-size:11px;color:var(--sub);margin-top:2px}
-.m:nth-child(1) .mv{color:var(--acc)}
-.m:nth-child(2) .mv{color:var(--acc3)}
-.m:nth-child(3) .mv{color:var(--acc4)}
-.m:nth-child(4) .mv{color:var(--acc2)}
+/* ── STATS ROW ── */
+.stats{display:flex;gap:8px;padding:12px 14px}
+.stats .stc{flex:1;background:var(--c);border:1px solid var(--br);border-radius:var(--r);padding:12px;text-align:center}
+.stc .sv{font-size:22px;font-weight:700}
+.stc .sl{font-size:10px;color:var(--s);margin-top:2px}
+.stats .stc:nth-child(1) .sv{color:var(--a)}
+.stats .stc:nth-child(2) .sv{color:var(--blu)}
+.stats .stc:nth-child(3) .sv{color:var(--grn)}
 
 /* ── PROGRESS ── */
-.pb{padding:0 16px 12px}
-.pb .pt{display:flex;justify-content:space-between;font-size:11px;color:var(--sub);margin-bottom:6px}
-.pb .pr{height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
-.pb .pf{height:100%;background:linear-gradient(90deg,var(--acc4),var(--acc));border-radius:2px;transition:width .5s}
+.pbar{padding:0 14px 14px}
+.pbar .plbl{display:flex;justify-content:space-between;font-size:11px;color:var(--s);margin-bottom:6px}
+.pbar .ptrk{height:3px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden}
+.pbar .pfil{height:100%;background:linear-gradient(90deg,var(--grn),var(--a));border-radius:2px;transition:width .5s}
 
-/* ── DAYS ── */
+/* ── GANTT ── */
+.gantt{padding:0 14px}
+.gantt .gh{display:flex;gap:0;margin-bottom:10px;position:sticky;top:56px;z-index:10;background:var(--b)}
+.gh .gl{width:64px;flex-shrink:0}
+.gh .gd{flex:1;text-align:center;font-size:10px;color:var(--s);padding:6px 0;font-weight:600;letter-spacing:.3px}
+.gantt .grow{display:flex;align-items:stretch;margin-bottom:6px;background:var(--c);border:1px solid var(--br);border-radius:var(--r);overflow:hidden;min-height:42px}
+.grow .grp{width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding:8px;font-size:11px;font-weight:600;color:var(--a);gap:4px}
+.grow .gcols{flex:1;display:flex;position:relative}
+.gcols .gc{flex:1;border-left:1px solid var(--br);position:relative;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;align-content:center;gap:2px;padding:4px 2px}
+.gcols .gc:first-child{border-left:none}
+.gc .gb{font-size:10px;padding:3px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.gb.pre{background:rgba(160,140,200,.15);color:#b8a8d8}
+.gb.d1{background:rgba(240,160,88,.12);color:var(--a)}
+.gb.d2{background:rgba(224,112,128,.12);color:var(--pink)}
+.gb.d3{background:rgba(120,176,224,.12);color:var(--blu)}
+.gb.d4{background:rgba(96,200,120,.12);color:var(--grn)}
+.gb.d5{background:rgba(224,192,96,.12);color:var(--yel)}
+
+/* ── DAY CARDS ── */
 .days{padding:0 14px 90px}
-.day{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;transition:all .2s}
-.day:active{opacity:.8}
-.day .dh{padding:16px;display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none}
-.day .dn{font-size:32px;font-weight:900;min-width:44px;text-align:center;line-height:1;
-  background:linear-gradient(180deg,var(--acc),var(--acc2));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.day .di h3{font-size:16px;font-weight:600;margin-bottom:3px}
-.day .di .ds{font-size:12px;color:var(--sub)}
-.day .di .dt{display:inline-block;font-size:10px;padding:3px 10px;border-radius:20px;margin-top:4px;
-  background:rgba(240,160,96,.08);color:var(--acc);font-weight:500}
-.day .da{margin-left:auto;color:#333;font-size:12px;transition:.3s}
-.day.open .da{transform:rotate(180deg)}
-.day .db{display:none;padding:0 16px 16px 74px}
-.day.open .db{display:block}
-.day .db .tl{position:relative;padding-left:20px;border-left:1.5px solid rgba(255,255,255,.06)}
-.tl .ti{padding:10px 0;position:relative;font-size:14px;line-height:1.5}
-.tl .ti::before{content:'';position:absolute;left:-26px;top:16px;width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.1);background:var(--bg)}
-.tl .ti.food::before{border-color:rgba(240,160,96,.4);background:rgba(240,160,96,.15)}
-.tl .ti.act::before{border-color:rgba(120,176,224,.4);background:rgba(120,176,224,.15)}
-.tl .ti.key::before{border-color:rgba(224,112,128,.4);background:rgba(224,112,128,.15)}
-.tl .ti .tl-ic{font-size:16px;margin-right:6px}
-.tl .ti .tl-lb{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:500;margin-left:6px}
-.tl .ti.food .tl-lb{background:rgba(240,160,96,.1);color:var(--acc)}
-.tl .ti.act .tl-lb{background:rgba(120,176,224,.1);color:var(--acc3)}
-.tl .ti.key .tl-lb{background:rgba(224,112,128,.1);color:var(--acc2)}
-.tl .ti .tl-tm{font-size:11px;color:var(--sub);margin-left:6px}
+.dayc{background:var(--c);border:1px solid var(--br);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.dayc .dt{display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none}
+.dayc .dn{font-size:30px;font-weight:900;min-width:40px;text-align:center;line-height:1;background:linear-gradient(180deg,var(--a),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.dayc .di{flex:1;min-width:0}
+.dayc .di h3{font-size:15px;font-weight:600}
+.dayc .di .dd{font-size:11px;color:var(--s);margin-top:2px}
+.dayc .di .dg{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;margin-top:3px;font-weight:500}
+.dg.red{background:rgba(224,112,128,.1);color:var(--pink)}
+.dg.org{background:rgba(240,160,88,.1);color:var(--a)}
+.dg.blu{background:rgba(120,176,224,.1);color:var(--blu)}
+.dg.grn{background:rgba(96,200,120,.1);color:var(--grn)}
+.dayc .arr{margin-left:auto;color:#333;font-size:12px;transition:.3s}
+.dayc.open .arr{transform:rotate(180deg)}
+.dayc .db{display:none;padding:0 16px 16px 70px}
+.dayc.open .db{display:block}
+.db .tl{position:relative;padding-left:18px;border-left:1.5px solid rgba(255,255,255,.05)}
+.tl .item{padding:9px 0;position:relative;font-size:13px;display:flex;align-items:center;gap:8px}
+.tl .item::before{content:'';position:absolute;left:-25px;top:14px;width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.08)}
+.tl .item.m::before{border-color:rgba(240,160,88,.4);background:rgba(240,160,88,.12)}
+.tl .item.a::before{border-color:rgba(120,176,224,.4);background:rgba(120,176,224,.12)}
+.tl .item.k::before{border-color:rgba(224,112,128,.4);background:rgba(224,112,128,.12)}
+.tl .item .ic{font-size:16px;flex-shrink:0}
+.tl .item .tx{flex:1;line-height:1.4}
+.tl .item .lb{font-size:10px;padding:2px 6px;border-radius:5px;font-weight:500;flex-shrink:0}
+.lb.ml{background:rgba(240,160,88,.1);color:var(--a)}
+.lb.al{background:rgba(120,176,224,.1);color:var(--blu)}
+.lb.kl{background:rgba(224,112,128,.1);color:var(--pink)}
 
 /* ── CHECKLIST ── */
-.checks{padding:0 14px 90px}
-.ckg{margin-bottom:18px}
-.ckg .ckh{font-size:13px;color:var(--sub);margin-bottom:8px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px}
-.ckg .ckh::after{content:'';flex:1;height:1px;background:var(--border)}
-.ckg .ckh .ckn{font-size:10px;background:rgba(240,160,96,.1);color:var(--acc);padding:2px 8px;border-radius:10px}
-.cki{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:5px;cursor:pointer;transition:all .15s}
-.cki:active{transform:scale(.99)}
-.cki.done{opacity:.35;text-decoration:line-through}
-.cki .cb{width:22px;height:22px;border:2px solid #2a2a35;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.cki.done .cb{border-color:var(--acc4);background:var(--acc4)}
-.cki.done .cb::after{content:'✓';color:var(--bg);font-weight:700;font-size:12px;animation:pop .2s}
+.chks{padding:0 14px 90px}
+.ckg{margin-bottom:16px}
+.ckg .ckh{font-size:12px;color:var(--s);margin-bottom:8px;display:flex;align-items:center;gap:6px;letter-spacing:.3px}
+.ckg .ckh::after{content:'';flex:1;height:1px;background:var(--br)}
+.ckh .cnt{font-size:10px;background:rgba(240,160,88,.1);color:var(--a);padding:2px 8px;border-radius:10px}
+.ckit{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--c);border:1px solid var(--br);border-radius:8px;margin-bottom:5px;cursor:pointer;transition:all .15s}
+.ckit:active{transform:scale(.99)}
+.ckit.done{opacity:.35}
+.ckit.done .cktx{text-decoration:line-through}
+.ckit .cb{width:20px;height:20px;border:2px solid #2a2a33;border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ckit.done .cb{border-color:var(--grn);background:var(--grn)}
+.ckit.done .cb::after{content:'✓';color:var(--b);font-weight:700;font-size:11px;animation:pop .2s}
 @keyframes pop{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
-.cki .ck-ic{font-size:18px;flex-shrink:0}
-.cki .ck-tx{flex:1;line-height:1.4}
-.cki .ck-nb{font-size:11px;color:var(--sub);flex-shrink:0;max-width:90px;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-/* ── GALLERY (minimal, text-only search) ── */
-.gal{padding:0 14px 90px}
-.gal .gs{display:flex;gap:8px;margin-bottom:14px}
-.gal .gs input{flex:1;background:var(--card);border:1px solid var(--border);color:var(--text);font-size:14px;padding:12px 16px;border-radius:10px;outline:none;font-family:inherit}
-.gal .gs input:focus{border-color:var(--acc)}
-.gal .gs button{background:linear-gradient(135deg,var(--acc),var(--acc2));border:none;border-radius:10px;padding:0 18px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit}
-.gal-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.gal-card{border-radius:12px;overflow:hidden;aspect-ratio:1;background:var(--card);position:relative}
-.gal-card img{width:100%;height:100%;object-fit:cover;display:block}
+.ckit .ckem{font-size:16px;flex-shrink:0}
+.ckit .cktx{flex:1;font-size:13px}
+.ckit .cknb{font-size:10px;color:var(--s);flex-shrink:0}
 
 /* ── TABS ── */
-.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(6,6,9,.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;z-index:99;padding-bottom:env(safe-area-inset-bottom)}
-.nav .nt{flex:1;padding:10px 4px 8px;border:none;background:none;color:var(--sub);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;transition:.2s}
-.nav .nt .ni{font-size:20px}
-.nav .nt.on{color:var(--acc)}
-
-/* ── PANELS ── */
-.pan{display:none;padding-top:6px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,8,15,.97);backdrop-filter:blur(20px);border-top:1px solid var(--br);display:flex;z-index:99;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;padding:10px 4px 8px;border:none;background:none;color:var(--s);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:inherit;transition:.2s}
+.nav button .ni{font-size:18px}
+.nav button.on{color:var(--a)}
+.pan{display:none;padding-top:4px}
 .pan.on{display:block}
-
-/* ── SPINNER ── */
-.spin{display:flex;justify-content:center;padding:30px}
-.spin div{width:20px;height:20px;border:2px solid rgba(240,160,96,.15);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ── EMPTY ── */
-.empty{text-align:center;padding:40px;color:var(--sub);font-size:14px}
 </style>
 </head>
 <body>
 
 <div class="h">
-  <div class="tt"><span>한국고고고</span> · 首尔</div>
-  <div class="ss" id="sync">⏳</div>
+  <div class="logo">🇰🇷 한국고고고</div>
+  <div class="st" id="sync">⏳</div>
 </div>
 
-<div class="meta">
-  <div class="m"><div class="mv">5</div><div class="ml">天数</div></div>
-  <div class="m"><div class="mv" id="mTodo">-</div><div class="ml">待办</div></div>
-  <div class="m"><div class="mv" id="mDone">-</div><div class="ml">完成</div></div>
-  <div class="m"><div class="mv" id="mPct">-</div><div class="ml">进度</div></div>
+<div class="stats">
+  <div class="stc"><div class="sv">5</div><div class="sl">总天数</div></div>
+  <div class="stc"><div class="sv" id="sTodo">-</div><div class="sl">待办项</div></div>
+  <div class="stc"><div class="sv" id="sPct">-</div><div class="sl">完成率</div></div>
 </div>
 
-<div class="pb">
-  <div class="pt"><span>整体进度</span><span id="pTxt">-</span></div>
-  <div class="pr"><div class="pf" id="pFill"></div></div>
+<div class="pbar"><div class="plbl"><span>准备进度</span><span id="pTxt">-</span></div><div class="ptrk"><div class="pfil" id="pFil"></div></div></div>
+
+<div id="panG" class="pan on">
+  <!-- GANTT -->
+  <div class="gantt">
+    <div class="gh"><div class="gl"></div><div class="gd">准备</div><div class="gd">Day1</div><div class="gd">Day2</div><div class="gd">Day3</div><div class="gd">Day4</div><div class="gd">Day5</div></div>
+    <div id="ganttC"></div>
+  </div>
+  <!-- Day cards -->
+  <div class="days" id="daysC"></div>
 </div>
 
-<div id="panDays" class="pan on"><div class="days" id="daysC"></div></div>
-<div id="panCheck" class="pan"><div class="checks" id="checkC"></div></div>
-<div id="panGal" class="pan"><div class="gal"><div class="gs"><input id="gq" placeholder="搜图…" value="Seoul"><button onclick="srch()">搜</button></div><div class="gal-grid" id="galC"></div></div></div>
+<div id="panC" class="pan"><div class="chks" id="checkC"></div></div>
 
 <div class="nav">
-  <button class="nt on" onclick="sw('days')"><span class="ni">📅</span>行程</button>
-  <button class="nt" onclick="sw('check')"><span class="ni">✅</span>清单</button>
-  <button class="nt" onclick="sw('gal')"><span class="ni">🔍</span>搜图</button>
+  <button class="on" onclick="sw('g')"><span class="ni">📅</span>甘特图</button>
+  <button onclick="sw('c')"><span class="ni">✅</span>清单</button>
 </div>
 
 <script>
 // ═══ CONFIG ═══
-const PROXY='https://7b4ad832bd97d8.lhr.life/';
-const BASE='C28eb6d4VaGDtmsnACOc59ianOf',TBL='tbl9716rt5k5b37e';
-const APP='cli_aabfb6e658789be8',SECRET='Bu1YYA1VseQefwB4UQJhleSIEN7UtaAr';
+const PX='https://7b4ad832bd97d8.lhr.life/';
+const BA='C28eb6d4VaGDtmsnACOc59ianOf',TB='tbl9716rt5k5b37e';
+const AI='cli_aabfb6e658789be8',AS='Bu1YYA1VseQefwB4UQJhleSIEN7UtaAr';
 
-// ═══ DAYS DATA ═══
+// ═══ DATA ═══
 const DAYS=[
- {d:1,dt:'7.9 周四',tt:'抵达首尔',tag:'🛬 18:45 仁川T1',
-  tl:[
-   {ic:'✈️',tx:'18:45 仁川T1到达',tp:'key',lb:'关键'},
-   {ic:'🥩',tx:'Gop烤肉 或 高度食烤肉',tp:'food',lb:'晚餐'},
-   {ic:'🏨',tx:'入住酒店休息',tp:'act',lb:'休息'},
-  ]},
- {d:2,dt:'7.10 周五',tt:'明洞+演唱会',tag:'🎤 17:00入场',
-  tl:[
-   {ic:'🍲',tx:'麻浦阳地雪浓汤',tp:'food',lb:'早餐'},
-   {ic:'🛍️',tx:'明洞逛街',tp:'act',lb:'购物'},
-   {ic:'🍗',tx:'炸鸡60',tp:'food',lb:'午餐'},
-   {ic:'🎤',tx:'17:00 演唱会 ⭐',tp:'key',lb:'重点'},
-   {ic:'🍕',tx:'外卖·罗杰炒年糕+Nomore披萨',tp:'food',lb:'晚餐'},
-  ]},
- {d:3,dt:'7.11 周六',tt:'汝矣岛+弘大',tag:'🌅 汉江日落',
-  tl:[
-   {ic:'🐔',tx:'长寿韩方参鸡汤 / Fritz烘焙',tp:'food',lb:'早餐'},
-   {ic:'🛍️',tx:'汝矣岛现代百货',tp:'act',lb:'购物'},
-   {ic:'🐂',tx:'소곱창 烤牛肠',tp:'food',lb:'午餐'},
-   {ic:'🌅',tx:'汉江公园看日落',tp:'act',lb:'景点'},
-   {ic:'🍻',tx:'Hansabal大排档',tp:'food',lb:'晚餐'},
-   {ic:'💄',tx:'Olive Young扫货',tp:'act',lb:'购物'},
-  ]},
- {d:4,dt:'7.12 周日',tt:'圣水洞+狎鸥亭',tag:'☕ 设计师品牌',
-  tl:[
-   {ic:'🍔',tx:"Mom's Touch 汉堡",tp:'food',lb:'早餐'},
-   {ic:'🛍️',tx:'圣水洞逛街+网红咖啡',tp:'act',lb:'购物'},
-   {ic:'🥩',tx:'水芹菜牛肉饭汤',tp:'food',lb:'午餐'},
-   {ic:'🛍️',tx:'狎鸥亭设计师品牌',tp:'act',lb:'购物'},
-   {ic:'🍖',tx:'양천뼈다귀 孔德脊骨汤',tp:'food',lb:'晚餐'},
-  ]},
- {d:5,dt:'7.13 周一',tt:'返程回家',tag:'✈️ 13:10起飞',
-  tl:[
-   {ic:'⏰',tx:'8:00 起床',tp:'act',lb:'起床'},
-   {ic:'🏪',tx:'CU便利店 饭团+香蕉牛奶',tp:'food',lb:'早餐'},
-   {ic:'🚕',tx:'出发去机场',tp:'key',lb:'交通'},
-   {ic:'🛍️',tx:'免税店提货',tp:'act',lb:'购物'},
-   {ic:'✈️',tx:'13:10 仁川T1起飞',tp:'key',lb:'回家'},
-  ]},
+ {d:1,dt:'7.9 周四',tt:'抵达首尔',tag:'🛬 18:45 仁川T1',tc:'red',tl:[
+  {ic:'✈️',tx:'18:45 仁川T1到达',tp:'k',lb:'关键'},
+  {ic:'🥩',tx:'Gop烤肉 或 高度食烤肉',tp:'m',lb:'晚餐'},
+  {ic:'🏨',tx:'入住酒店休息',tp:'a',lb:'休息'}]},
+ {d:2,dt:'7.10 周五',tt:'明洞+演唱会',tag:'🎤 17:00入场⭐',tc:'org',tl:[
+  {ic:'🍲',tx:'麻浦阳地雪浓汤',tp:'m',lb:'早餐'},{ic:'🛍️',tx:'明洞逛街',tp:'a',lb:'购物'},
+  {ic:'🍗',tx:'炸鸡60',tp:'m',lb:'午餐'},{ic:'🎤',tx:'17:00 演唱会!!!',tp:'k',lb:'重点'},
+  {ic:'🍕',tx:'外卖·罗杰炒年糕+Nomore披萨',tp:'m',lb:'晚餐'}]},
+ {d:3,dt:'7.11 周六',tt:'汝矣岛+弘大',tag:'🌅 汉江日落',tc:'blu',tl:[
+  {ic:'🐔',tx:'长寿韩方参鸡汤 / Fritz烘焙',tp:'m',lb:'早餐'},{ic:'🛍️',tx:'汝矣岛现代百货',tp:'a',lb:'购物'},
+  {ic:'🐂',tx:'소곱창 烤牛肠',tp:'m',lb:'午餐'},{ic:'🌅',tx:'汉江公园看日落',tp:'a',lb:'景点'},
+  {ic:'🍻',tx:'Hansabal大排档',tp:'m',lb:'晚餐'},{ic:'💄',tx:'Olive Young扫货',tp:'a',lb:'购物'}]},
+ {d:4,dt:'7.12 周日',tt:'圣水洞+狎鸥亭',tag:'☕ 网红咖啡',tc:'grn',tl:[
+  {ic:'🍔',tx:"Mom's Touch 汉堡",tp:'m',lb:'早餐'},{ic:'🛍️',tx:'圣水洞逛街+网红咖啡',tp:'a',lb:'购物'},
+  {ic:'🥩',tx:'水芹菜牛肉饭汤',tp:'m',lb:'午餐'},{ic:'🛍️',tx:'狎鸥亭·设计师品牌',tp:'a',lb:'购物'},
+  {ic:'🍖',tx:'양천뼈다귀 孔德脊骨汤',tp:'m',lb:'晚餐'}]},
+ {d:5,dt:'7.13 周一',tt:'返程回家',tag:'✈️ 13:10起飞',tc:'org',tl:[
+  {ic:'⏰',tx:'8:00起床',tp:'a',lb:'起床'},{ic:'🏪',tx:'CU/GS25 饭团+香蕉牛奶',tp:'m',lb:'早餐'},
+  {ic:'🚕',tx:'出发去机场',tp:'k',lb:'交通'},{ic:'🛍️',tx:'免税店提货',tp:'a',lb:'购物'},
+  {ic:'✈️',tx:'13:10 仁川T1起飞',tp:'k',lb:'回家'}]},
 ];
 
-// ═══ CHECKLIST DATA ═══
-const CHECKS=[
- {g:'出发前准备',ic:'🎒',items:[
-  {em:'📱',tx:'LG U+ 电话卡',done:1},{em:'🪥',tx:'牙刷+卫生蓝膜',done:1},
-  {em:'💰',tx:'现金 ₩',done:1},{em:'🔋',tx:'充电宝（大容量）',done:1},
-  {em:'🔌',tx:'充电转换头（韩标→国标）',done:1},{em:'🛏️',tx:'充气U形枕',done:1},
-  {em:'🚊',tx:'落地买 T-money 气候卡',nb:'仁川地铁站'},
-  {em:'🧤',tx:'一次性手套'},{em:'🧻',tx:'卫生纸/抽纸',nb:'多拿'},
-  {em:'🗑️',tx:'垃圾袋×5',nb:'韩国没垃圾桶'},{em:'💳',tx:'Visa卡'},
-  {em:'📿',tx:'手机挂绳',nb:'防盗'},{em:'🚕',tx:'预定接送机',nb:'仁川⇄酒店'},
-  {em:'📱',tx:'必备APP：Uber/KakaoMap/Papago'},
-  {em:'🛍️',tx:'新罗免税店APP',nb:'提前下单机场提'},
+const CHKS=[
+ {g:'出发前必备',ic:'🥳',items:[
+  {em:'📱',tx:'电话卡 LG U+',done:1},{em:'🪥',tx:'一次性牙刷+卫生蓝膜',done:1},
+  {em:'💰',tx:'现金 ₩',done:1},{em:'🔋',tx:'充电宝',done:1},
+  {em:'🔌',tx:'充电器转换头',done:1},{em:'🛏️',tx:'充气U形枕',done:1},
+  {em:'🚊',tx:'落地买 T-money 气候卡',nb:'地铁站买'},{em:'🧤',tx:'一次性手套'},
+  {em:'🧻',tx:'卫生纸/抽纸',nb:'多拿'},{em:'🗑️',tx:'垃圾袋×5',nb:'没有垃圾桶'},
+  {em:'💳',tx:'Visa卡'},{em:'📿',tx:'手机挂绳',nb:'防盗'},
+  {em:'🚕',tx:'提前预定接送机',nb:'仁川⇄酒店'},{em:'📱',tx:'必备APP',nb:'Uber/Kakao/Papago'},
+  {em:'🛍️',tx:'新罗免税店APP',nb:'提前买机场提'},
  ]},
  {g:'重要提醒',ic:'🚨',items:[
-  {em:'💳',tx:'刷支付宝/微信汇率更优惠',nb:'Visa+现金保底'},
+  {em:'💳',tx:'刷支付宝/微信汇率优惠',nb:'Visa+现金保底'},
   {em:'📱',tx:'手机挂绳不离身'},{em:'🗑️',tx:'垃圾袋随身带'},
-  {em:'🧻',tx:'多拿抽纸',nb:'餐厅纸很少'},
-  {em:'📲',tx:'用KakaoMap别用Google Map'},
+  {em:'🧻',tx:'多拿抽纸',nb:'餐厅纸很少'},{em:'📲',tx:'用KakaoMap别用Google'},
  ]},
 ];
 
 // ═══ STATE ═══
 let cl=[],ft='';
 
-async function fs(path,opts={}){
- if(!ft){let r=await fetch(PROXY+'auth/v3/tenant_access_token/internal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_id:APP,app_secret:SECRET})});ft=(await r.json()).tenant_access_token}
- let h={Authorization:'Bearer '+ft,'Content-Type':'application/json; charset=utf-8'};
- return (await fetch(PROXY+'bitable/v1/apps/'+BASE+'/tables/'+TBL+path,{headers:h,...opts})).json();
+async function fs(p,o={}){
+ if(!ft){let r=await fetch(PX+'auth/v3/tenant_access_token/internal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_id:AI,app_secret:AS})});ft=(await r.json()).tenant_access_token}
+ return(await fetch(PX+'bitable/v1/apps/'+BA+'/tables/'+TB+p,{headers:{Authorization:'Bearer '+ft,'Content-Type':'application/json; charset=utf-8'},...o})).json();
 }
 
 async function ld(){
- document.getElementById('sync').innerHTML='<div class="d off"></div>同步中';
+ document.getElementById('sync').innerHTML='<span class="dot bad"></span>同步中';
  try{
-  let data=await fs('/records?page_size=100');
-  let items=data.data.items;cl=[];
-  CHECKS.forEach(g=>g.items.forEach(item=>{
-   let fi=items.find(it=>it.fields['文本']===item.tx);
-   cl.push({...item,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':!!item.done});
+  let data=await fs('/records?page_size=100');let items=data.data.items;cl=[];
+  CHKS.forEach(g=>g.items.forEach(it=>{
+   let fi=items.find(i=>i.fields['文本']===it.tx);
+   cl.push({...it,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':!!it.done});
   }));
-  document.getElementById('sync').innerHTML='<div class="d ok"></div>在线';
+  document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
  }catch(e){
-  CHECKS.forEach(g=>g.items.forEach(item=>cl.push({...item,id:null,done:!!item.done})));
-  document.getElementById('sync').innerHTML='<div class="d off"></div>离线';
+  CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));
+  document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线';
  }
  ren();
 }
@@ -238,58 +215,68 @@ async function ld(){
 async function tg(i){
  cl[i].done=!cl[i].done;ren();
  if(!cl[i].id)return;
- document.getElementById('sync').innerHTML='<div class="d off"></div>保存中';
+ document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
  try{await fs('/records/'+cl[i].id,{method:'PUT',body:JSON.stringify({fields:{'状态':cl[i].done?'✅ 已完成':'⬜ 待办'}})});
-  document.getElementById('sync').innerHTML='<div class="d ok"></div>在线';
- }catch(e){document.getElementById('sync').innerHTML='<div class="d off"></div>离线'}
+  document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
+ }catch(e){document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线'}
 }
 
 function ren(){
- // Days
- let h='';DAYS.forEach(d=>{
-  h+=`<div class="day" id="d${d.d}"><div class="dh" onclick="document.getElementById('d${d.d}').classList.toggle('open')"><div class="dn">${String(d.d).padStart(2,'0')}</div><div class="di"><h3>${d.tt}</h3><div class="ds">${d.dt}</div><div class="dt">${d.tag}</div></div><div class="da">▼</div></div><div class="db"><div class="tl">`;
-  d.tl.forEach(t=>{h+=`<div class="ti ${t.tp}"><span class="tl-ic">${t.ic}</span>${t.tx}<span class="tl-lb">${t.lb}</span></div>`;});
-  h+='</div></div></div>';
+ // Gantt
+ let gh='';
+ [{g:'🎒 准备',c:'pre',d:0},{g:'🌴 Day1',c:'d1',d:1},{g:'🎵 Day2',c:'d2',d:2},{g:'🌅 Day3',c:'d3',d:3},{g:'☕ Day4',c:'d4',d:4},{g:'✈️ Day5',c:'d5',d:5}].forEach(row=>{
+  let items=[];
+  if(row.d===0) CHKS[0].items.forEach(it=>items.push({em:it.em,tx:it.tx,done:cl.find(x=>x.tx===it.tx)?.done}));
+  else{let day=DAYS.find(d=>d.d===row.d);if(day)day.tl.forEach(t=>items.push({em:t.ic,tx:t.tx}));}
+  if(!items.length)return;
+  gh+=`<div class="grow"><div class="grp">${row.g}</div><div class="gcols">`;
+  for(let i=0;i<6;i++){
+   let cls=i===0?'pre':`d${i}`;
+   let cell=items.filter(it=>{
+    if(row.d===0)return i===0;
+    return i===row.d;
+   });
+   gh+=`<div class="gc">`;
+   cell.forEach(it=>gh+=`<div class="gb ${cls}">${it.em} ${it.tx.slice(0,8)}</div>`);
+   gh+=`</div>`;
+  }
+  gh+=`</div></div>`;
  });
- document.getElementById('daysC').innerHTML=h;
+ document.getElementById('ganttC').innerHTML=gh;
+
+ // Day cards
+ let dh='';DAYS.forEach(d=>{
+  dh+=`<div class="dayc" id="dy${d.d}"><div class="dt" onclick="document.getElementById('dy${d.d}').classList.toggle('open')"><div class="dn">${String(d.d).padStart(2,'0')}</div><div class="di"><h3>${d.tt}</h3><div class="dd">${d.dt}</div><div class="dg ${d.tc}">${d.tag}</div></div><div class="arr">▼</div></div><div class="db"><div class="tl">`;
+  d.tl.forEach(t=>dh+=`<div class="item ${t.tp}"><span class="ic">${t.ic}</span><span class="tx">${t.tx}</span><span class="lb ${t.tp}l">${t.lb}</span></div>`);
+  dh+=`</div></div></div>`;
+ });
+ document.getElementById('daysC').innerHTML=dh;
 
  // Checklist
- let h2='';CHECKS.forEach((g,gi)=>{
-  let items=cl.slice(CHECKS.slice(0,gi).reduce((a,c)=>a+c.items.length,0),CHECKS.slice(0,gi+1).reduce((a,c)=>a+c.items.length,0));
+ let ch='';CHKS.forEach((g,gi)=>{
+  let ofs=CHKS.slice(0,gi).reduce((a,c)=>a+c.items.length,0);
+  let items=cl.slice(ofs,ofs+g.items.length);
   let done=items.filter(i=>i.done).length;
-  h2+=`<div class="ckg"><div class="ckh">${g.ic} ${g.g}<span class="ckn">${done}/${items.length}</span></div>`;
-  items.forEach((it,i)=>{let idx=CHECKS.slice(0,gi).reduce((a,c)=>a+c.items.length,0)+i;
-   h2+=`<div class="cki${it.done?' done':''}" onclick="tg(${idx})"><div class="cb"></div><div class="ck-ic">${it.em}</div><div class="ck-tx">${it.tx}</div>${it.nb?`<div class="ck-nb">${it.nb}</div>`:''}</div>`});
-  h2+='</div>';
+  ch+=`<div class="ckg"><div class="ckh">${g.ic} ${g.g}<span class="cnt">${done}/${items.length}</span></div>`;
+  items.forEach((it,i)=>{let idx=ofs+i;
+   ch+=`<div class="ckit${it.done?' done':''}" onclick="tg(${idx})"><div class="cb"></div><div class="ckem">${it.em}</div><div class="cktx">${it.tx}</div>${it.nb?`<div class="cknb">${it.nb}</div>`:''}</div>`});
+  ch+='</div>';
  });
- document.getElementById('checkC').innerHTML=h2;
+ document.getElementById('checkC').innerHTML=ch;
 
  // Stats
- let td=cl.length,dn=cl.filter(i=>i.done).length,td2=td-dn,pc=td?Math.round(dn/td*100):0;
- document.getElementById('mTodo').textContent=td2;document.getElementById('mDone').textContent=dn;
- document.getElementById('mPct').textContent=pc+'%';document.getElementById('pFill').style.width=pc+'%';
+ let td=cl.length,dn=cl.filter(i=>i.done).length,pc=td?Math.round(dn/td*100):0;
+ document.getElementById('sTodo').textContent=td-dn;
+ document.getElementById('sPct').textContent=pc+'%';
+ document.getElementById('pFil').style.width=pc+'%';
  document.getElementById('pTxt').textContent=dn+'/'+td+' 项完成';
 }
 
 function sw(n){
- ['panDays','panCheck','panGal'].forEach(id=>document.getElementById(id).classList.remove('on'));
- document.querySelectorAll('.nt').forEach(t=>t.classList.remove('on'));
- document.getElementById('pan'+{days:'Days',check:'Check',gal:'Gal'}[n]).classList.add('on');
- document.querySelectorAll('.nt')[{days:0,check:1,gal:2}[n]].classList.add('on');
- if(n==='gal'&&!document.getElementById('galC').innerHTML) srch();
+ document.getElementById('panG').classList.toggle('on',n==='g');
+ document.getElementById('panC').classList.toggle('on',n==='c');
+ document.querySelectorAll('.nav button').forEach((b,i)=>b.classList.toggle('on',(n==='g'&&i===0)||(n==='c'&&i===1)));
 }
-
-async function srch(){
- document.getElementById('galC').innerHTML='<div class="spin"><div></div></div>';
- try{
-  let q=document.getElementById('gq').value||'Seoul';
-  let r=await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(q)}&per_page=10&orientation=squarish&client_id=Jjx4NKDKgeP2kRJNcbW6Jm-X2dBW1NyJMTmJhIi2bSU`);
-  let d=await r.json();let h='';
-  d.results.forEach(p=>{h+=`<div class="gal-card"><img src="${p.urls.thumb}" alt="" loading="lazy"></div>`});
-  document.getElementById('galC').innerHTML=h||'<div class="empty">无结果</div>';
- }catch(e){document.getElementById('galC').innerHTML='<div class="empty">加载失败</div>'}
-}
-document.getElementById('gq').addEventListener('keydown',e=>{if(e.key==='Enter')srch()});
 
 ld();
 </script>
