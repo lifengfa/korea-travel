@@ -154,10 +154,67 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
 .grow:nth-child(4){animation-delay:.12s}
 .grow:nth-child(5){animation-delay:.16s}
 .grow:nth-child(6){animation-delay:.2s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TIMELINE ── */
+.tmln{padding:0 14px 90px}
+.tday{margin-bottom:20px}
+.tday .thd{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.tday .thd .tnum{font-size:28px;font-weight:900;min-width:36px;background:linear-gradient(180deg,var(--a),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tday .thd .tinfo{flex:1}
+.tday .thd .tinfo h3{font-size:15px;font-weight:600}
+.tday .thd .tinfo .tsub{font-size:11px;color:var(--s)}
+.tline{position:relative;padding-left:24px;border-left:2px solid var(--br)}
+.tline .titem{padding:10px 0;position:relative;display:flex;align-items:flex-start;gap:10px}
+.tline .titem::before{content:'';position:absolute;left:-29px;top:13px;width:12px;height:12px;border-radius:50%;border:2px solid var(--br);background:var(--b)}
+.tline .titem.eat::before{border-color:var(--a);background:rgba(240,160,88,.15)}
+.tline .titem.move::before{border-color:var(--blu);background:rgba(120,176,224,.15)}
+.tline .titem.shop::before{border-color:var(--pink);background:rgba(224,112,128,.15)}
+.tline .titem.spot::before{border-color:var(--grn);background:rgba(96,200,120,.15)}
+.tline .titem.key::before{border-color:var(--yel);background:rgba(224,192,96,.15)}
+.tline .ttime{font-size:11px;color:var(--s);min-width:42px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.tline .tcard{flex:1;background:var(--c);border:1px solid var(--br);border-radius:8px;padding:10px 12px;min-width:0}
+.tline .tcard .tcicon{font-size:16px;margin-right:6px}
+.tline .tcard .tctitle{font-size:13px;font-weight:500}
+.tline .tcard .tcdetail{font-size:11px;color:var(--s);margin-top:3px;line-height:1.5}
+.tline .tcard .tctag{display:inline-block;font-size:9px;padding:2px 7px;border-radius:8px;margin-top:4px;font-weight:500}
+.tctag.food{background:rgba(240,160,88,.1);color:var(--a)}
+.tctag.trans{background:rgba(120,176,224,.1);color:var(--blu)}
+.tctag.shopping{background:rgba(224,112,128,.1);color:var(--pink)}
+.tctag.view{background:rgba(96,200,120,.1);color:var(--grn)}
+.tctag.important{background:rgba(224,192,96,.15);color:var(--yel)}
+
+/* ── BUDGET ── */
+.bud{padding:0 14px 90px}
+.bud .bfab{position:sticky;top:56px;z-index:10;background:var(--b);padding:10px 0;display:flex;gap:8px}
+.bfab input,.bfab select{flex:1;min-width:0;padding:9px 10px;background:var(--c);border:1px solid var(--br);border-radius:8px;color:var(--t);font-size:13px;font-family:inherit;outline:none}
+.bfab input:focus,.bfab select:focus{border-color:var(--a)}
+.bfab select{-webkit-appearance:none;appearance:none;padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23d4cec8' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.bfab .ba{width:40px;min-width:40px;height:40px;border-radius:50%;background:var(--a);color:#000;border:none;font-size:20px;font-weight:700;cursor:pointer;flex-shrink:0}
+.bfab .ba:active{opacity:.8}
+.bud .bsum{display:flex;gap:8px;margin-bottom:14px}
+.bsum .bsc{flex:1;background:var(--c);border:1px solid var(--br);border-radius:8px;padding:10px;text-align:center}
+.bsc .bv{font-size:18px;font-weight:700}
+.bsc .bl{font-size:10px;color:var(--s);margin-top:2px}
+.bsum .bsc:nth-child(1) .bv{color:var(--a)}
+.bsum .bsc:nth-child(2) .bv{color:var(--pink)}
+.bsum .bsc:nth-child(3) .bv{color:var(--grn)}
+.bex{margin-bottom:6px;background:var(--c);border:1px solid var(--br);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;animation:fadeIn .25s ease-out}
+.bex .bea{font-size:18px;font-weight:700;color:var(--a);min-width:60px;flex-shrink:0;text-align:right}
+.bex .beinfo{flex:1;min-width:0}
+.bex .beinfo .betitle{font-size:13px;line-height:1.3}
+.bex .beinfo .bemeta{font-size:10px;color:var(--s);margin-top:2px}
+.bex .bedel{width:28px;height:28px;border-radius:50%;border:1px solid var(--br);background:transparent;color:var(--pink);font-size:14px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.bedel:active{background:rgba(224,112,128,.08)}
+
+/* ── COUNTDOWN ── */
+.cdbar{display:none;padding:8px 14px;text-align:center;background:linear-gradient(90deg,rgba(240,160,88,.08),rgba(224,112,128,.08));border-bottom:1px solid var(--br)}
+.cdbar .cdtxt{font-size:12px;color:var(--a);font-weight:500}
 </style>
 </head>
 <body>
+
+<div id="countdown" class="cdbar"></div>
 
 <div class="h">
   <div class="logo">🇰🇷 한국고고고</div>
@@ -183,6 +240,23 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
 </div>
 
 <div id="panC" class="pan"><div class="chks" id="checkC"></div></div>
+
+<!-- Timeline Panel -->
+<div id="panT" class="pan"><div class="tmln" id="timelineC"></div></div>
+
+<!-- Budget Panel -->
+<div id="panB" class="pan">
+  <div class="bud">
+    <div class="bfab">
+      <input id="bAmt" type="number" placeholder="₩金额" autocomplete="off">
+      <select id="bPayer"><option value="ff">ff</option><option value="小韩">小韩</option><option value="老三">老三</option><option value="老四">老四</option></select>
+      <input id="bNote" placeholder="备注" autocomplete="off" style="max-width:70px">
+      <button class="ba" onclick="addExp()">+</button>
+    </div>
+    <div class="bsum" id="bSum"></div>
+    <div id="bList"></div>
+  </div>
+</div>
 
 <!-- FAB -->
 <button class="fab" onclick="showAdd()">+</button>
@@ -222,6 +296,8 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
 <div class="nav">
   <button class="on" onclick="sw('g')"><span class="ni">📅</span>甘特图</button>
   <button onclick="sw('c')"><span class="ni">✅</span>清单</button>
+  <button onclick="sw('t')"><span class="ni">🕐</span>时间线</button>
+  <button onclick="sw('b')"><span class="ni">💰</span>预算</button>
 </div>
 
 <script>
@@ -500,6 +576,48 @@ function toast(m){
  t.textContent=m;t.classList.add('show');
  t._tid=setTimeout(()=>t.classList.remove('show'),2000);
 }
+
+// ═══ BUDGET ═══
+let bl=[];
+async function ld2(){
+ try{let data=await fs2('/records?page_size=200&filter='+encodeURIComponent('分类="预算"'));let items=(data.data||{}).items||[];bl=items.filter(i=>{let f=i.fields;return f['分类']==='预算';}).map(i=>({id:i.record_id,amt:parseInt(i.fields['状态']||'0'),tx:i.fields['文本'],note:i.fields['备注']||''}));}catch(e){}renB();}
+function renB(){
+ let f=document.getElementById('panB').classList.contains('on');if(!f)return;
+ let total=bl.reduce((a,b)=>a+b.amt,0),pp=Math.round(total/4);
+ document.getElementById('bSum').innerHTML=`<div class="bsc"><div class="bv">₩${total.toLocaleString()}</div><div class="bl">总花费</div></div><div class="bsc"><div class="bv">₩${pp.toLocaleString()}</div><div class="bl">人均 ₩</div></div><div class="bsc"><div class="bv">¥${Math.round(pp/185)}</div><div class="bl">人均 ¥(~185)</div></div>`;
+ let h='';[...bl].reverse().forEach(e=>{let n=e.note.split('|'),payer=n[0]||'?',cat=n[1]||'其他',detail=n[2]||'';h+=`<div class="bex"><div class="bea">₩${e.amt.toLocaleString()}</div><div class="beinfo"><div class="betitle">${e.tx}</div><div class="bemeta">${payer} · ${cat}${detail?' · '+detail:''}</div></div><button class="bedel" onclick="delExp('${e.id}')">×</button></div>`;});document.getElementById('bList').innerHTML=h||'<div style="text-align:center;color:var(--s);padding:30px">还没有记账 📝</div>';}
+async function addExp(){
+ let amt=parseInt(document.getElementById('bAmt').value),payer=document.getElementById('bPayer').value,note=document.getElementById('bNote').value.trim();
+ if(!amt||amt<0)return toast('请输入金额');
+ let tx=document.getElementById('bAmt').placeholder||'消费',fullNote=[payer,'餐饮',note].filter(Boolean).join('|'),fields={'文本':tx,'分类':'预算','状态':String(amt),'备注':fullNote};
+ try{await fs2('/records',{method:'POST',body:JSON.stringify({fields})});document.getElementById('bAmt').value='';document.getElementById('bNote').value='';await ld2();toast('✅ 已记账');}catch(e){toast('❌ 记账失败')}}
+async function delExp(id){if(!confirm('删除此记录？'))return;try{await fs2('/records/'+id,{method:'DELETE'});await ld2();toast('🗑️ 已删除')}catch(e){toast('❌ 删除失败')}}
+let ft2='';
+async function fs2(p,o={}){if(!ft2){let r=await fetch(PX+'auth/v3/tenant_access_token/internal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_id:AI,app_secret:AS})});ft2=(await r.json()).tenant_access_token}return(await fetch(PX+'bitable/v1/apps/'+BA+'/tables/'+TB+p,{headers:{Authorization:'Bearer '+ft2,'Content-Type':'application/json; charset=utf-8'},...o})).json();}
+
+// ═══ TIMELINE ═══
+const TIMELINE=[{d:1,dt:'7.9 周四',tt:'抵达首尔',tc:'red',items:[{t:'18:45',ic:'✈️',tx:'仁川T1到达',dt:'入境+取行李约30min',tp:'key'},{t:'19:15',ic:'🛂',tx:'出关完毕',dt:'',tp:'key'},{t:'19:30',ic:'🚇',tx:'AREX→首尔站',dt:'快线₩9500/43min',tp:'move'},{t:'20:30',ic:'🏨',tx:'入住酒店',dt:'放行李休息',tp:'key'},{t:'21:00',ic:'🥩',tx:'Gop烤肉/高度食',dt:'人均₩20000',tp:'eat'},{t:'22:30',ic:'😴',tx:'休息！买水+交通卡',dt:'',tp:'spot'}]},{d:2,dt:'7.10 周五',tt:'明洞+🎤演唱会',tc:'org',items:[{t:'08:00',ic:'🍲',tx:'麻浦阳地雪浓汤',dt:'24h营业 ₩9000/碗',tp:'eat'},{t:'10:00',ic:'🛍️',tx:'明洞逛街',dt:'SPAO/Stylenanda/Aland',tp:'shop'},{t:'12:30',ic:'🍗',tx:'炸鸡60 午餐',dt:'BHC半半 ₩20000',tp:'eat'},{t:'14:00',ic:'☕',tx:'明洞咖啡/休整',dt:'',tp:'spot'},{t:'16:00',ic:'🚇',tx:'出发去演唱会',dt:'预留1h交通',tp:'move'},{t:'17:00',ic:'🎤',tx:'演唱会!!! ⭐',dt:'入场安检',tp:'key'},{t:'20:00',ic:'🚇',tx:'演唱会结束返程',dt:'',tp:'move'},{t:'21:00',ic:'🍕',tx:'外卖晚餐',dt:'Shuttle→炒年糕+披萨',tp:'eat'}]},{d:3,dt:'7.11 周六',tt:'汝矣岛+🌅弘大',tc:'blu',items:[{t:'09:00',ic:'🐔',tx:'参鸡汤/Fritz',dt:'参鸡汤₩16000/Fritz盐面包₩3500',tp:'eat'},{t:'11:00',ic:'🛍️',tx:'汝矣岛现代百货',dt:'더현대서울 B2美食街',tp:'shop'},{t:'13:00',ic:'🐂',tx:'소곱창 牛肠午餐',dt:'여의도소곱창+볶음밥',tp:'eat'},{t:'15:00',ic:'🌿',tx:'汉江公园',dt:'买炸鸡啤酒+垫子',tp:'spot'},{t:'19:00',ic:'🌅',tx:'汉江日落!!',dt:'19:56日落 ⭐拍照',tp:'spot'},{t:'20:00',ic:'🚇',tx:'前往弘大',dt:'5号线约20min',tp:'move'},{t:'20:30',ic:'🍻',tx:'Hansabal大排档',dt:'生啤₩4000+전',tp:'eat'},{t:'22:00',ic:'💄',tx:'Olive Young扫货',dt:'22点关！防晒/面膜',tp:'shop'}]},{d:4,dt:'7.12 周日',tt:'圣水洞+☕狎鸥亭',tc:'grn',items:[{t:'09:00',ic:'🍔',tx:'Mom\'s Touch',dt:'싸이버거套餐₩5000',tp:'eat'},{t:'10:30',ic:'🛍️',tx:'圣水洞逛街',dt:'대림창고/Onion/Nudake',tp:'shop'},{t:'13:00',ic:'🥩',tx:'水芹菜牛肉饭汤',dt:'미나리소고기국밥 ₩9000',tp:'eat'},{t:'14:30',ic:'🚇',tx:'前往狎鸥亭',dt:'地铁约20min',tp:'move'},{t:'15:00',ic:'🛍️',tx:'狎鸥亭逛街',dt:'갤러리아+Boon the Shop',tp:'shop'},{t:'18:00',ic:'🚇',tx:'前往孔德',dt:'地铁约30min ₩1500',tp:'move'},{t:'19:00',ic:'🍖',tx:'양천뼈다귀 脊骨汤',dt:'11-22点 人均₩15000',tp:'eat'}]},{d:5,dt:'7.13 周一',tt:'✈️返程回家',tc:'org',items:[{t:'08:00',ic:'⏰',tx:'起床！退房准备',dt:'',tp:'key'},{t:'08:15',ic:'🏪',tx:'CU/GS25早餐',dt:'香蕉牛奶₩1500+饭团₩1200',tp:'eat'},{t:'08:30',ic:'🚇',tx:'出发去机场',dt:'AREX直通₩9500/43min',tp:'move'},{t:'09:20',ic:'🛂',tx:'到达仁川T1',dt:'找退税kiosk',tp:'key'},{t:'10:00',ic:'🧾',tx:'退税+值机+托运',dt:'单笔₩30000+可退',tp:'key'},{t:'10:30',ic:'🛍️',tx:'免税店+提货',dt:'新罗/乐天→28号口提货',tp:'shop'},{t:'12:30',ic:'✈️',tx:'登机',dt:'',tp:'key'},{t:'13:10',ic:'🛫',tx:'起飞！回家🇨🇳',dt:'다음에 또 만나요!',tp:'key'}]}];
+
+function renT(){
+ let f=document.getElementById('panT').classList.contains('on');if(!f)return;
+ let h='';TIMELINE.forEach(d=>{h+=`<div class="tday"><div class="thd"><div class="tnum">D${d.d}</div><div class="tinfo"><h3>${d.tt}</h3><div class="tsub">${d.dt}</div></div></div><div class="tline">`;
+  d.items.forEach(it=>{h+=`<div class="titem ${it.tp}"><div class="ttime">${it.t}</div><div class="tcard"><span class="tcicon">${it.ic}</span><span class="tctitle">${it.tx}</span>${it.dt?`<div class="tcdetail">${it.dt}</div>`:''}<div class="tctag ${it.tp==='eat'?'food':it.tp==='move'?'trans':it.tp==='shop'?'shopping':it.tp==='spot'?'view':'important'}">${it.tp==='eat'?'🍴美食':it.tp==='move'?'🚇交通':it.tp==='shop'?'🛍️购物':it.tp==='spot'?'📸景点':'⭐关键'}</div></div></div>`;});h+=`</div></div>`;});document.getElementById('timelineC').innerHTML=h;
+}
+
+// ═══ COUNTDOWN ═══
+function renCD(){
+ let now=new Date(),tgt=new Date('2026-07-09T18:45:00+09:00'),diff=tgt-now;
+ if(diff<=0){document.getElementById('countdown').style.display='block';document.getElementById('countdown').innerHTML='<div class="cdtxt">🎉 韩国gogogo！行程进行中~</div>';return;}
+ let d=Math.floor(diff/86400000),h=Math.floor(diff%86400000/3600000),m=Math.floor(diff%3600000/60000);
+ document.getElementById('countdown').style.display='block';document.getElementById('countdown').innerHTML=`<div class="cdtxt">⏳ 距出发还有 <b>${d}</b> 天 <b>${h}</b> 小时 <b>${m}</b> 分</div>`;}
+setInterval(renCD,60000);
+
+// ═══ OVERRIDE sw() ═══
+let _curTab='g';
+(function(){let origSw=sw;sw=function(n){_curTab=n;origSw(n);let ns=document.querySelectorAll('.nav button');ns.forEach((b,i)=>{b.classList.toggle('on',(n==='g'&&i===0)||(n==='c'&&i===1)||(n==='t'&&i===2)||(n==='b'&&i===3));});document.getElementById('panT').classList.toggle('on',n==='t');document.getElementById('panB').classList.toggle('on',n==='b');if(n==='t')renT();if(n==='b'){if(bl.length===0)ld2();else renB();}};})();
+
+// ═══ OVERRIDE ren() ═══
+(function(){let origRen=ren;ren=function(){origRen();renCD();if(_curTab==='t')renT();if(_curTab==='b'){if(bl.length===0)ld2();else renB();}};})();
 
 ld();
 </script>
