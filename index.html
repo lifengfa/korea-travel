@@ -570,14 +570,28 @@ async function doAdd(){
    let item=_editing.type==='dl'?dl[_editing.idx]:cl[_editing.idx];
    if(!item.id){toast('❌ 离线无法编辑');return;}
    await fs('/records/'+item.id,{method:'PUT',body:JSON.stringify({fields:{'文本':tx,'备注':nt}})});
+   item.tx=tx;item.lb=nt||item.lb;item.nb=nt||item.nb;
    toast('✅ 已更新');
   }else{
-   await fs('/records',{method:'POST',body:JSON.stringify({fields:{'文本':tx,'分类':cat,'状态':'⬜ 待办','备注':nt}})});
+   let res=await fs('/records',{method:'POST',body:JSON.stringify({fields:{'文本':tx,'分类':cat,'状态':'⬜ 待办','备注':nt}})});
+   let rid=res?.data?.record?.record_id;
+   // Optimistic local add — survive ld() failure
+   let m=cat.match(/Day(\d)/);
+   if(m){
+    let d=parseInt(m[1]);
+    dl.push({ic:'📌',tx:tx,tp:'a',lb:nt||'新增',id:rid,done:false,day:d,_dyn:true});
+   } else {
+    // Checklist or other — add to cl with basic info
+    cl.push({em:'📌',tx:tx,done:false,id:rid,nb:nt||undefined});
+   }
+   try{localStorage.setItem('kt_cl',JSON.stringify(cl.map(i=>({tx:i.tx,em:i.em,done:i.done,id:i.id}))));}catch(_){}
+   try{localStorage.setItem('kt_dl',JSON.stringify(dl.map(i=>({tx:i.tx,ic:i.ic,done:i.done,id:i.id,day:i.day}))));}catch(_){}
    toast('✅ 已添加');
   }
   _editing=null;
   document.getElementById('atx').value='';document.getElementById('ant').value='';
-  await ld();
+  ren();
+  try{await ld();}catch(e){/* local state already updated, ld() is best-effort */}
  }catch(e){toast('❌ 操作失败')}
 }
 
