@@ -386,15 +386,33 @@ let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00
    }
   });
   document.getElementById('sync').innerHTML='<span class="dot ok"></span>在线';
+   // Save to localStorage on success
+  try{localStorage.setItem('kt_cl',JSON.stringify(cl.map(i=>({tx:i.tx,em:i.em,done:i.done,id:i.id}))));}catch(_){}
+  try{localStorage.setItem('kt_dl',JSON.stringify(dl.map(i=>({tx:i.tx,ic:i.ic,done:i.done,id:i.id,day:i.day}))));}catch(_){}
  }catch(e){
-  CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));DAYS.forEach(d=>d.tl.forEach(t=>dl.push({...t,id:null,done:false,day:d.d,_dyn:false})));
-  document.getElementById('sync').innerHTML='<span class="dot bad"></span>离线';
+  // Restore from localStorage, fallback to defaults
+  let restored=false;
+  try{
+   let sCl=localStorage.getItem('kt_cl'),sDl=localStorage.getItem('kt_dl');
+   if(sCl&&sDl){
+    let cCache=JSON.parse(sCl),dCache=JSON.parse(sDl);
+    cl=CHKS.flatMap(g=>g.items).map(it=>{let c=cCache.find(x=>x.tx===it.tx);return{...it,id:c?.id||null,done:c?c.done:!!it.done};});
+    dl=DAYS.flatMap(d=>d.tl.map(t=>({...t,day:d.d,_dyn:false}))).map(t=>{let c=dCache.find(x=>x.tx===t.tx);return{...t,id:c?.id||null,done:c?c.done:false};});
+    restored=true;
+   }
+  }catch(_){}
+  if(!restored){
+   CHKS.forEach(g=>g.items.forEach(it=>cl.push({...it,id:null,done:!!it.done})));
+   DAYS.forEach(d=>d.tl.forEach(t=>dl.push({...t,id:null,done:false,day:d.d,_dyn:false})));
+  }
+  document.getElementById('sync').innerHTML='<span class="dot bad"></span>'+(restored?'缓存':'离线');
  }
  ren();
 }
 
 async function tg(i){
  cl[i].done=!cl[i].done;ren();
+ try{localStorage.setItem('kt_cl',JSON.stringify(cl.map(it=>({tx:it.tx,em:it.em,done:it.done,id:it.id}))));}catch(_){}
  if(!cl[i].id)return;
  document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
  try{await fs('/records/'+cl[i].id,{method:'PUT',body:JSON.stringify({fields:{'状态':cl[i].done?'✅ 已完成':'⬜ 待办'}})});
@@ -473,6 +491,7 @@ function sw(n){
 
 async function tgd(i){
  dl[i].done=!dl[i].done;ren();
+ try{localStorage.setItem('kt_dl',JSON.stringify(dl.map(it=>({tx:it.tx,ic:it.ic,done:it.done,id:it.id,day:it.day}))));}catch(_){}
  if(!dl[i].id)return toast('离线模式，无法同步');
  document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
  try{await fs('/records/'+dl[i].id,{method:'PUT',body:JSON.stringify({fields:{'状态':dl[i].done?'✅ 已完成':'⬜ 待办'}})});
@@ -581,7 +600,7 @@ function toast(m){
 // ═══ BUDGET ═══
 let bl=[];
 async function ld2(){
- try{let data=await fs('/records?page_size=200');let items=(data.data||{}).items||[];bl=items.filter(i=>{let f=i.fields;return f['分类']==='预算';}).map(i=>({id:i.record_id,amt:parseInt(i.fields['状态']||'0'),tx:i.fields['文本'],note:i.fields['备注']||''}));}catch(e){console.log('ld2 err',e)}renB();}
+ try{let data=await fs('/records?page_size=200');let items=(data.data||{}).items||[];bl=items.filter(i=>{let f=i.fields;return f['分类']==='预算';}).map(i=>({id:i.record_id,amt:parseInt(i.fields['状态']||'0'),tx:i.fields['文本'],note:i.fields['备注']||''}));try{localStorage.setItem('kt_bl',JSON.stringify(bl));}catch(_){}}catch(e){try{bl=JSON.parse(localStorage.getItem('kt_bl')||'[]');}catch(_){bl=[];}}renB();}
 function renB(){
  let f=document.getElementById('panB').classList.contains('on');if(!f)return;
  let total=bl.reduce((a,b)=>a+b.amt,0),pp=Math.round(total/4);
