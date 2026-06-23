@@ -630,8 +630,13 @@ function toast(m){
 // ═══ BUDGET ═══
 let bl=[];
 async function ld2(){
+ if(ld2._busy)return;
+ ld2._busy=true;
+ try{
  let _oldBl=bl.filter(i=>i.id);
- try{let data=await fs('/records?page_size=200');let items=(data.data||{}).items||[];bl=items.filter(i=>{let f=i.fields;return f['分类']==='预算';}).map(i=>({id:i.record_id,amt:parseInt(i.fields['状态']||'0'),tx:i.fields['文本'],note:i.fields['备注']||''}));let _apiIds=new Set(items.map(i=>i.record_id));_oldBl.filter(i=>!_apiIds.has(i.id)).forEach(i=>bl.push(i));try{localStorage.setItem('kt_bl',JSON.stringify(bl));}catch(_){}}catch(e){try{bl=JSON.parse(localStorage.getItem('kt_bl')||'[]');}catch(_){bl=[];}}renB();}
+ try{let data=await fs('/records?page_size=200');let items=(data.data||{}).items||[];bl=items.filter(i=>{let f=i.fields;return f['分类']==='预算';}).map(i=>({id:i.record_id,amt:parseInt(i.fields['状态']||'0'),tx:i.fields['文本'],note:i.fields['备注']||''}));let _apiIds=new Set(items.map(i=>i.record_id));_oldBl.filter(i=>!_apiIds.has(i.id)).forEach(i=>bl.push(i));try{localStorage.setItem('kt_bl',JSON.stringify(bl));}catch(_){}}catch(e){try{bl=JSON.parse(localStorage.getItem('kt_bl')||'[]');}catch(_){bl=[];}}renB();
+ }finally{ld2._busy=false;}
+}
 function renB(){
  let f=document.getElementById('panB').classList.contains('on');if(!f)return;
  let total=bl.reduce((a,b)=>a+b.amt,0),pp=Math.round(total/4);
