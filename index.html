@@ -614,8 +614,10 @@ async function delItem(type,idx){
  let item=type==='cl'?cl[idx]:dl[idx];
  if(!item||!item.id)return toast('❌ 离线无法删除');
  document.getElementById('sync').innerHTML='<span class="dot bad"></span>保存中';
+ let arr=type==='cl'?cl:dl;
+ arr.splice(idx,1);ren();
  try{await fs('/records/'+item.id,{method:'DELETE'});toast('🗑️ 已删除');await ld();}
- catch(e){toast('❌ 删除失败')}
+ catch(e){arr.splice(idx,0,item);ren();toast('❌ 删除失败')}
 }
 
 function toast(m){
@@ -653,7 +655,7 @@ async function addExp(){
   try{await ld2();}catch(_){}
  }catch(e){console.log('add err',e);toast('❌ 记账失败')}
  addExp._busy=false;}
-async function delExp(id){if(!confirm('删除此记录？'))return;try{await fs('/records/'+id,{method:'DELETE'});await ld2();toast('🗑️ 已删除')}catch(e){toast('❌ 删除失败')}}
+async function delExp(id){if(!confirm('删除此记录？'))return;let oldBl=bl.slice();bl=bl.filter(i=>i.id!==id);try{localStorage.setItem('kt_bl',JSON.stringify(bl));}catch(_){}renB();try{await fs('/records/'+id,{method:'DELETE'});await ld2();toast('🗑️ 已删除')}catch(e){bl=oldBl;renB();toast('❌ 删除失败')}}
 
 // ═══ TIMELINE ═══
 const TIMELINE=[{d:1,dt:'7.9 周四',tt:'抵达首尔',tc:'red',items:[{t:'18:45',ic:'✈️',tx:'仁川T1到达',dt:'入境+取行李约30min',tp:'key'},{t:'19:15',ic:'🛂',tx:'出关完毕',dt:'',tp:'key'},{t:'19:30',ic:'🚇',tx:'AREX→首尔站',dt:'快线₩9500/43min',tp:'move'},{t:'20:30',ic:'🏨',tx:'入住酒店',dt:'放行李休息',tp:'key'},{t:'21:00',ic:'🥩',tx:'Gop烤肉/高度食',dt:'人均₩20000',tp:'eat'},{t:'22:30',ic:'😴',tx:'休息！买水+交通卡',dt:'',tp:'spot'}]},{d:2,dt:'7.10 周五',tt:'明洞+🎤演唱会',tc:'org',items:[{t:'08:00',ic:'🍲',tx:'麻浦阳地雪浓汤',dt:'24h营业 ₩9000/碗',tp:'eat'},{t:'10:00',ic:'🛍️',tx:'明洞逛街',dt:'SPAO/Stylenanda/Aland',tp:'shop'},{t:'12:30',ic:'🍗',tx:'炸鸡60 午餐',dt:'BHC半半 ₩20000',tp:'eat'},{t:'14:00',ic:'☕',tx:'明洞咖啡/休整',dt:'',tp:'spot'},{t:'16:00',ic:'🚇',tx:'出发去演唱会',dt:'预留1h交通',tp:'move'},{t:'17:00',ic:'🎤',tx:'演唱会!!! ⭐',dt:'入场安检',tp:'key'},{t:'20:00',ic:'🚇',tx:'演唱会结束返程',dt:'',tp:'move'},{t:'21:00',ic:'🍕',tx:'外卖晚餐',dt:'Shuttle→炒年糕+披萨',tp:'eat'}]},{d:3,dt:'7.11 周六',tt:'汝矣岛+🌅弘大',tc:'blu',items:[{t:'09:00',ic:'🐔',tx:'参鸡汤/Fritz',dt:'参鸡汤₩16000/Fritz盐面包₩3500',tp:'eat'},{t:'11:00',ic:'🛍️',tx:'汝矣岛现代百货',dt:'더현대서울 B2美食街',tp:'shop'},{t:'13:00',ic:'🐂',tx:'소곱창 牛肠午餐',dt:'여의도소곱창+볶음밥',tp:'eat'},{t:'15:00',ic:'🌿',tx:'汉江公园',dt:'买炸鸡啤酒+垫子',tp:'spot'},{t:'19:00',ic:'🌅',tx:'汉江日落!!',dt:'19:56日落 ⭐拍照',tp:'spot'},{t:'20:00',ic:'🚇',tx:'前往弘大',dt:'5号线约20min',tp:'move'},{t:'20:30',ic:'🍻',tx:'Hansabal大排档',dt:'生啤₩4000+전',tp:'eat'},{t:'22:00',ic:'💄',tx:'Olive Young扫货',dt:'22点关！防晒/面膜',tp:'shop'}]},{d:4,dt:'7.12 周日',tt:'圣水洞+☕狎鸥亭',tc:'grn',items:[{t:'09:00',ic:'🍔',tx:'Mom\'s Touch',dt:'싸이버거套餐₩5000',tp:'eat'},{t:'10:30',ic:'🛍️',tx:'圣水洞逛街',dt:'대림창고/Onion/Nudake',tp:'shop'},{t:'13:00',ic:'🥩',tx:'水芹菜牛肉饭汤',dt:'미나리소고기국밥 ₩9000',tp:'eat'},{t:'14:30',ic:'🚇',tx:'前往狎鸥亭',dt:'地铁约20min',tp:'move'},{t:'15:00',ic:'🛍️',tx:'狎鸥亭逛街',dt:'갤러리아+Boon the Shop',tp:'shop'},{t:'18:00',ic:'🚇',tx:'前往孔德',dt:'地铁约30min ₩1500',tp:'move'},{t:'19:00',ic:'🍖',tx:'양천뼈다귀 脊骨汤',dt:'11-22点 人均₩15000',tp:'eat'}]},{d:5,dt:'7.13 周一',tt:'✈️返程回家',tc:'org',items:[{t:'08:00',ic:'⏰',tx:'起床！退房准备',dt:'',tp:'key'},{t:'08:15',ic:'🏪',tx:'CU/GS25早餐',dt:'香蕉牛奶₩1500+饭团₩1200',tp:'eat'},{t:'08:30',ic:'🚇',tx:'出发去机场',dt:'AREX直通₩9500/43min',tp:'move'},{t:'09:20',ic:'🛂',tx:'到达仁川T1',dt:'找退税kiosk',tp:'key'},{t:'10:00',ic:'🧾',tx:'退税+值机+托运',dt:'单笔₩30000+可退',tp:'key'},{t:'10:30',ic:'🛍️',tx:'免税店+提货',dt:'新罗/乐天→28号口提货',tp:'shop'},{t:'12:30',ic:'✈️',tx:'登机',dt:'',tp:'key'},{t:'13:10',ic:'🛫',tx:'起飞！回家🇨🇳',dt:'다음에 또 만나요!',tp:'key'}]}];
