@@ -391,6 +391,9 @@ async function fs(p,o={}){
 }
 
 async function ld(){
+ if(ld._busy)return;
+ ld._busy=true;
+ try{
  if(!PX){
   PX='https://7ff709921e2b4a.lhr.life'; // auto-updated by cron
   try{let r=await fetch('proxy.txt?t='+Date.now(),{cache:'no-store'});PX=(await r.text()).trim()+'/';}catch(e){}
@@ -462,6 +465,7 @@ let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00
   document.getElementById('sync').innerHTML='<span class="dot bad"></span>'+(restored?'缓存':'离线');
  }
  ren();
+ }finally{ld._busy=false;}
 }
 
 async function tg(i){
@@ -645,8 +649,8 @@ async function doAdd(){
   _editing=null;
   document.getElementById('atx').value='';document.getElementById('ant').value='';
   ren();
-  try{await ld();}catch(e){/* local state already updated, ld() is best-effort */}
- }catch(e){toast('❌ 操作失败')}
+  try{await ld();}catch(e){console.error('ld after add failed',e);/* local state already updated, ld() is best-effort */}
+ }catch(e){console.error('doAdd failed',e);toast('❌ 操作失败')}
 }
 
 async function delItem(type,idx){
@@ -707,7 +711,7 @@ async function addExp(){
   renB();
   toast('✅ 已记账');
   try{await ld2();}catch(_){}
- }catch(e){console.log('add err',e);toast('❌ 记账失败')}
+ }catch(e){console.error('addExp failed',e);toast('❌ 记账失败')}
  addExp._busy=false;}
 async function delExp(id){if(!confirm('删除此记录？'))return;let oldBl=bl.slice();bl=bl.filter(i=>i.id!==id);try{localStorage.setItem('kt_bl',JSON.stringify(bl));}catch(_){}renB();try{await fs('/records/'+id,{method:'DELETE'});await ld2();toast('🗑️ 已删除')}catch(e){bl=oldBl;renB();toast('❌ 删除失败')}}
 
