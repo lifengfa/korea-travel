@@ -366,7 +366,14 @@ async function ld(){
  let _oldCl=cl.filter(i=>i.id),_oldDl=dl.filter(i=>i.id);
  document.getElementById('sync').innerHTML='<span class="dot bad"></span>同步中';
  try{
-  let data=await fs('/records?page_size=100');let items=data.data.items;cl=[];
+  let data=await fs('/records?page_size=200');let items=data.data.items;
+  // Fetch remaining pages if more records exist
+  while(data.data.has_more&&data.data.page_token){
+   let next=await fs('/records?page_size=200&page_token='+data.data.page_token);
+   items=items.concat(next.data.items||[]);
+   data=next;
+  }
+  cl=[];
   CHKS.forEach(g=>g.items.forEach(it=>{
 let fi=items.find(i=>i.fields['文本']&&i.fields['文本'].replace(/^[^\w\u4e00-\u9fff]+/,'')===it.tx.replace(/^[^\w\u4e00-\u9fff]+/,''));
    cl.push({...it,id:fi?.record_id||null,done:fi?fi.fields['状态']==='✅ 已完成':!!it.done});
@@ -634,7 +641,16 @@ async function ld2(){
  ld2._busy=true;
  try{
  let _oldBl=bl.filter(i=>i.id);
- try{let data=await fs('/records?page_size=200');let items=(data.data||{}).items||[];bl=items.filter(i=>{let f=i.fields;return f['分类']==='预算';}).map(i=>({id:i.record_id,amt:parseInt(i.fields['状态']||'0'),tx:i.fields['文本'],note:i.fields['备注']||''}));let _apiIds=new Set(items.map(i=>i.record_id));_oldBl.filter(i=>!_apiIds.has(i.id)).forEach(i=>bl.push(i));try{localStorage.setItem('kt_bl',JSON.stringify(bl));}catch(_){}}catch(e){try{bl=JSON.parse(localStorage.getItem('kt_bl')||'[]');}catch(_){bl=[];}}renB();
+ try{
+  let data=await fs('/records?page_size=200');let items=(data.data||{}).items||[];
+  // Fetch remaining pages
+  while(data.data&&data.data.has_more&&data.data.page_token){
+   let next=await fs('/records?page_size=200&page_token='+data.data.page_token);
+   items=items.concat((next.data||{}).items||[]);
+   data=next;
+  }
+  bl=items.filter(i=>{let f=i.fields;return f['分类']==='预算';}).map(i=>({id:i.record_id,amt:parseInt(i.fields['状态']||'0'),tx:i.fields['文本'],note:i.fields['备注']||''}));let _apiIds=new Set(items.map(i=>i.record_id));_oldBl.filter(i=>!_apiIds.has(i.id)).forEach(i=>bl.push(i));try{localStorage.setItem('kt_bl',JSON.stringify(bl));}catch(_){}
+ }catch(e){try{bl=JSON.parse(localStorage.getItem('kt_bl')||'[]');}catch(_){bl=[];}}renB();
  }finally{ld2._busy=false;}
 }
 function renB(){
