@@ -236,6 +236,20 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
 .trsum span{color:var(--s)}
 .trsum b{color:var(--t)}
 
+/* ── TRANSPORT EDIT ── */
+.trseg{cursor:pointer;transition:background .15s}
+.trseg:hover{background:rgba(255,255,255,.03)}
+.trh{cursor:pointer;transition:background .15s}
+.trh:hover{background:rgba(255,255,255,.03)}
+.trsum{cursor:pointer;transition:background .15s}
+.trsum:hover{background:rgba(120,176,224,.1)}
+.trFm{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:4px 0}
+.trFm .fw{grid-column:1/-1}
+.trFm input,.trFm select,.trFm textarea{width:100%;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid var(--br);border-radius:8px;color:var(--t);font-size:14px;font-family:inherit;outline:none}
+.trFm input:focus,.trFm select:focus,.trFm textarea:focus{border-color:var(--a)}
+.trFm select{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23d4cec8' d='M5 7L1 3h8z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:30px}
+.trFm .lbl{font-size:10px;color:var(--s);margin:12px 0 2px 2px;grid-column:1/-1}
+
 /* ── COUNTDOWN ── */
 .cdbar{display:none;padding:8px 14px;text-align:center;background:linear-gradient(90deg,rgba(240,160,88,.08),rgba(224,112,128,.08));border-bottom:1px solid var(--br)}
 .cdbar .cdtxt{font-size:12px;color:var(--a);font-weight:500}
@@ -316,6 +330,17 @@ body{font-family:'Noto Sans SC',sans-serif;background:var(--b);color:var(--t);fo
   </div>
 </div>
 
+<!-- Transport Edit Modal -->
+<div class="mo" id="moTr" onclick="if(event.target===this)hideTrEdit()">
+  <div class="md">
+    <h3 id="trTitle">✏️ 编辑交通</h3>
+    <div class="trFm" id="trFm"></div>
+    <div class="ma">
+      <button onclick="hideTrEdit()">取消</button>
+      <button class="bp" onclick="doTrEdit()">保存</button>
+    </div>
+  </div>
+</div>
 
 <!-- Context Menu -->
 <div class="cm" id="cm" onclick="event.stopPropagation()">
@@ -716,7 +741,10 @@ async function addExp(){
 async function delExp(id){if(!confirm('删除此记录？'))return;let oldBl=bl.slice();bl=bl.filter(i=>i.id!==id);try{localStorage.setItem('kt_bl',JSON.stringify(bl));}catch(_){}renB();try{await fs('/records/'+id,{method:'DELETE'});await ld2();toast('🗑️ 已删除')}catch(e){bl=oldBl;renB();toast('❌ 删除失败')}}
 
 // ═══ ROUTES (Transport Tab) ═══
-const ROUTES=[{d:1,dt:'7.9 周四',tt:'抵达首尔',hub:'孔德站',segs:[{m:'🚇',mc:'subway',fr:'仁川T1',to:'孔德站',ln:'AREX 普通列车',tm:'55min',cs:'₩4,150/人',tip:'直达不换乘',tg:'good'},{m:'🚶',mc:'walk',fr:'孔德站',to:'酒店',ln:'步行 700m',tm:'8min',cs:'₩0',tip:'1号出口',tg:'good'},{m:'🚶',mc:'walk',fr:'酒店',to:'Gop烤肉',ln:'步行',tm:'5min',cs:'₩0',tip:'附近',tg:'good'}],sum:'₩16,600/4人 | AREX+步行 | 全程约1h10min'},{d:2,dt:'7.10 周五',tt:'明洞+演唱会',hub:'孔德站',segs:[{m:'🚶',mc:'walk',fr:'酒店',to:'阳地雪浓汤',ln:'步行',tm:'5min',cs:'₩0',tip:'麻浦站3号口',tg:'good'},{m:'🚕',mc:'taxi',fr:'雪浓汤',to:'明洞',ln:'打车',tm:'15min',cs:'₩8,000',tip:'4人比地铁值',tg:'good'},{m:'🚕',mc:'taxi',fr:'明洞',to:'高尺巨蛋',ln:'打车',tm:'25min',cs:'₩15,000',tip:'逛街后省体力',tg:'warn'},{m:'🚕',mc:'taxi',fr:'高尺巨蛋',to:'酒店',ln:'打车(夜间)',tm:'25min',cs:'₩16,000',tip:'演唱会结束晚',tg:'warn'}],sum:'₩39,000/4人 | Day2打车多(演唱会日) | 人均₩9,750'},{d:3,dt:'7.11 周六',tt:'汝矣岛+弘大',hub:'孔德站',segs:[{m:'🚇',mc:'subway',fr:'孔德站',to:'汝矣岛',ln:'5号线 2站',tm:'5min',cs:'₩1,500',tip:'直达！',tg:'good'},{m:'🚇',mc:'subway',fr:'汝矣岛',to:'弘大入口',ln:'9号线→堂山→2号线',tm:'12min',cs:'₩1,500',tip:'不折返孔德',tg:'good'},{m:'🚇',mc:'subway',fr:'弘大入口',to:'孔德站',ln:'京义中央线 1站',tm:'2min',cs:'₩1,500',tip:'秒回酒店',tg:'good'}],sum:'₩18,000/4人 | 全程地铁 | 人均₩4,500 | 气候卡免费！'},{d:4,dt:'7.12 周日',tt:'圣水洞+狎鸥亭',hub:'孔德站',segs:[{m:'🚇',mc:'subway',fr:'孔德站',to:'圣水',ln:'5号线→往十里→2号线',tm:'30min',cs:'₩1,500',tip:'13站',tg:'warn'},{m:'🚕',mc:'taxi',fr:'圣水',to:'狎鸥亭',ln:'打车',tm:'10min',cs:'₩6,000',tip:'地铁要折返',tg:'good'},{m:'🚇',mc:'subway',fr:'狎鸥亭',to:'孔德站',ln:'盆唐线→往十里→京义中央线',tm:'25min',cs:'₩1,500',tip:'6站',tg:'good'}],sum:'₩24,000/4人 | 地铁+1程打车 | 人均₩6,000'},{d:5,dt:'7.13 周一',tt:'返程回家',hub:'孔德站',segs:[{m:'🚇',mc:'subway',fr:'孔德站',to:'仁川T1',ln:'AREX 普通列车',tm:'50min',cs:'₩4,150/人',tip:'直达！9:45出发',tg:'good'},{m:'🚕',mc:'taxi',fr:'酒店',to:'仁川T1',ln:'打车(备选)',tm:'60min',cs:'₩80,000',tip:'行李多可选',tg:'warn'}],sum:'首选AREX ₩16,600/4人 | 9:45出发→10:35到机场 | 13:10起飞时间充裕'}];
+let ROUTES=[{d:1,dt:'7.9 周四',tt:'抵达首尔',hub:'孔德站',segs:[{m:'🚇',mc:'subway',fr:'仁川T1',to:'孔德站',ln:'AREX 普通列车',tm:'55min',cs:'₩4,150/人',tip:'直达不换乘',tg:'good'},{m:'🚶',mc:'walk',fr:'孔德站',to:'酒店',ln:'步行 700m',tm:'8min',cs:'₩0',tip:'1号出口',tg:'good'},{m:'🚶',mc:'walk',fr:'酒店',to:'Gop烤肉',ln:'步行',tm:'5min',cs:'₩0',tip:'附近',tg:'good'}],sum:'₩16,600/4人 | AREX+步行 | 全程约1h10min'},{d:2,dt:'7.10 周五',tt:'明洞+演唱会',hub:'孔德站',segs:[{m:'🚶',mc:'walk',fr:'酒店',to:'阳地雪浓汤',ln:'步行',tm:'5min',cs:'₩0',tip:'麻浦站3号口',tg:'good'},{m:'🚕',mc:'taxi',fr:'雪浓汤',to:'明洞',ln:'打车',tm:'15min',cs:'₩8,000',tip:'4人比地铁值',tg:'good'},{m:'🚕',mc:'taxi',fr:'明洞',to:'高尺巨蛋',ln:'打车',tm:'25min',cs:'₩15,000',tip:'逛街后省体力',tg:'warn'},{m:'🚕',mc:'taxi',fr:'高尺巨蛋',to:'酒店',ln:'打车(夜间)',tm:'25min',cs:'₩16,000',tip:'演唱会结束晚',tg:'warn'}],sum:'₩39,000/4人 | Day2打车多(演唱会日) | 人均₩9,750'},{d:3,dt:'7.11 周六',tt:'汝矣岛+弘大',hub:'孔德站',segs:[{m:'🚇',mc:'subway',fr:'孔德站',to:'汝矣岛',ln:'5号线 2站',tm:'5min',cs:'₩1,500',tip:'直达！',tg:'good'},{m:'🚇',mc:'subway',fr:'汝矣岛',to:'弘大入口',ln:'9号线→堂山→2号线',tm:'12min',cs:'₩1,500',tip:'不折返孔德',tg:'good'},{m:'🚇',mc:'subway',fr:'弘大入口',to:'孔德站',ln:'京义中央线 1站',tm:'2min',cs:'₩1,500',tip:'秒回酒店',tg:'good'}],sum:'₩18,000/4人 | 全程地铁 | 人均₩4,500 | 气候卡免费！'},{d:4,dt:'7.12 周日',tt:'圣水洞+狎鸥亭',hub:'孔德站',segs:[{m:'🚇',mc:'subway',fr:'孔德站',to:'圣水',ln:'5号线→往十里→2号线',tm:'30min',cs:'₩1,500',tip:'13站',tg:'warn'},{m:'🚕',mc:'taxi',fr:'圣水',to:'狎鸥亭',ln:'打车',tm:'10min',cs:'₩6,000',tip:'地铁要折返',tg:'good'},{m:'🚇',mc:'subway',fr:'狎鸥亭',to:'孔德站',ln:'盆唐线→往十里→京义中央线',tm:'25min',cs:'₩1,500',tip:'6站',tg:'good'}],sum:'₩24,000/4人 | 地铁+1程打车 | 人均₩6,000'},{d:5,dt:'7.13 周一',tt:'返程回家',hub:'孔德站',segs:[{m:'🚇',mc:'subway',fr:'孔德站',to:'仁川T1',ln:'AREX 普通列车',tm:'50min',cs:'₩4,150/人',tip:'直达！9:45出发',tg:'good'},{m:'🚕',mc:'taxi',fr:'酒店',to:'仁川T1',ln:'打车(备选)',tm:'60min',cs:'₩80,000',tip:'行李多可选',tg:'warn'}],sum:'首选AREX ₩16,600/4人 | 9:45出发→10:35到机场 | 13:10起飞时间充裕'}];
+// Load saved ROUTES from localStorage (survives page refresh)
+try{let r=localStorage.getItem('kt_routes');if(r)ROUTES=JSON.parse(r)}catch(_){}
+if(!localStorage.getItem('kt_routes')){try{localStorage.setItem('kt_routes',JSON.stringify(ROUTES))}catch(_){}}
 
 // ═══ TIMELINE ═══
 const TIMELINE=[{d:1,dt:'7.9 周四',tt:'抵达首尔',tc:'red',items:[{t:'18:45',ic:'✈️',tx:'仁川T1到达',dt:'入境+取行李约30min',tp:'key'},{t:'19:15',ic:'🛂',tx:'出关完毕',dt:'',tp:'key'},{t:'19:30',ic:'🚇',tx:'AREX→首尔站',dt:'快线₩9500/43min',tp:'move'},{t:'20:30',ic:'🏨',tx:'入住酒店',dt:'放行李休息',tp:'key'},{t:'21:00',ic:'🥩',tx:'Gop烤肉/高度食',dt:'人均₩20000',tp:'eat'},{t:'22:30',ic:'😴',tx:'休息！买水+交通卡',dt:'',tp:'spot'}]},{d:2,dt:'7.10 周五',tt:'明洞+🎤演唱会',tc:'org',items:[{t:'08:00',ic:'🍲',tx:'麻浦阳地雪浓汤',dt:'24h营业 ₩9000/碗',tp:'eat'},{t:'10:00',ic:'🛍️',tx:'明洞逛街',dt:'SPAO/Stylenanda/Aland',tp:'shop'},{t:'12:30',ic:'🍗',tx:'炸鸡60 午餐',dt:'BHC半半 ₩20000',tp:'eat'},{t:'14:00',ic:'☕',tx:'明洞咖啡/休整',dt:'',tp:'spot'},{t:'16:00',ic:'🚇',tx:'出发去演唱会',dt:'预留1h交通',tp:'move'},{t:'17:00',ic:'🎤',tx:'演唱会!!! ⭐',dt:'入场安检',tp:'key'},{t:'20:00',ic:'🚇',tx:'演唱会结束返程',dt:'',tp:'move'},{t:'21:00',ic:'🍕',tx:'外卖晚餐',dt:'Shuttle→炒年糕+披萨',tp:'eat'}]},{d:3,dt:'7.11 周六',tt:'汝矣岛+🌅弘大',tc:'blu',items:[{t:'09:00',ic:'🐔',tx:'参鸡汤/Fritz',dt:'参鸡汤₩16000/Fritz盐面包₩3500',tp:'eat'},{t:'11:00',ic:'🛍️',tx:'汝矣岛现代百货',dt:'더현대서울 B2美食街',tp:'shop'},{t:'13:00',ic:'🐂',tx:'소곱창 牛肠午餐',dt:'여의도소곱창+볶음밥',tp:'eat'},{t:'15:00',ic:'🌿',tx:'汉江公园',dt:'买炸鸡啤酒+垫子',tp:'spot'},{t:'19:00',ic:'🌅',tx:'汉江日落!!',dt:'19:56日落 ⭐拍照',tp:'spot'},{t:'20:00',ic:'🚇',tx:'前往弘大',dt:'5号线约20min',tp:'move'},{t:'20:30',ic:'🍻',tx:'Hansabal大排档',dt:'生啤₩4000+전',tp:'eat'},{t:'22:00',ic:'💄',tx:'Olive Young扫货',dt:'22点关！防晒/面膜',tp:'shop'}]},{d:4,dt:'7.12 周日',tt:'圣水洞+☕狎鸥亭',tc:'grn',items:[{t:'09:00',ic:'🍔',tx:'Mom\'s Touch',dt:'싸이버거套餐₩5000',tp:'eat'},{t:'10:30',ic:'🛍️',tx:'圣水洞逛街',dt:'대림창고/Onion/Nudake',tp:'shop'},{t:'13:00',ic:'🥩',tx:'水芹菜牛肉饭汤',dt:'미나리소고기국밥 ₩9000',tp:'eat'},{t:'14:30',ic:'🚇',tx:'前往狎鸥亭',dt:'地铁约20min',tp:'move'},{t:'15:00',ic:'🛍️',tx:'狎鸥亭逛街',dt:'갤러리아+Boon the Shop',tp:'shop'},{t:'18:00',ic:'🚇',tx:'前往孔德',dt:'地铁约30min ₩1500',tp:'move'},{t:'19:00',ic:'🍖',tx:'양천뼈다귀 脊骨汤',dt:'11-22点 人均₩15000',tp:'eat'}]},{d:5,dt:'7.13 周一',tt:'✈️返程回家',tc:'org',items:[{t:'08:00',ic:'⏰',tx:'起床！退房准备',dt:'',tp:'key'},{t:'08:15',ic:'🏪',tx:'CU/GS25早餐',dt:'香蕉牛奶₩1500+饭团₩1200',tp:'eat'},{t:'08:30',ic:'🚇',tx:'出发去机场',dt:'AREX直通₩9500/43min',tp:'move'},{t:'09:20',ic:'🛂',tx:'到达仁川T1',dt:'找退税kiosk',tp:'key'},{t:'10:00',ic:'🧾',tx:'退税+值机+托运',dt:'单笔₩30000+可退',tp:'key'},{t:'10:30',ic:'🛍️',tx:'免税店+提货',dt:'新罗/乐天→28号口提货',tp:'shop'},{t:'12:30',ic:'✈️',tx:'登机',dt:'',tp:'key'},{t:'13:10',ic:'🛫',tx:'起飞！回家🇨🇳',dt:'다음에 또 만나요!',tp:'key'}]}];
@@ -729,14 +757,53 @@ function renT(){
 
 function renM(){
  let f=document.getElementById('panM').classList.contains('on');if(!f)return;
- let h='';ROUTES.forEach(d=>{
-  h+=`<div class="trday"><div class="trh"><div class="trdn">D${d.d}</div><div class="trdi"><h3>${d.tt}</h3><div class="trsub">${d.dt}</div></div><div class="trhub">🏨 ${d.hub}</div></div>`;
-  d.segs.forEach(s=>{
-   h+=`<div class="trseg"><div class="trmode ${s.mc}">${s.m}</div><div class="trroute"><div class="trfromto">${s.fr}<span class="arr">→</span>${s.to}</div><div class="trline">${s.ln}</div></div><div class="trinfo"><div class="trtime">${s.tm}</div><div class="trcost">${s.cs}</div></div>${s.tip?`<div class="trtip ${s.tg}">${s.tip}</div>`:''}</div>`;
+ let h='';ROUTES.forEach((d,di)=>{
+  h+=`<div class="trday"><div class="trh" onclick="showTrEdit(${di},-1)"><div class="trdn">D${d.d}</div><div class="trdi"><h3>${d.tt}</h3><div class="trsub">${d.dt}</div></div><div class="trhub">🏨 ${d.hub}</div></div>`;
+  d.segs.forEach((s,si)=>{
+   h+=`<div class="trseg" onclick="showTrEdit(${di},${si})"><div class="trmode ${s.mc}">${s.m}</div><div class="trroute"><div class="trfromto">${s.fr}<span class="arr">→</span>${s.to}</div><div class="trline">${s.ln}</div></div><div class="trinfo"><div class="trtime">${s.tm}</div><div class="trcost">${s.cs}</div></div>${s.tip?`<div class="trtip ${s.tg}">${s.tip}</div>`:''}</div>`;
   });
-  h+=`<div class="trsum"><span>💰</span><b>${d.sum}</b></div></div>`;
+  h+=`<div class="trsum" onclick="showTrEdit(${di},-2)"><span>💰</span><b>${d.sum}</b></div></div>`;
  });
  document.getElementById('transC').innerHTML=h;
+}
+
+// ═══ TRANSPORT EDIT FUNCTIONS ═══
+let _trTarget=null;
+function showTrEdit(di,si){
+ let d=ROUTES[di],F=document.getElementById('trFm'),T=document.getElementById('trTitle');
+ if(si===-1){
+  T.textContent='✏️ 编辑 Day'+d.d+' 标题';
+  F.innerHTML='<div class="lbl">日期</div><input id="tre_dt" maxlength="30"><div class="lbl">标题</div><input id="tre_tt" maxlength="30"><div class="lbl">枢纽站</div><input id="tre_hub" maxlength="20">';
+  document.getElementById('tre_dt').value=d.dt;document.getElementById('tre_tt').value=d.tt;document.getElementById('tre_hub').value=d.hub;
+ }else if(si===-2){
+  T.textContent='✏️ 编辑 Day'+d.d+' 汇总';
+  F.innerHTML='<textarea class="fw" id="tre_sum" rows="3" style="min-height:60px"></textarea>';
+  document.getElementById('tre_sum').value=d.sum;
+ }else{
+  let s=d.segs[si];
+  T.textContent='✏️ 编辑 Day'+d.d+' 交通段';
+  F.innerHTML='<div class="lbl">出行方式</div><select id="tre_mc"><option value="subway">🚇 地铁</option><option value="taxi">🚕 出租车</option><option value="walk">🚶 步行</option></select><div class="lbl">出发</div><input id="tre_fr" maxlength="30"><div class="lbl">到达</div><input id="tre_to" maxlength="30"><div class="lbl">路线信息</div><input class="fw" id="tre_ln" maxlength="50"><div class="lbl">时间</div><input id="tre_tm" maxlength="15"><div class="lbl">费用</div><input id="tre_cs" maxlength="25"><div class="lbl">提示文字</div><input id="tre_tip" maxlength="30"><div class="lbl">提示类型</div><select id="tre_tg"><option value="good">💡 提示</option><option value="warn">⚠️ 注意</option></select>';
+  document.getElementById('tre_mc').value=s.mc;document.getElementById('tre_fr').value=s.fr;document.getElementById('tre_to').value=s.to;document.getElementById('tre_ln').value=s.ln;document.getElementById('tre_tm').value=s.tm;document.getElementById('tre_cs').value=s.cs;document.getElementById('tre_tip').value=s.tip||'';document.getElementById('tre_tg').value=s.tg||'good';
+ }
+ _trTarget={di,si};
+ document.getElementById('moTr').classList.add('show');
+}
+function hideTrEdit(){document.getElementById('moTr').classList.remove('show')}
+function doTrEdit(){
+ let t=_trTarget;if(!t)return;
+ let d=ROUTES[t.di];
+ if(t.si===-1){
+  d.dt=document.getElementById('tre_dt').value.trim()||d.dt;d.tt=document.getElementById('tre_tt').value.trim()||d.tt;d.hub=document.getElementById('tre_hub').value.trim()||d.hub;
+ }else if(t.si===-2){
+  d.sum=document.getElementById('tre_sum').value.trim()||d.sum;
+ }else{
+  let s=d.segs[t.si];
+  s.mc=document.getElementById('tre_mc').value;s.m={subway:'🚇',taxi:'🚕',walk:'🚶'}[s.mc]||s.m;
+  s.fr=document.getElementById('tre_fr').value.trim()||s.fr;s.to=document.getElementById('tre_to').value.trim()||s.to;s.ln=document.getElementById('tre_ln').value.trim()||s.ln;s.tm=document.getElementById('tre_tm').value.trim()||s.tm;s.cs=document.getElementById('tre_cs').value.trim()||s.cs;s.tip=document.getElementById('tre_tip').value.trim()||'';s.tg=document.getElementById('tre_tg').value;
+ }
+ hideTrEdit();
+ try{localStorage.setItem('kt_routes',JSON.stringify(ROUTES))}catch(_){}
+ renM();toast('✅ 已更新');
 }
 
 // ═══ COUNTDOWN ═══
