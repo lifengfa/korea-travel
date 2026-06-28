@@ -420,7 +420,7 @@ async function ld(){
  ld._busy=true;
  try{
  if(!PX){
-  PX='https://7ff709921e2b4a.lhr.life'; // auto-updated by cron
+  PX='https://d290816b764bb2.lhr.life'; // auto-updated by cron
   try{let r=await fetch('proxy.txt?t='+Date.now(),{cache:'no-store'});PX=(await r.text()).trim()+'/';}catch(e){}
  }
  // Capture current items with valid IDs before reset (protect against API latency)
