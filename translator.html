@@ -234,6 +234,10 @@ function tryWebSpeechFirst(){
   r.onresult=e=>{
     const t=e.results[0][0].transcript;
     document.getElementById('inp').value=t;
+    // Show what was heard before translating
+    document.getElementById('result').style.display='block';
+    document.getElementById('rl').textContent='🎙️ 识别结果';
+    document.getElementById('rt').textContent=t;
     btn.textContent='🎤 按住说话';
     btn.style.background='#e94560';btn.style.color='#fff';
     go();
