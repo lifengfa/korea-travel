@@ -219,7 +219,7 @@ async function startRecording(){
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     let opts={};
     if(MediaRecorder.isTypeSupported('audio/webm'))opts.mimeType='audio/webm';
-    mediaRecorder=new MediaRecorder(stream,{...opts, audioBitsPerSecond: 32000}); // 低码率，上传快
+    mediaRecorder=new MediaRecorder(stream,{...opts, audioBitsPerSecond: 16000}); // 极低码率，语音识别够用
     audioChunks=[];
     mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data)};
     mediaRecorder.onstop=async()=>{
@@ -248,7 +248,10 @@ async function sendSTT(blob){
   btn.textContent='⏳ 识别中…';
   const lang=mode==='ko2zh'?'ko-KR':'zh-CN';
   try{
-    const resp=await fetch(TUNNEL+'/stt?lang='+lang,{method:'POST',body:blob});
+    const ctrl=new AbortController();
+    const tmr=setTimeout(()=>ctrl.abort(), 15000); // 15秒超时
+    const resp=await fetch(TUNNEL+'/stt?lang='+lang,{method:'POST',body:blob,signal:ctrl.signal});
+    clearTimeout(tmr);
     const data=await resp.json();
     if(data.text){
       document.getElementById('inp').value=data.text;
@@ -257,7 +260,7 @@ async function sendSTT(blob){
       toast('未识别到语音');
     }
   }catch(e){
-    toast('识别失败: '+e.message);
+    toast(e.name==='AbortError'?'识别超时，请说短一点':('识别失败: '+e.message));
   }
   btn.textContent='🎤 点击开始说话';btn.style.background='#e94560';
 }
