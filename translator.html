@@ -232,9 +232,12 @@ function tryWebSpeechFirst(){
   btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
 
   r.onresult=e=>{
-    const t=e.results[0][0].transcript;
+    // Only process final result to avoid duplicates
+    if(!e.results[0].isFinal)return;
+    r.stop();
+    const t=e.results[0][0].transcript.trim();
+    if(!t)return;
     document.getElementById('inp').value=t;
-    // Show what was heard before translating
     document.getElementById('result').style.display='block';
     document.getElementById('rl').textContent='🎙️ 识别结果';
     document.getElementById('rt').textContent=t;
