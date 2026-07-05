@@ -2,6 +2,9 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -55,11 +58,6 @@ body{
 
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 24px;border-radius:24px;font-size:13px;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
-
-.mic-wrap{text-align:center;margin-bottom:14px}
-.mic-btn{display:inline-block;padding:18px 48px;border-radius:50px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.15s;letter-spacing:1px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 20px rgba(233,69,96,.35)}
-.mic-btn:active,.mic-btn.listening{background:#c03950;transform:scale(.96);box-shadow:0 2px 8px rgba(233,69,96,.25)}
-.mic-label{font-size:11px;color:#8892b0;margin-top:8px}
 </style>
 </head>
 <body>
@@ -82,14 +80,13 @@ body{
   💡 <strong>点输入框 → 按键盘 🎤 → 说话</strong> → 自动输入文字 → 点翻译
 </div>
 
-<div class="input-row">
-  <input type="text" id="inp" placeholder="输入文字，或点下方🎤说话...">
-  <button onclick="go()">翻译</button>
+<div style="margin-bottom:12px">
+  <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 按住说话（韩语→中文）</button>
 </div>
 
-<div class="mic-wrap">
-  <button class="mic-btn" id="micBtn" ontouchstart="startMic(event)" ontouchend="stopMic(event)" onmousedown="startMic(event)" onmouseup="stopMic(event)">🎤 按住说话</button>
-  <div class="mic-label" id="micLabel">按住说话</div>
+<div class="input-row">
+  <input type="text" id="inp" placeholder="或手动输入文字...">
+  <button onclick="go()">翻译</button>
 </div>
 
 <div class="result" id="result">
@@ -117,9 +114,11 @@ function setMode(m){
   mode=m;
   document.getElementById('mKo2zh').classList.toggle('active',m==='ko2zh');
   document.getElementById('mZh2ko').classList.toggle('active',m==='zh2ko');
-  document.getElementById('hint').innerHTML=mode==='ko2zh'
-    ?'💡 <strong>店员说韩语时</strong>：按住 🎤 说韩语 → 识别 → 翻译成中文'
-    :'💡 <strong>你说中文时</strong>：按住 🎤 说中文 → 识别 → 翻译成韩文 → 自动朗读';
+  document.getElementById('hint').innerHTML=m==='ko2zh'
+    ?'💡 <strong>店员说韩语时</strong>：输入韩文 → 翻译成中文'
+    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 自动朗读';
+  document.getElementById('micBtn').textContent=m==='ko2zh'
+    ?'🎤 按住说话（听韩语）':'🎤 按住说话（听中文）';
 }
 
 async function go(){
@@ -147,14 +146,14 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: Browser native first (best on Chrome) → Google TTS fallback
+// TTS: Browser native first → Google TTS fallback
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
   const btn=document.getElementById('spkBtn');
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
   const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
   
-  // Method 1: Browser SpeechSynthesis (Chrome has great Korean/Chinese voices)
+  // Method 1: Browser SpeechSynthesis
   try{
     const s=window.speechSynthesis;
     if(!s)throw new Error('no synth');
@@ -164,13 +163,13 @@ async function speakR(){
     const v=s.getVoices();
     if(v.length){const vv=v.find(x=>x.lang.startsWith(mode==='zh2ko'?'ko':'zh'));if(vv)u.voice=vv}
     await new Promise((resolve,reject)=>{
-      u.onend=resolve;u.onerror=()=>reject('tts error');
+      u.onend=resolve;u.onerror=()=>reject('err');
       s.speak(u);
     });
     done();return;
   }catch(e){console.log('Browser TTS:',e)}
   
-  // Method 2: Google Translate TTS
+  // Method 2: Google TTS
   try{
     const tl=mode==='zh2ko'?'ko':'zh-CN';
     const a=new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`);
@@ -191,43 +190,121 @@ function replay(t){cur=t;document.getElementById('result').style.display='block'
 function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
-// Speech Recognition (Chrome only)
-let recognition=null,micActive=false;
-function initRecognition(){
-  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SpeechRecognition)return null;
-  const r=new SpeechRecognition();
-  r.continuous=false;r.interimResults=false;r.maxAlternatives=1;
+// Voice recording via tunnel STT
+let mediaRecorder=null, audioChunks=[], isRecording=false;
+const STT_URL='https://4038fcc6bee995.lhr.life/stt';
+
+async function toggleMic(){
+  if(isRecording){stopRecording();return;}
+
+  // Method 1: Try browser's built-in SpeechRecognition (Chrome supports it)
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR){
+    tryWebSpeechFirst();
+    return;
+  }
+  // Method 2: Fallback to tunnel STT
+  await startRecording();
+}
+
+function tryWebSpeechFirst(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r=new SR();
+  r.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
+  r.interimResults=false;
+  r.maxAlternatives=1;
+
+  const btn=document.getElementById('micBtn');
+  btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
+  btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
+
   r.onresult=e=>{
-    const t=e.results[0][0].transcript;
+    // Only process final result to avoid duplicates
+    if(!e.results[0].isFinal)return;
+    r.stop();
+    const t=e.results[0][0].transcript.trim();
+    if(!t)return;
     document.getElementById('inp').value=t;
-    stopMicUI();
-    recognition=null;
+    document.getElementById('result').style.display='block';
+    document.getElementById('rl').textContent='🎙️ 识别结果';
+    document.getElementById('rt').textContent=t;
+    btn.textContent='🎤 按住说话';
+    btn.style.background='#e94560';btn.style.color='#fff';
+    go();
   };
-  r.onerror=e=>{toast('识别失败');stopMicUI();recognition=null};
-  r.onend=()=>{stopMicUI();recognition=null};
-  return r;
+
+  r.onerror=e=>{
+    btn.textContent='🎤 按住说话';
+    btn.style.background='#e94560';btn.style.color='#fff';
+    if(e.error==='not-allowed'){
+      toast('麦克风权限未开启，请在浏览器设置中允许');
+    }else{
+      toast('语音识别失败('+e.error+')，尝试备用方案…');
+      startRecording();
+    }
+  };
+
+  r.onend=()=>{
+    if(btn.textContent==='🎙️ 正在听…'){
+      btn.textContent='🎤 按住说话';
+      btn.style.background='#e94560';btn.style.color='#fff';
+    }
+  };
+
+  try{r.start()}catch(e){toast('语音不可用');startRecording()}
 }
-function startMic(e){e.preventDefault();
-  if(micActive)return;
-  if(!(recognition=initRecognition())){toast('请用Chrome浏览器');return}
-  recognition.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
-  try{recognition.start()}catch(ex){recognition=null;return}
-  micActive=true;
-  document.getElementById('micBtn').classList.add('listening');
-  document.getElementById('micBtn').textContent='🎤 正在听...';
-  document.getElementById('micLabel').textContent='松手完成识别';
+
+async function startRecording(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    let opts={};
+    if(MediaRecorder.isTypeSupported('audio/webm'))opts.mimeType='audio/webm';
+    mediaRecorder=new MediaRecorder(stream,opts);
+    audioChunks=[];
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data)};
+    mediaRecorder.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      if(!audioChunks.length)return;
+      const blob=new Blob(audioChunks,{type:mediaRecorder.mimeType||'audio/webm'});
+      await sendSTT(blob);
+    };
+    mediaRecorder.start();
+    isRecording=true;
+    const btn=document.getElementById('micBtn');
+    btn.textContent='🎙️ 录音中…松手停止';
+    btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
+  }catch(e){toast('麦克风不可用: '+e.message)}
 }
-function stopMic(e){if(e)e.preventDefault();
-  if(!micActive)return;
-  micActive=false;
-  if(recognition){try{recognition.stop()}catch(ex){}recognition=null}
-  stopMicUI();
+
+function stopRecording(){
+  if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
+  isRecording=false;
+  const btn=document.getElementById('micBtn');
+  btn.textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
+  btn.style.background='rgba(240,160,88,.08)';btn.style.borderColor='rgba(240,160,88,.3)';btn.style.color='#f0a058';
 }
-function stopMicUI(){
-  document.getElementById('micBtn').classList.remove('listening');
-  document.getElementById('micBtn').textContent='🎤 按住说话';
-  document.getElementById('micLabel').textContent='按住说话';
+
+async function sendSTT(blob){
+  const btn=document.getElementById('micBtn');
+  btn.textContent='⏳ 识别中…';
+  const lang=mode==='ko2zh'?'ko-KR':'zh-CN';
+  try{
+    const resp=await fetch(STT_URL+'?lang='+lang,{method:'POST',body:blob});
+    const data=await resp.json();
+    if(data.text){
+      document.getElementById('inp').value=data.text;
+      go(); // auto-translate
+    }else{
+      toast('未识别到语音');
+    }
+  }catch(e){
+    toast('识别失败: '+e.message);
+    document.getElementById('rt').textContent='错误详情: '+e.message;
+    document.getElementById('result').style.display='block';
+    document.getElementById('rl').textContent='❌ 识别失败';
+  }
+  btn.textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
+  btn.style.background='rgba(240,160,88,.08)';btn.style.borderColor='rgba(240,160,88,.3)';btn.style.color='#f0a058';
 }
 
 // Init
