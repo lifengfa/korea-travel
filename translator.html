@@ -114,10 +114,10 @@ function setMode(m){
   mode=m;
   document.getElementById('mKo2zh').classList.toggle('active',m==='ko2zh');
   document.getElementById('mZh2ko').classList.toggle('active',m==='zh2ko');
-  document.getElementById('hint').innerHTML=m==='ko2zh'
-    ?'💡 <strong>店员说韩语时</strong>：输入韩文 → 翻译成中文'
-    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 自动朗读';
-  document.getElementById('micBtn').textContent=m==='ko2zh'
+  document.getElementById('hint').innerHTML=mode==='ko2zh'
+    ?'💡 <strong>店员说韩语时</strong>：按红色按钮说话 → 自动翻译'
+    :'💡 <strong>你说中文时</strong>：按红色按钮说话 → 自动翻译 → 点🔊朗读';
+  document.getElementById('micBtn').textContent=mode==='ko2zh'
     ?'🎤 按住说话（听韩语）':'🎤 按住说话（听中文）';
 }
 
@@ -207,13 +207,6 @@ async function toggleMic(){
 }
 
 // Init
-const isSamsung=/SamsungBrowser/i.test(navigator.userAgent);
-if(isSamsung){
-  // Samsung browser: hide mic button + TTS button, show keyboard mic instructions
-  document.getElementById('micWrap').style.display='none';
-  document.getElementById('spkBtn').style.display='none';
-  document.getElementById('hint').innerHTML='💡 <strong>点输入框 → 按键盘 🎤 说话</strong> → 翻译<br><small style="color:#f0a058">建议用 Chrome 体验更好（语音识别+朗读）</small>';
-}
 document.getElementById('inp').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
 const s=window.speechSynthesis;if(s){s.getVoices();if(s.onvoiceschanged!==undefined)s.onvoiceschanged=()=>s.getVoices()}
 document.getElementById('inp').focus();
