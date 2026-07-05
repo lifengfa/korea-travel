@@ -81,7 +81,7 @@ body{
 </div>
 
 <div style="margin-bottom:12px">
-  <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 按住说话（韩语→中文）</button>
+  <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 点击开始说话</button>
 </div>
 
 <div class="input-row">
@@ -108,6 +108,7 @@ body{
 <script>
 let mode='ko2zh',cur='';
 let hist=[];try{hist=JSON.parse(localStorage.getItem('kt3_hist')||'[]')}catch(e){}
+const TUNNEL='https://5f2251d2ade61c.lhr.life';
 
 function toast(s){const e=document.getElementById('toast');e.textContent=s;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
 function setMode(m){
@@ -127,11 +128,12 @@ async function go(){
   const from=mode==='ko2zh'?'ko':'zh-CN';
   const to=mode==='ko2zh'?'zh-CN':'ko';
   try{
-    const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${mode==='ko2zh'?'ko|zh-CN':'zh-CN|ko'}`;
+    const lp=mode==='ko2zh'?'ko|zh-CN':'zh-CN|ko';
+    const url=TUNNEL+'/translate?q='+encodeURIComponent(text)+'&lp='+lp;
     const r=await fetch(url);
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
-    const t=d.responseData.translatedText;
+    const t=d.text;
     if(!t)throw new Error('无翻译结果');
     cur=t;
     showResult(t,text);
@@ -148,7 +150,7 @@ function showResult(translated,orig){
 }
 
 // TTS: Edge TTS via tunnel (primary) + browser fallback
-const TTS_BASE = 'https://4038fcc6bee995.lhr.life';
+const TTS_BASE = TUNNEL;
 
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
@@ -204,68 +206,12 @@ function replay(t){cur=t;document.getElementById('result').style.display='block'
 function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
-// Voice recording via tunnel STT
+// Voice: 录音 → 隧道 STT（纯备用方案，不走 Google）
 let mediaRecorder=null, audioChunks=[], isRecording=false;
-const STT_URL='https://5f2251d2ade61c.lhr.life/stt';
 
 async function toggleMic(){
   if(isRecording){stopRecording();return;}
-
-  // Method 1: Try browser's built-in SpeechRecognition (Chrome supports it)
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(SR){
-    tryWebSpeechFirst();
-    return;
-  }
-  // Method 2: Fallback to tunnel STT
   await startRecording();
-}
-
-function tryWebSpeechFirst(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const r=new SR();
-  r.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
-  r.interimResults=false;
-  r.maxAlternatives=1;
-
-  const btn=document.getElementById('micBtn');
-  btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
-  btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
-
-  r.onresult=e=>{
-    // Only process final result to avoid duplicates
-    if(!e.results[0].isFinal)return;
-    r.stop();
-    const t=e.results[0][0].transcript.trim();
-    if(!t)return;
-    document.getElementById('inp').value=t;
-    document.getElementById('result').style.display='block';
-    document.getElementById('rl').textContent='🎙️ 识别结果';
-    document.getElementById('rt').textContent=t;
-    btn.textContent='🎤 按住说话';
-    btn.style.background='#e94560';btn.style.color='#fff';
-    go();
-  };
-
-  r.onerror=e=>{
-    btn.textContent='🎤 按住说话';
-    btn.style.background='#e94560';btn.style.color='#fff';
-    if(e.error==='not-allowed'){
-      toast('麦克风权限未开启，请在浏览器设置中允许');
-    }else{
-      toast('语音识别失败('+e.error+')，尝试备用方案…');
-      startRecording();
-    }
-  };
-
-  r.onend=()=>{
-    if(btn.textContent==='🎙️ 正在听…'){
-      btn.textContent='🎤 按住说话';
-      btn.style.background='#e94560';btn.style.color='#fff';
-    }
-  };
-
-  try{r.start()}catch(e){toast('语音不可用');startRecording()}
 }
 
 async function startRecording(){
@@ -285,8 +231,8 @@ async function startRecording(){
     mediaRecorder.start();
     isRecording=true;
     const btn=document.getElementById('micBtn');
-    btn.textContent='🎙️ 录音中…松手停止';
-    btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
+    btn.textContent='🎙️ 录音中…点击停止';
+    btn.style.background='#c03950';
   }catch(e){toast('麦克风不可用: '+e.message)}
 }
 
@@ -294,8 +240,7 @@ function stopRecording(){
   if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
   isRecording=false;
   const btn=document.getElementById('micBtn');
-  btn.textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
-  btn.style.background='rgba(240,160,88,.08)';btn.style.borderColor='rgba(240,160,88,.3)';btn.style.color='#f0a058';
+  btn.textContent='🎤 点击开始说话';btn.style.background='#e94560';
 }
 
 async function sendSTT(blob){
@@ -303,22 +248,18 @@ async function sendSTT(blob){
   btn.textContent='⏳ 识别中…';
   const lang=mode==='ko2zh'?'ko-KR':'zh-CN';
   try{
-    const resp=await fetch(STT_URL+'?lang='+lang,{method:'POST',body:blob});
+    const resp=await fetch(TUNNEL+'/stt?lang='+lang,{method:'POST',body:blob});
     const data=await resp.json();
     if(data.text){
       document.getElementById('inp').value=data.text;
-      go(); // auto-translate
+      go();
     }else{
       toast('未识别到语音');
     }
   }catch(e){
     toast('识别失败: '+e.message);
-    document.getElementById('rt').textContent='错误详情: '+e.message;
-    document.getElementById('result').style.display='block';
-    document.getElementById('rl').textContent='❌ 识别失败';
   }
-  btn.textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
-  btn.style.background='rgba(240,160,88,.08)';btn.style.borderColor='rgba(240,160,88,.3)';btn.style.color='#f0a058';
+  btn.textContent='🎤 点击开始说话';btn.style.background='#e94560';
 }
 
 // Init
