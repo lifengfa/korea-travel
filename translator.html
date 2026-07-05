@@ -76,17 +76,19 @@ body{
   </button>
 </div>
 
-<div class="hint" id="hint">
-  💡 <strong>点输入框 → 按键盘 🎤 → 说话</strong> → 自动输入文字 → 点翻译
-</div>
-
-<div style="margin-bottom:12px">
-  <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 点击开始说话</button>
+<div class="hint" id="hint" style="background:rgba(233,69,96,.1);border-color:rgba(233,69,96,.3);color:#e94560;font-size:14px;padding:16px">
+  👆 <strong>点击上方输入框</strong> → 键盘上点 <strong>🎤 麦克风</strong> → 说话 → 自动识别
+  <br><span style="font-size:11px;color:#8892b0;display:block;margin-top:4px">（这是手机系统自带语音，不走 Google，100% 能用）</span>
 </div>
 
 <div class="input-row">
-  <input type="text" id="inp" placeholder="或手动输入文字...">
-  <button onclick="go()">翻译</button>
+  <input type="text" id="inp" placeholder="点这里，按键盘🎤说话…" style="font-size:20px;padding:18px 16px">
+  <button onclick="go()" style="padding:18px 28px;font-size:18px">翻译</button>
+</div>
+
+<div style="text-align:center;margin:8px 0 16px">
+  <span style="font-size:11px;color:#555">或者试试浏览器语音（需要 Google 服务）→</span>
+  <button id="micBtn" onclick="toggleMic()" style="padding:8px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.04);color:#8892b0;font-size:12px;cursor:pointer">🎤 浏览器语音</button>
 </div>
 
 <div class="result" id="result">
@@ -115,8 +117,8 @@ function setMode(m){
   document.getElementById('mKo2zh').classList.toggle('active',m==='ko2zh');
   document.getElementById('mZh2ko').classList.toggle('active',m==='zh2ko');
   document.getElementById('hint').innerHTML=m==='ko2zh'
-    ?'💡 <strong>店员说韩语时</strong>：输入韩文 → 翻译成中文'
-    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 自动朗读';
+    ?'👆 <strong>点击输入框</strong> → 键盘 <strong>🎤</strong> → 说<strong>韩语</strong> → 翻译成中文'
+    :'👆 <strong>点击输入框</strong> → 键盘 <strong>🎤</strong> → 说<strong>中文</strong> → 翻译成韩文 → 朗读';
 }
 
 async function go(){
@@ -199,39 +201,39 @@ async function toggleMic(){
   r.maxAlternatives=1;
 
   const btn=document.getElementById('micBtn');
-  btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
-  btn.style.background='#e94560';btn.style.color='#fff';
+  btn.textContent='🎙️ 听'+(mode==='ko2zh'?'韩语':'中文')+'…';
+  btn.style.color='#e94560';btn.style.borderColor='#e94560';
 
   r.onresult=e=>{
     if(recogDone)return;
     if(!e.results[0].isFinal)return;
     recogDone=true;
     const t=e.results[0][0].transcript.trim();
+    btn.textContent='🎤 浏览器语音';btn.style.color='#8892b0';btn.style.borderColor='rgba(255,255,255,.15)';
     if(!t)return;
     document.getElementById('inp').value=t;
-    btn.textContent='🎤 点击说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
     go();
   };
 
   r.onerror=e=>{
     recogDone=true;
-    btn.textContent='🎤 点击说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
-    if(e.error==='not-allowed'){
-      toast('🎤 麦克风权限未开启，请在浏览器设置中允许');
-    }else if(e.error==='aborted'){
-      // Samsung 浏览器常见，静默处理
+    btn.textContent='🎤 浏览器语音';btn.style.color='#8892b0';btn.style.borderColor='rgba(255,255,255,.15)';
+    if(e.error==='aborted')return;
+    if(e.error==='network'||e.error==='not-allowed'){
+      document.getElementById('hint').style.background='rgba(233,69,96,.15)';
+      document.getElementById('hint').innerHTML='⚠️ <strong>Google 服务被墙，浏览器语音不可用</strong><br>请用 👆 <strong>键盘🎤</strong>（系统自带，不受影响）';
     }else{
-      toast('语音识别失败('+e.error+')，请换 Chrome 或手动输入');
+      toast('语音错误: '+e.error);
     }
   };
 
   r.onend=()=>{
     if(!recogDone){
-      btn.textContent='🎤 点击说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
+      btn.textContent='🎤 浏览器语音';btn.style.color='#8892b0';btn.style.borderColor='rgba(255,255,255,.15)';
     }
   };
 
-  try{r.start()}catch(e){toast('语音不可用，请手动输入')}
+  try{r.start()}catch(e){toast('语音不可用，请用键盘🎤')}
 }
 
 // Init
