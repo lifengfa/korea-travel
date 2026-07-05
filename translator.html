@@ -153,35 +153,42 @@ async function speakR(){
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
   const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
   const tl=mode==='zh2ko'?'ko':'zh-CN';
+  toast('开始朗读...');
   
-  // Method 1: Google Translate TTS — 你在韩国应该能访问
-  const gUrl=`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`;
+  // Method 1: Google Translate TTS
   try{
-    const a=new Audio(gUrl);
-    await new Promise((resolve,reject)=>{
-      a.onended=resolve;a.onerror=()=>reject('Google TTS error');
-      a.play().then(()=>{}).catch(reject);
-    });
-    done();return;
-  }catch(e){console.log('Google:',e);toast('Google TTS 不通，试浏览器...')}
+    const a=new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`);
+    await Promise.race([
+      new Promise((resolve,reject)=>{
+        a.onended=resolve;a.onerror=()=>reject('err');
+        a.play().catch(reject);
+      }),
+      new Promise((_,reject)=>setTimeout(()=>reject('timeout'),5000))
+    ]);
+    done();toast('');return;
+  }catch(e){toast('Google不通，试浏览器...')}
   
   // Method 2: Browser SpeechSynthesis
   try{
     const s=window.speechSynthesis;
     if(!s)throw new Error('no API');
     s.cancel();
+    await new Promise(r=>setTimeout(r,100));
     const u=new SpeechSynthesisUtterance(cur);
     u.lang=tl==='ko'?'ko-KR':'zh-CN';u.rate=0.85;u.volume=1;
     const v=s.getVoices();
     if(v.length){const vv=v.find(x=>x.lang.startsWith(tl==='ko'?'ko':'zh'));if(vv)u.voice=vv}
-    await new Promise((resolve,reject)=>{
-      u.onend=resolve;u.onerror=()=>reject('Browser TTS error');
-      s.speak(u);
-    });
-    done();return;
-  }catch(e){console.log('Browser:',e)}
+    await Promise.race([
+      new Promise((resolve,reject)=>{
+        u.onend=resolve;u.onerror=()=>reject('err');
+        s.speak(u);
+      }),
+      new Promise((_,reject)=>setTimeout(()=>reject('timeout'),8000))
+    ]);
+    done();toast('');return;
+  }catch(e){toast('浏览器也不行')}
   
-  done();toast('朗读失败：两种方式都不通')
+  done();toast('朗读失败')
 }
 
 // History
