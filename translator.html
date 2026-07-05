@@ -175,15 +175,16 @@ function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toas
 let rec=null, listening=false;
 
 function toggleMic(){
+  const btn=document.getElementById('micBtn');
+  const label='🎤 点击开始说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
+  
   if(listening){
-    // Second click: stop and process
     listening=false;
     if(rec){try{rec.stop()}catch(ex){};rec=null}
-    document.getElementById('micBtn').textContent='🎤 点击开始说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
-    document.getElementById('micBtn').style.background='#e94560';document.getElementById('micBtn').style.color='#fff';
+    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
     return;
   }
-  // First click: start listening
+  
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast('浏览器不支持语音');return}
   
@@ -193,7 +194,6 @@ function toggleMic(){
   rec.interimResults=false;
   rec.maxAlternatives=1;
 
-  const btn=document.getElementById('micBtn');
   btn.textContent='🎙️ 正在听…再点停止';
   btn.style.background='rgba(233,69,96,.2)';btn.style.color='#e94560';
   listening=true;
@@ -202,28 +202,33 @@ function toggleMic(){
     const last=e.results.length-1;
     if(!e.results[last].isFinal)return;
     const t=e.results[last][0].transcript.trim();
-    if(!t){resetUI();return}
+    if(!t){listening=false;rec=null;btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';return}
+    listening=false;rec=null;
+    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
     document.getElementById('inp').value=t;
     document.getElementById('result').style.display='block';
     document.getElementById('rl').textContent='🎙️ 识别结果';
     document.getElementById('rt').textContent=t;
-    resetUI();
     go();
   };
 
   rec.onerror=e=>{
     if(e.error==='aborted')return;
-    resetUI();toast('识别失败: '+e.error)
+    listening=false;rec=null;
+    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
+    toast('识别失败: '+e.error);
   };
-  rec.onend=()=>{if(listening)resetUI()};
+  rec.onend=()=>{
+    if(!listening)return;
+    listening=false;rec=null;
+    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
+  };
   
-  function resetUI(){
-    listening=false;if(rec){try{rec.stop()}catch(ex){};rec=null}
-    btn.textContent='🎤 点击开始说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
-    btn.style.background='#e94560';btn.style.color='#fff';
+  try{rec.start()}catch(e){
+    listening=false;rec=null;
+    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
+    toast('语音不可用');
   }
-  
-  try{rec.start()}catch(e){resetUI();toast('语音不可用')}
 }
 
 // Init
