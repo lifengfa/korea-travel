@@ -437,51 +437,107 @@ async function translateText(){
   input.value='';
 }
 
-// ===== TTS (Browser native SpeechSynthesis) =====
-function doSpeak(text, lang) {
-  if (!synth) {
-    toast('你的浏览器不支持朗读，请用 Chrome/Safari 打开');
-    return;
-  }
-  synth.cancel();
-  
-  // Load voices (may need async on some browsers)
-  let voices = synth.getVoices();
-  if (voices.length === 0) {
-    // Voices not loaded yet, try again after they load
-    synth.onvoiceschanged = () => {
-      synth.onvoiceschanged = null;
-      doSpeakNow(text, lang);
-    };
-    return;
-  }
-  doSpeakNow(text, lang);
+// ===== TTS: multi-fallback =====
+let ttsPlaying = false;
+
+// Method 1: Browser SpeechSynthesis (try without explicit voice first)
+function trySpeakBrowser(text, lang) {
+  return new Promise((resolve, reject) => {
+    if (!synth) return reject('no synth');
+    synth.cancel();
+    
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang === 'ko' ? 'ko-KR' : 'zh-CN';
+    utter.rate = 0.85;
+    
+    // Try to find a matching voice, but don't require it
+    const voices = synth.getVoices();
+    if (voices.length > 0) {
+      let voice = null;
+      if (lang === 'ko') {
+        voice = voices.find(v => v.lang === 'ko-KR') || voices.find(v => v.lang.startsWith('ko'));
+      } else {
+        voice = voices.find(v => v.lang === 'zh-CN') || voices.find(v => v.lang.startsWith('zh')) || voices.find(v => v.lang === 'zh-TW');
+      }
+      if (voice) utter.voice = voice;
+    }
+    
+    let resolved = false;
+    utter.onstart = () => { if(!resolved){ resolved=true; resolve(); } };
+    utter.onerror = (e) => { if(!resolved){ resolved=true; reject(e.error || 'utter error'); } };
+    utter.onend = () => { if(!resolved){ resolved=true; resolve(); } };
+    
+    synth.speak(utter);
+    
+    // Timeout: if no event in 3 seconds, consider it failed
+    setTimeout(() => { if(!resolved){ resolved=true; synth.cancel(); reject('timeout'); } }, 3000);
+  });
 }
 
-function doSpeakNow(text, lang) {
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = lang === 'ko' ? 'ko-KR' : 'zh-CN';
-  utter.rate = 0.85;
-  utter.pitch = 1;
+// Method 2: Google Translate TTS via Audio element (works in Korea)
+function trySpeakGoogle(text, lang) {
+  return new Promise((resolve, reject) => {
+    // Split long text (Google TTS has length limits)
+    const maxLen = 150;
+    const chunks = [];
+    for (let i = 0; i < text.length; i += maxLen) {
+      chunks.push(text.slice(i, i + maxLen));
+    }
+    
+    let idx = 0;
+    function playNext() {
+      if (idx >= chunks.length) return resolve();
+      const chunk = chunks[idx++];
+      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
+      const audio = new Audio();
+      audio.src = url;
+      audio.onended = playNext;
+      audio.onerror = () => reject('google tts failed');
+      audio.play().catch(() => reject('google tts play failed'));
+    }
+    playNext();
+  });
+}
+
+// Method 3: Alternative free TTS API (VoiceRSS-like)
+function trySpeakAlt(text, lang) {
+  return new Promise((resolve, reject) => {
+    const lc = lang === 'ko' ? 'ko-KR' : 'zh-CN';
+    const url = `https://api.streamelements.com/kappa/v2/speech?voice=${lang === 'ko' ? 'Korean Female' : 'Chinese Female'}&text=${encodeURIComponent(text)}`;
+    const audio = new Audio();
+    audio.src = url;
+    audio.onended = () => resolve();
+    audio.onerror = () => reject('alt tts failed');
+    audio.play().catch(() => reject('alt tts play failed'));
+  });
+}
+
+async function doSpeak(text, lang) {
+  if (ttsPlaying) return;
+  ttsPlaying = true;
+  document.getElementById('speakBtn').textContent = '🔊 播放中...';
   
-  const voices = synth.getVoices();
-  let voice = null;
-  if (lang === 'ko') {
-    voice = voices.find(v => v.lang === 'ko-KR') || voices.find(v => v.lang.startsWith('ko'));
-  } else {
-    voice = voices.find(v => v.lang === 'zh-CN') || voices.find(v => v.lang.startsWith('zh'));
+  const methods = [
+    () => trySpeakBrowser(text, lang),
+    () => trySpeakGoogle(text, lang),
+    () => trySpeakAlt(text, lang),
+  ];
+  
+  for (const fn of methods) {
+    try {
+      await fn();
+      ttsPlaying = false;
+      document.getElementById('speakBtn').textContent = '🔊 朗读译文';
+      return; // success!
+    } catch(e) {
+      console.log('TTS method failed, trying next:', e);
+    }
   }
-  if (voice) utter.voice = voice;
   
-  utter.onstart = () => { document.getElementById('speakBtn').textContent = '🔊 播放中...'; };
-  utter.onend = () => { document.getElementById('speakBtn').textContent = '🔊 朗读译文'; };
-  utter.onerror = (e) => {
-    document.getElementById('speakBtn').textContent = '🔊 朗读译文';
-    console.error('TTS error:', e);
-    toast('朗读失败，请重试');
-  };
-  
-  synth.speak(utter);
+  // All methods failed
+  ttsPlaying = false;
+  document.getElementById('speakBtn').textContent = '🔊 朗读译文';
+  toast('朗读失败。请尝试：设置 > 文字转语音 > 安装语音包');
 }
 
 function speakKorean(text) {
