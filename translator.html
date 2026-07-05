@@ -55,6 +55,11 @@ body{
 
 .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 24px;border-radius:24px;font-size:13px;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
+
+.mic-wrap{text-align:center;margin-bottom:14px}
+.mic-btn{width:64px;height:64px;border-radius:50%;border:3px solid rgba(233,69,96,.3);background:rgba(233,69,96,.1);color:#e94560;font-size:28px;cursor:pointer;transition:.15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.mic-btn:active,.mic-btn.listening{background:#e94560;color:#fff;border-color:#e94560;box-shadow:0 0 24px rgba(233,69,96,.4);transform:scale(1.1)}
+.mic-label{font-size:11px;color:#8892b0;margin-top:6px}
 </style>
 </head>
 <body>
@@ -78,8 +83,13 @@ body{
 </div>
 
 <div class="input-row">
-  <input type="text" id="inp" placeholder="输入文字，或按键盘🎤说话...">
+  <input type="text" id="inp" placeholder="输入文字，或点下方🎤说话...">
   <button onclick="go()">翻译</button>
+</div>
+
+<div class="mic-wrap">
+  <button class="mic-btn" id="micBtn" ontouchstart="startMic(event)" ontouchend="stopMic(event)" onmousedown="startMic(event)" onmouseup="stopMic(event)">🎤</button>
+  <div class="mic-label" id="micLabel">按住说话</div>
 </div>
 
 <div class="result" id="result">
@@ -107,9 +117,9 @@ function setMode(m){
   mode=m;
   document.getElementById('mKo2zh').classList.toggle('active',m==='ko2zh');
   document.getElementById('mZh2ko').classList.toggle('active',m==='zh2ko');
-  document.getElementById('hint').innerHTML=m==='ko2zh'
-    ?'💡 <strong>店员说韩语时</strong>：输入韩文 → 翻译成中文'
-    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 自动朗读';
+  document.getElementById('hint').innerHTML=mode==='ko2zh'
+    ?'💡 <strong>店员说韩语时</strong>：按住 🎤 说韩语 → 识别 → 翻译成中文'
+    :'💡 <strong>你说中文时</strong>：按住 🎤 说中文 → 识别 → 翻译成韩文 → 自动朗读';
 }
 
 async function go(){
@@ -180,6 +190,43 @@ function renderHist(){const w=document.getElementById('histWrap'),l=document.get
 function replay(t){cur=t;document.getElementById('result').style.display='block';document.getElementById('rt').textContent=t}
 function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
+
+// Speech Recognition (Chrome only)
+let recognition=null,micActive=false;
+function initRecognition(){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition)return null;
+  const r=new SpeechRecognition();
+  r.continuous=false;r.interimResults=false;r.maxAlternatives=1;
+  r.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    document.getElementById('inp').value=t;
+    stopMicUI();
+    recognition=null;
+  };
+  r.onerror=e=>{toast('识别失败');stopMicUI();recognition=null};
+  r.onend=()=>{stopMicUI();recognition=null};
+  return r;
+}
+function startMic(e){e.preventDefault();
+  if(micActive)return;
+  if(!(recognition=initRecognition())){toast('请用Chrome浏览器');return}
+  recognition.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
+  try{recognition.start()}catch(ex){recognition=null;return}
+  micActive=true;
+  document.getElementById('micBtn').classList.add('listening');
+  document.getElementById('micLabel').textContent='正在听...';
+}
+function stopMic(e){if(e)e.preventDefault();
+  if(!micActive)return;
+  micActive=false;
+  if(recognition){try{recognition.stop()}catch(ex){}recognition=null}
+  stopMicUI();
+}
+function stopMicUI(){
+  document.getElementById('micBtn').classList.remove('listening');
+  document.getElementById('micLabel').textContent='按住说话';
+}
 
 // Init
 document.getElementById('inp').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
