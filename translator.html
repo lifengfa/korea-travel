@@ -127,11 +127,12 @@ async function go(){
   const from=mode==='ko2zh'?'ko':'zh-CN';
   const to=mode==='ko2zh'?'zh-CN':'ko';
   try{
-    const url=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+    const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${mode==='ko2zh'?'ko|zh-CN':'zh-CN|ko'}`;
     const r=await fetch(url);
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
-    const t=d[0].map(s=>s[0]).join('');
+    const t=d.responseData.translatedText;
+    if(!t)throw new Error('无翻译结果');
     cur=t;
     showResult(t,text);
     document.getElementById('inp').value='';
@@ -205,7 +206,7 @@ function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toas
 
 // Voice recording via tunnel STT
 let mediaRecorder=null, audioChunks=[], isRecording=false;
-const STT_URL='https://4038fcc6bee995.lhr.life/stt';
+const STT_URL='https://5f2251d2ade61c.lhr.life/stt';
 
 async function toggleMic(){
   if(isRecording){stopRecording();return;}
