@@ -193,20 +193,24 @@ function replay(t){cur=t;document.getElementById('result').style.display='block'
 function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
-// Voice recording via tunnel STT
-let mediaRecorder=null, audioChunks=[], isRecording=false;
-const STT_URL='https://4038fcc6bee995.lhr.life/stt';
+// Voice via SpeechRecognition (Chrome)
+let srActive=false, srInst=null;
 
 async function toggleMic(){
+  if(srActive){
+    if(srInst)try{srInst.stop()}catch(e){}
+    srActive=false;srInst=null;
+    document.getElementById('micBtn').textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
+    document.getElementById('micBtn').style.background='#e94560';document.getElementById('micBtn').style.color='#fff';
+    return;
+  }
   if(isRecording){stopRecording();return;}
 
-  // Method 1: Try browser's built-in SpeechRecognition (Chrome supports it)
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(SR){
     tryWebSpeechFirst();
     return;
   }
-  // Method 2: Fallback to tunnel STT
   await startRecording();
 }
 
@@ -218,11 +222,13 @@ function tryWebSpeechFirst(){
   r.interimResults=false;
   r.maxAlternatives=1;
 
+  srActive=true;srInst=r;
   const btn=document.getElementById('micBtn');
   btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
   btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
 
   let done=false;
+  function cleanup(){srActive=false;srInst=null;btn.textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';btn.style.background='#e94560';btn.style.color='#fff'}
   r.onresult=e=>{
     if(done)return;
     if(!e.results[0].isFinal)return;
@@ -234,28 +240,20 @@ function tryWebSpeechFirst(){
     document.getElementById('result').style.display='block';
     document.getElementById('rl').textContent='🎙️ 识别结果';
     document.getElementById('rt').textContent=t;
-    btn.textContent='🎤 按住说话';
-    btn.style.background='#e94560';btn.style.color='#fff';
+    cleanup();
     go();
   };
 
   r.onerror=e=>{
-    btn.textContent='🎤 按住说话';
-    btn.style.background='#e94560';btn.style.color='#fff';
+    cleanup();
     if(e.error==='not-allowed'){
-      toast('麦克风权限未开启，请在浏览器设置中允许');
+      toast('麦克风权限未开启');
     }else{
-      toast('语音识别失败('+e.error+')，尝试备用方案…');
-      startRecording();
+      toast('识别失败');
     }
   };
 
-  r.onend=()=>{
-    if(btn.textContent==='🎙️ 正在听…'){
-      btn.textContent='🎤 按住说话';
-      btn.style.background='#e94560';btn.style.color='#fff';
-    }
-  };
+  r.onend=()=>{if(srActive)cleanup()};
 
   try{r.start()}catch(e){toast('语音不可用');startRecording()}
 }
