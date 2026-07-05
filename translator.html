@@ -219,7 +219,7 @@ async function startRecording(){
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     let opts={};
     if(MediaRecorder.isTypeSupported('audio/webm'))opts.mimeType='audio/webm';
-    mediaRecorder=new MediaRecorder(stream,opts);
+    mediaRecorder=new MediaRecorder(stream,{...opts, audioBitsPerSecond: 32000}); // 低码率，上传快
     audioChunks=[];
     mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data)};
     mediaRecorder.onstop=async()=>{
