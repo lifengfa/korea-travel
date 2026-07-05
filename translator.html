@@ -207,7 +207,55 @@ const STT_URL='https://4038fcc6bee995.lhr.life/stt';
 
 async function toggleMic(){
   if(isRecording){stopRecording();return;}
+
+  // Method 1: Try browser's built-in SpeechRecognition (Chrome supports it)
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(SR){
+    tryWebSpeechFirst();
+    return;
+  }
+  // Method 2: Fallback to tunnel STT
   await startRecording();
+}
+
+function tryWebSpeechFirst(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r=new SR();
+  r.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
+  r.interimResults=false;
+  r.maxAlternatives=1;
+
+  const btn=document.getElementById('micBtn');
+  btn.textContent='🎙️ 正在听…';
+  btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
+
+  r.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    document.getElementById('inp').value=t;
+    btn.textContent='🎤 按住说话';
+    btn.style.background='#e94560';btn.style.color='#fff';
+    go();
+  };
+
+  r.onerror=e=>{
+    btn.textContent='🎤 按住说话';
+    btn.style.background='#e94560';btn.style.color='#fff';
+    if(e.error==='not-allowed'){
+      toast('麦克风权限未开启，请在浏览器设置中允许');
+    }else{
+      toast('语音识别失败('+e.error+')，尝试备用方案…');
+      startRecording();
+    }
+  };
+
+  r.onend=()=>{
+    if(btn.textContent==='🎙️ 正在听…'){
+      btn.textContent='🎤 按住说话';
+      btn.style.background='#e94560';btn.style.color='#fff';
+    }
+  };
+
+  try{r.start()}catch(e){toast('语音不可用');startRecording()}
 }
 
 async function startRecording(){
