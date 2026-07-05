@@ -187,41 +187,71 @@ async function toggleRec(){
 
 async function startRec(){
   try{
-    log('Requesting mic...');
+    log('Step1: getUserMedia...');
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    mediaRecorder=new MediaRecorder(stream,{mimeType:'audio/webm;codecs=opus'});
+    log('Step2: stream ok, creating recorder...');
+    
+    // Let browser choose format - don't force codec
+    let options={};
+    if(MediaRecorder.isTypeSupported('audio/webm')) options.mimeType='audio/webm';
+    else if(MediaRecorder.isTypeSupported('audio/mp4')) options.mimeType='audio/mp4';
+    else if(MediaRecorder.isTypeSupported('audio/ogg')) options.mimeType='audio/ogg';
+    log('Step3: using '+ (options.mimeType||'default'));
+    
+    mediaRecorder=new MediaRecorder(stream,options);
     audioChunks=[];
 
-    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data)};
+    mediaRecorder.ondataavailable=e=>{
+      log('Chunk: '+e.data.size+'bytes');
+      if(e.data.size>0)audioChunks.push(e.data);
+    };
+    
+    mediaRecorder.onerror=e=>{
+      log('Recorder error: '+e.error);
+      stopRec();
+    };
 
     mediaRecorder.onstop=async()=>{
+      log('Step5: recorder stopped, chunks='+audioChunks.length);
       stream.getTracks().forEach(t=>t.stop());
-      const blob=new Blob(audioChunks,{type:'audio/webm'});
-      log('Recording done: '+blob.size+' bytes');
+      if(audioChunks.length===0){
+        log('No audio data recorded');
+        toast('没有录到声音，请重试');
+        document.getElementById('status').textContent='没有录到声音';
+        return;
+      }
+      const mime=mediaRecorder.mimeType||'audio/webm';
+      const blob=new Blob(audioChunks,{type:mime});
+      log('Step6: blob='+blob.size+'bytes, type='+mime);
       await sendAudioForSTT(blob);
     };
 
-    mediaRecorder.start();
+    mediaRecorder.start(1000); // get data every 1 second
     isRec=true;
     document.getElementById('recBtn').classList.add('recording');
-    document.getElementById('recLabel').textContent='录音中...松手停止';
-    document.getElementById('status').textContent='🎙️ 正在录音...';
-    log('Recording...');
+    document.getElementById('recLabel').textContent='录音中…松手停止';
+    document.getElementById('status').textContent='🎙️ 正在录音…';
+    log('Step4: recording started');
   }catch(e){
-    log('Mic error: '+e.message);
-    toast('无法访问麦克风: '+e.message);
+    log('FAIL at startRec: '+e.message+' | '+e.name);
+    toast('录音失败: '+e.message);
+    document.getElementById('status').textContent='录音失败: '+e.message;
   }
 }
 
 function stopRec(){
+  log('stopRec called, state='+(mediaRecorder?mediaRecorder.state:'null'));
   if(mediaRecorder&&mediaRecorder.state==='recording'){
     mediaRecorder.stop();
+  }else if(mediaRecorder&&mediaRecorder.state==='inactive'){
+    log('Already inactive');
   }
   isRec=false;
   document.getElementById('recBtn').classList.remove('recording');
   document.getElementById('recLabel').textContent='按住录音';
-  document.getElementById('status').textContent='处理中...';
-  log('Stopped recording');
+  if(audioChunks&&audioChunks.length>0){
+    document.getElementById('status').textContent='处理中...';
+  }
 }
 
 // ===== SEND AUDIO FOR STT =====
