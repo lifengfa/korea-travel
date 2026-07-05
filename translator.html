@@ -253,7 +253,12 @@ async function sendSTT(blob){
     }else{
       toast('未识别到语音');
     }
-  }catch(e){toast('识别失败: '+e.message)}
+  }catch(e){
+    toast('识别失败: '+e.message);
+    document.getElementById('rt').textContent='错误详情: '+e.message;
+    document.getElementById('result').style.display='block';
+    document.getElementById('rl').textContent='❌ 识别失败';
+  }
   btn.textContent='🎤 按住说话（韩语）';
   btn.style.background='rgba(240,160,88,.08)';btn.style.borderColor='rgba(240,160,88,.3)';btn.style.color='#f0a058';
 }
