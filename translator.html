@@ -137,54 +137,41 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: Edge TTS via tunnel (primary) + browser fallback
-const TTS_BASE = 'https://4038fcc6bee995.lhr.life';
-
+// TTS: Browser native first (best on Chrome) → Google TTS fallback
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
-  const lang=mode==='zh2ko'?'ko':'zh';
   const btn=document.getElementById('spkBtn');
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
+  const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
   
-  // Method 1: Edge TTS via tunnel (high quality Korean/Chinese)
+  // Method 1: Browser SpeechSynthesis (Chrome has great Korean/Chinese voices)
   try{
-    await speakEdge(cur,lang);
-    btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
-    return;
-  }catch(e){console.log('Edge TTS failed:',e)}
-  
-  // Method 2: Browser SpeechSynthesis fallback
-  try{
-    await speakBrowser(cur,lang);
-    btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
-    return;
-  }catch(e){console.log('Browser TTS failed:',e)}
-  
-  btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
-  toast('朗读失败')
-}
-
-function speakEdge(text,lang){
-  return new Promise((resolve,reject)=>{
-    const a=new Audio(`${TTS_BASE}/tts?text=${encodeURIComponent(text)}&lang=${lang}`);
-    a.onended=()=>resolve();
-    a.onerror=()=>reject('edge tts');
-    a.play().catch(()=>reject('edge play'));
-  })
-}
-
-function speakBrowser(text,lang){
-  return new Promise((resolve,reject)=>{
     const s=window.speechSynthesis;
-    if(!s)return reject('no synth');
+    if(!s)throw new Error('no synth');
     s.cancel();
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang=lang==='ko'?'ko-KR':'zh-CN';u.rate=0.85;
+    const u=new SpeechSynthesisUtterance(cur);
+    u.lang=mode==='zh2ko'?'ko-KR':'zh-CN';u.rate=0.85;
     const v=s.getVoices();
-    if(v.length){const vv=v.find(x=>x.lang.startsWith(lang==='ko'?'ko':'zh'));if(vv)u.voice=vv}
-    u.onstart=()=>resolve();u.onerror=e=>reject(e.error);
-    s.speak(u);
-  })
+    if(v.length){const vv=v.find(x=>x.lang.startsWith(mode==='zh2ko'?'ko':'zh'));if(vv)u.voice=vv}
+    await new Promise((resolve,reject)=>{
+      u.onend=resolve;u.onerror=()=>reject('tts error');
+      s.speak(u);
+    });
+    done();return;
+  }catch(e){console.log('Browser TTS:',e)}
+  
+  // Method 2: Google Translate TTS
+  try{
+    const tl=mode==='zh2ko'?'ko':'zh-CN';
+    const a=new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`);
+    await new Promise((resolve,reject)=>{
+      a.onended=resolve;a.onerror=reject;
+      a.play().catch(reject);
+    });
+    done();return;
+  }catch(e){console.log('Google TTS:',e)}
+  
+  done();toast('朗读失败')
 }
 
 // History
