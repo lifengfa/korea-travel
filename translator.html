@@ -114,9 +114,9 @@ function setMode(m){
   mode=m;
   document.getElementById('mKo2zh').classList.toggle('active',m==='ko2zh');
   document.getElementById('mZh2ko').classList.toggle('active',m==='zh2ko');
-  document.getElementById('hint').innerHTML=m==='ko2zh'
+  document.getElementById('hint').innerHTML=mode==='ko2zh'
     ?'💡 <strong>店员说韩语时</strong>：输入韩文 → 翻译成中文'
-    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 自动朗读';
+    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 点🔊朗读';
   document.getElementById('micBtn').textContent=m==='ko2zh'
     ?'🎤 按住说话（听韩语）':'🎤 按住说话（听中文）';
 }
@@ -135,7 +135,6 @@ async function go(){
     cur=t;
     showResult(t,text);
     document.getElementById('inp').value='';
-    if(mode==='zh2ko') setTimeout(()=>speakR(),300);
   }catch(e){toast('翻译失败: '+e.message)}
 }
 
@@ -146,7 +145,7 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: Google TTS → Browser fallback
+// TTS: Google TTS → Browser fallback (manual only, no auto-speak to avoid echo loop)
 let ttsTimer=null;
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
@@ -216,9 +215,11 @@ function tryWebSpeechFirst(){
   btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
   btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
 
+  let done=false;
   r.onresult=e=>{
-    // Only process final result to avoid duplicates
+    if(done)return;
     if(!e.results[0].isFinal)return;
+    done=true;
     r.stop();
     const t=e.results[0][0].transcript.trim();
     if(!t)return;
