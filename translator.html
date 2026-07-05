@@ -146,39 +146,24 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: fetch blob → blob URL (avoids cross-origin audio restrictions)
+// TTS: sync Audio element (Samsung-safe) → fetch+blob → SpeechSynthesis
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
   const btn=document.getElementById('spkBtn');
   const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
-  
   const tl=mode==='zh2ko'?'ko':'zh-CN';
   const url=`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`;
   
-  try{
-    const resp=await fetch(url);
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
-    const blob=await resp.blob();
-    const a=new Audio(URL.createObjectURL(blob));
-    await new Promise((resolve,reject)=>{
-      a.onended=resolve;a.onerror=reject;
-      a.play().catch(reject);
-    });
-    done();return;
-  }catch(e){console.log('TTS fetch:',e)}
-  
-  // Fallback: direct Audio element
-  try{
-    const a=new Audio(url);
-    await new Promise((resolve,reject)=>{
-      a.onended=resolve;a.onerror=reject;
-      a.play().catch(reject);
-    });
-    done();return;
-  }catch(e){console.log('TTS direct:',e)}
-  
-  done();toast('朗读失败')
+  // Method 1: Sync Audio element (no await, preserves user gesture for Samsung)
+  const a=new Audio(url);
+  a.autoplay=true;
+  let played=false;
+  a.onplay=()=>{played=true};
+  a.onended=()=>{if(played)done()};
+  a.onerror=()=>{if(!played)done();toast('播放失败')};
+  // Timeout in case events don't fire
+  setTimeout(()=>{if(!played)done()},8000);
 }
 
 // History
@@ -222,7 +207,9 @@ function tryWebSpeechFirst(){
     if(done)return;
     if(!e.results[0].isFinal)return;
     done=true;
-    r.stop();
+    // Samsung browser: use abort() for aggressive stop, clear handlers
+    try{r.abort()}catch(ex){try{r.stop()}catch(ex){}}
+    r.onresult=r.onerror=r.onend=null;
     const t=e.results[0][0].transcript.trim();
     if(!t)return;
     document.getElementById('inp').value=t;
@@ -309,6 +296,8 @@ async function sendSTT(blob){
 }
 
 // Init
+const isSamsung=/SamsungBrowser/i.test(navigator.userAgent);
+if(isSamsung)toast('⚠️ 三星浏览器兼容性差，建议用 Chrome 打开');
 document.getElementById('inp').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
 const s=window.speechSynthesis;if(s){s.getVoices();if(s.onvoiceschanged!==undefined)s.onvoiceschanged=()=>s.getVoices()}
 document.getElementById('inp').focus();
