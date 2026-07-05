@@ -81,7 +81,7 @@ body{
 </div>
 
 <div style="margin-bottom:12px" id="micWrap">
-  <button id="micBtn" ontouchstart="startMic(event)" ontouchend="stopMic(event)" onmousedown="startMic(event)" onmouseup="stopMic(event)" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s;touch-action:manipulation">🎤 按住说话（韩语→中文）</button>
+  <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 点击开始说话（韩语→中文）</button>
 </div>
 
 <div class="input-row">
@@ -171,11 +171,19 @@ function replay(t){cur=t;document.getElementById('result').style.display='block'
 function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
-// Voice: SpeechRecognition — press and hold
-let rec=null, listening=false, micStart=0;
+// Voice: click to start, click again to stop
+let rec=null, listening=false;
 
-function startMic(e){e.preventDefault();
-  if(listening)return;
+function toggleMic(){
+  if(listening){
+    // Second click: stop and process
+    listening=false;
+    if(rec){try{rec.stop()}catch(ex){};rec=null}
+    document.getElementById('micBtn').textContent='🎤 点击开始说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
+    document.getElementById('micBtn').style.background='#e94560';document.getElementById('micBtn').style.color='#fff';
+    return;
+  }
+  // First click: start listening
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){toast('浏览器不支持语音');return}
   
@@ -186,42 +194,36 @@ function startMic(e){e.preventDefault();
   rec.maxAlternatives=1;
 
   const btn=document.getElementById('micBtn');
-  btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
+  btn.textContent='🎙️ 正在听…再点停止';
   btn.style.background='rgba(233,69,96,.2)';btn.style.color='#e94560';
-  listening=true;micStart=Date.now();
+  listening=true;
 
   rec.onresult=e=>{
     const last=e.results.length-1;
     if(!e.results[last].isFinal)return;
     const t=e.results[last][0].transcript.trim();
-    if(!t)return;
+    if(!t){resetUI();return}
     document.getElementById('inp').value=t;
     document.getElementById('result').style.display='block';
     document.getElementById('rl').textContent='🎙️ 识别结果';
     document.getElementById('rt').textContent=t;
-    listening=false;if(rec){try{rec.stop()}catch(ex){};rec=null}
-    document.getElementById('micBtn').textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
-    document.getElementById('micBtn').style.background='#e94560';document.getElementById('micBtn').style.color='#fff';
+    resetUI();
     go();
   };
 
   rec.onerror=e=>{
-    if(e.error==='aborted')return; // normal when user releases early
-    stopMic();toast('识别失败: '+e.error)
+    if(e.error==='aborted')return;
+    resetUI();toast('识别失败: '+e.error)
   };
-  rec.onend=()=>{if(listening)stopMic()};
+  rec.onend=()=>{if(listening)resetUI()};
   
-  try{rec.start()}catch(e){stopMic();toast('语音不可用')}
-}
-
-function stopMic(e){if(e)e.preventDefault();
-  if(!listening)return;
-  if(Date.now()-micStart<400)return; // minimum 400ms hold
-  listening=false;
-  if(rec){try{rec.stop()}catch(ex){};rec=null}
-  const btn=document.getElementById('micBtn');
-  btn.textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
-  btn.style.background='#e94560';btn.style.color='#fff';
+  function resetUI(){
+    listening=false;if(rec){try{rec.stop()}catch(ex){};rec=null}
+    btn.textContent='🎤 点击开始说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
+    btn.style.background='#e94560';btn.style.color='#fff';
+  }
+  
+  try{rec.start()}catch(e){resetUI();toast('语音不可用')}
 }
 
 // Init
