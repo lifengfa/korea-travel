@@ -185,7 +185,9 @@ body{
 
 <div class="main">
   <div class="unsupported" id="unsupported">
-    ⚠️ 你的浏览器不支持语音识别。请用 Chrome/Safari 打开，或使用下方文本输入。
+    <div style="font-size:16px;margin-bottom:4px">⚠️ 语音识别不可用</div>
+    <div style="font-size:12px;opacity:0.8">请<strong>复制链接用系统浏览器打开</strong>（Chrome/Safari）<br>或直接使用下方文本输入翻译</div>
+    <button onclick="copyPageUrl()" style="margin-top:8px;padding:8px 16px;border-radius:20px;border:1px solid #ffc107;background:rgba(255,193,7,0.15);color:#ffc107;font-size:13px;cursor:pointer">📋 复制链接</button>
   </div>
 
   <div class="mic-wrap">
@@ -240,14 +242,32 @@ let currentTranslation = '';
 // Load history
 try{history=JSON.parse(localStorage.getItem('kt_trans_history')||'[]')}catch(e){history=[]}
 
+// ===== COPY PAGE URL =====
+function copyPageUrl() {
+  navigator.clipboard.writeText(window.location.href).then(() => toast('链接已复制！用 Chrome/Safari 打开即可')).catch(() => toast('复制失败，请手动复制地址栏链接'));
+}
+
 // ===== INIT =====
 function init(){
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRecognition){
-    document.getElementById('unsupported').style.display='block';
+  const isWebView = /wv|WebView|Feishu|Lark|DingTalk|WeChat|MicroMessenger/i.test(navigator.userAgent);
+  
+  if(!SpeechRecognition || isWebView){
+    const banner = document.getElementById('unsupported');
+    banner.style.display = 'block';
+    if (isWebView) {
+      banner.querySelector('div:first-child').textContent = '⚠️ 检测到你在 App 内置浏览器中';
+    }
+    // Still allow text input translation
+    document.getElementById('micBtn').style.opacity = '0.4';
+    document.getElementById('micBtn').style.pointerEvents = 'auto';
+    document.getElementById('micBtn').onclick = function() {
+      toast('请用系统浏览器打开此页面才能使用语音');
+      copyPageUrl();
+    };
     return;
   }
-  // Load voices
+  // Load voices for fallback
   if(synth) synth.getVoices();
 }
 
@@ -399,43 +419,49 @@ async function translateText(){
   input.value='';
 }
 
-// ===== TTS =====
-function speakKorean(text){
-  if(!synth){toast('你的浏览器不支持语音朗读');return;}
+// ===== TTS (Google TTS MP3 primary, SpeechSynthesis fallback) =====
+let ttsAudio = null;
+
+// Google TTS: returns MP3, works everywhere (even in WebViews)
+function speakViaGoogleTTS(text, lang) {
+  // Stop any current playback
+  if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+  
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=gtx&q=${encodeURIComponent(text)}`;
+  ttsAudio = new Audio(url);
+  ttsAudio.play().catch(e => {
+    console.log('Google TTS failed, trying browser TTS:', e);
+    // Fallback to browser SpeechSynthesis
+    speakViaBrowserTTS(text, lang);
+  });
+}
+
+// Browser SpeechSynthesis fallback
+function speakViaBrowserTTS(text, lang) {
+  if (!synth) { toast('语音朗读不支持，请检查浏览器'); return; }
   synth.cancel();
-
-  const utter=new SpeechSynthesisUtterance(text);
-  utter.lang='ko-KR';
-  utter.rate=0.9;
-  utter.pitch=1;
-
-  // Find Korean voice
-  const voices=synth.getVoices();
-  const koVoice=voices.find(v=>v.lang.startsWith('ko')) ||
-                voices.find(v=>v.lang==='ko-KR');
-  if(koVoice) utter.voice=koVoice;
-
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = lang === 'ko' ? 'ko-KR' : 'zh-CN';
+  utter.rate = 0.9;
+  const voices = synth.getVoices();
+  const v = voices.find(x => x.lang.startsWith(lang === 'ko' ? 'ko' : 'zh'));
+  if (v) utter.voice = v;
   synth.speak(utter);
 }
 
-function speakTrans(){
-  if(!currentTranslation||currentTranslation==='等待翻译...'){
+function speakKorean(text) {
+  speakViaGoogleTTS(text, 'ko');
+}
+
+function speakTrans() {
+  if (!currentTranslation || currentTranslation === '等待翻译...') {
     toast('还没有翻译结果');
     return;
   }
-  if(mode==='zh2ko'){
+  if (mode === 'zh2ko') {
     speakKorean(currentTranslation);
-  }else{
-    // Chinese TTS
-    if(!synth){toast('你的浏览器不支持语音朗读');return;}
-    synth.cancel();
-    const utter=new SpeechSynthesisUtterance(currentTranslation);
-    utter.lang='zh-CN';
-    utter.rate=0.9;
-    const voices=synth.getVoices();
-    const zhVoice=voices.find(v=>v.lang.startsWith('zh'));
-    if(zhVoice) utter.voice=zhVoice;
-    synth.speak(utter);
+  } else {
+    speakViaGoogleTTS(currentTranslation, 'zh-CN');
   }
 }
 
