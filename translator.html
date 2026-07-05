@@ -114,9 +114,9 @@ function setMode(m){
   mode=m;
   document.getElementById('mKo2zh').classList.toggle('active',m==='ko2zh');
   document.getElementById('mZh2ko').classList.toggle('active',m==='zh2ko');
-  document.getElementById('hint').innerHTML=mode==='ko2zh'
+  document.getElementById('hint').innerHTML=m==='ko2zh'
     ?'💡 <strong>店员说韩语时</strong>：输入韩文 → 翻译成中文'
-    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 点🔊朗读';
+    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 自动朗读';
   document.getElementById('micBtn').textContent=m==='ko2zh'
     ?'🎤 按住说话（听韩语）':'🎤 按住说话（听中文）';
 }
@@ -127,28 +127,15 @@ async function go(){
   const from=mode==='ko2zh'?'ko':'zh-CN';
   const to=mode==='ko2zh'?'zh-CN':'ko';
   try{
-    // Try multiple Google Translate endpoints
-    const urls=[
-      `https://translate.google.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`,
-      `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=${from}&tl=${to}&q=${encodeURIComponent(text)}`,
-      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&dj=1&q=${encodeURIComponent(text)}`
-    ];
-    let t='';
-    for(const url of urls){
-      try{
-        const r=await fetch(url);
-        if(!r.ok)continue;
-        const d=await r.json();
-        if(Array.isArray(d[0])){t=d[0].map(s=>s[0]).join('')}
-        else if(d.sentences){t=d.sentences.map(s=>s.trans).join('')}
-        else if(Array.isArray(d)){t=d[0]}
-        if(t)break;
-      }catch(e){continue}
-    }
-    if(!t)throw new Error('所有接口不通');
+    const url=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+    const r=await fetch(url);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    const t=d[0].map(s=>s[0]).join('');
     cur=t;
     showResult(t,text);
     document.getElementById('inp').value='';
+    if(mode==='zh2ko') setTimeout(()=>speakR(),300);
   }catch(e){toast('翻译失败: '+e.message)}
 }
 
@@ -159,37 +146,38 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: Google TTS → Browser fallback (manual only, no auto-speak to avoid echo loop)
-let ttsTimer=null;
+// TTS: fetch blob → blob URL (avoids cross-origin audio restrictions)
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
   const btn=document.getElementById('spkBtn');
-  const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');clearTimeout(ttsTimer)};
+  const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
   
-  // Method 1: Google TTS (you're in Korea, should work)
-  try{
-    const tl=mode==='zh2ko'?'ko':'zh-CN';
-    const a=new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`);
-    a.onended=()=>done();a.onerror=()=>{done();toast('Google不通')};
-    a.play().catch(()=>{done();toast('播放失败')});
-    ttsTimer=setTimeout(()=>done(),8000);
-    return;
-  }catch(e){}
+  const tl=mode==='zh2ko'?'ko':'zh-CN';
+  const url=`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`;
   
-  // Method 2: Browser SpeechSynthesis
-  const s=window.speechSynthesis;
-  if(s){
-    s.cancel();await new Promise(r=>setTimeout(r,50));
-    const u=new SpeechSynthesisUtterance(cur);
-    u.lang=mode==='zh2ko'?'ko-KR':'zh-CN';u.rate=0.85;u.volume=1;
-    const v=s.getVoices();
-    if(v.length){const vv=v.find(x=>x.lang.startsWith(mode==='zh2ko'?'ko':'zh'));if(vv)u.voice=vv}
-    u.onend=()=>done();u.onerror=()=>{done();toast('TTS出错')};
-    s.speak(u);
-    ttsTimer=setTimeout(()=>done(),Math.max(cur.length*(mode==='zh2ko'?250:330),3000));
-    return;
-  }
+  try{
+    const resp=await fetch(url);
+    if(!resp.ok)throw new Error('HTTP '+resp.status);
+    const blob=await resp.blob();
+    const a=new Audio(URL.createObjectURL(blob));
+    await new Promise((resolve,reject)=>{
+      a.onended=resolve;a.onerror=reject;
+      a.play().catch(reject);
+    });
+    done();return;
+  }catch(e){console.log('TTS fetch:',e)}
+  
+  // Fallback: direct Audio element
+  try{
+    const a=new Audio(url);
+    await new Promise((resolve,reject)=>{
+      a.onended=resolve;a.onerror=reject;
+      a.play().catch(reject);
+    });
+    done();return;
+  }catch(e){console.log('TTS direct:',e)}
+  
   done();toast('朗读失败')
 }
 
