@@ -57,9 +57,9 @@ body{
 .toast.show{opacity:1}
 
 .mic-wrap{text-align:center;margin-bottom:14px}
-.mic-btn{width:64px;height:64px;border-radius:50%;border:3px solid rgba(233,69,96,.3);background:rgba(233,69,96,.1);color:#e94560;font-size:28px;cursor:pointer;transition:.15s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.mic-btn:active,.mic-btn.listening{background:#e94560;color:#fff;border-color:#e94560;box-shadow:0 0 24px rgba(233,69,96,.4);transform:scale(1.1)}
-.mic-label{font-size:11px;color:#8892b0;margin-top:6px}
+.mic-btn{display:inline-block;padding:18px 48px;border-radius:50px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.15s;letter-spacing:1px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 20px rgba(233,69,96,.35)}
+.mic-btn:active,.mic-btn.listening{background:#c03950;transform:scale(.96);box-shadow:0 2px 8px rgba(233,69,96,.25)}
+.mic-label{font-size:11px;color:#8892b0;margin-top:8px}
 </style>
 </head>
 <body>
@@ -88,7 +88,7 @@ body{
 </div>
 
 <div class="mic-wrap">
-  <button class="mic-btn" id="micBtn" ontouchstart="startMic(event)" ontouchend="stopMic(event)" onmousedown="startMic(event)" onmouseup="stopMic(event)">🎤</button>
+  <button class="mic-btn" id="micBtn" ontouchstart="startMic(event)" ontouchend="stopMic(event)" onmousedown="startMic(event)" onmouseup="stopMic(event)">🎤 按住说话</button>
   <div class="mic-label" id="micLabel">按住说话</div>
 </div>
 
@@ -215,7 +215,8 @@ function startMic(e){e.preventDefault();
   try{recognition.start()}catch(ex){recognition=null;return}
   micActive=true;
   document.getElementById('micBtn').classList.add('listening');
-  document.getElementById('micLabel').textContent='正在听...';
+  document.getElementById('micBtn').textContent='🎤 正在听...';
+  document.getElementById('micLabel').textContent='松手完成识别';
 }
 function stopMic(e){if(e)e.preventDefault();
   if(!micActive)return;
@@ -225,6 +226,7 @@ function stopMic(e){if(e)e.preventDefault();
 }
 function stopMicUI(){
   document.getElementById('micBtn').classList.remove('listening');
+  document.getElementById('micBtn').textContent='🎤 按住说话';
   document.getElementById('micLabel').textContent='按住说话';
 }
 
