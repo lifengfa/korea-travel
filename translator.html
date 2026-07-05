@@ -173,10 +173,14 @@ function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
 // Voice: SpeechRecognition
+let srBusy=false;
+
 async function toggleMic(){
+  if(srBusy)return;
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(SR){tryWebSpeechFirst();return}
-  toast('浏览器不支持语音');
+  if(!SR){toast('浏览器不支持语音');return}
+  srBusy=true;
+  tryWebSpeechFirst();
 }
 
 function tryWebSpeechFirst(){
@@ -202,23 +206,27 @@ function tryWebSpeechFirst(){
     document.getElementById('rt').textContent=t;
     btn.textContent='🎤 按住说话';
     btn.style.background='#e94560';btn.style.color='#fff';
+    srBusy=false;
     go();
   };
 
   r.onerror=e=>{
     btn.textContent='🎤 按住说话';
     btn.style.background='#e94560';btn.style.color='#fff';
-    toast(e.error==='not-allowed'?'请开启麦克风权限':'识别失败: '+e.error);
+    srBusy=false;
+    if(e.error==='aborted')return;
+    toast('识别失败: '+e.error);
   };
 
   r.onend=()=>{
     if(btn.textContent==='🎙️ 正在听…'){
       btn.textContent='🎤 按住说话';
       btn.style.background='#e94560';btn.style.color='#fff';
+      srBusy=false;
     }
   };
 
-  try{r.start()}catch(e){toast('语音不可用')}
+  try{r.start()}catch(e){srBusy=false;toast('语音不可用')}
 }
 
 // Init
