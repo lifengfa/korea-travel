@@ -76,8 +76,8 @@ body{
   </button>
 </div>
 
-<div class="hint" id="hint">
-  💡 <strong>点输入框 → 按键盘 🎤 → 说话</strong> → 自动输入文字 → 点翻译
+<div class="hint" id="hint" style="font-size:13px">
+  👆 <strong>点输入框 → 键盘🎤 → 说话</strong> → 自动翻译 ✨
 </div>
 
 <div style="margin-bottom:12px">
@@ -265,7 +265,13 @@ async function sendSTT(blob){
   btn.textContent='🎤 点击开始说话';btn.style.background='#e94560';
 }
 
-// Init
+// Init — 键盘🎤输入后自动翻译
+let inpTimer=null;
+document.getElementById('inp').addEventListener('input',()=>{
+  clearTimeout(inpTimer);
+  const v=document.getElementById('inp').value.trim();
+  if(v) inpTimer=setTimeout(()=>go(), 800); // 停顿0.8秒后自动翻译
+});
 document.getElementById('inp').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
 const s=window.speechSynthesis;if(s){s.getVoices();if(s.onvoiceschanged!==undefined)s.onvoiceschanged=()=>s.getVoices()}
 document.getElementById('inp').focus();
