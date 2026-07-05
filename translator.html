@@ -107,6 +107,9 @@ body{
 
 <script>
 let mode='ko2zh',cur='';
+// Auto-clear history on version bump to prevent stale cache
+const VER='v10';
+if(localStorage.getItem('kt3_ver')!==VER){localStorage.removeItem('kt3_hist');localStorage.setItem('kt3_ver',VER)}
 let hist=[];try{hist=JSON.parse(localStorage.getItem('kt3_hist')||'[]')}catch(e){}
 
 function toast(s){const e=document.getElementById('toast');e.textContent=s;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
