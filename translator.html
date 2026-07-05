@@ -146,41 +146,42 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: Browser native first → Google TTS fallback
+// TTS: Google TTS (best Korean) → Browser fallback
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
   const btn=document.getElementById('spkBtn');
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
   const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
+  const tl=mode==='zh2ko'?'ko':'zh-CN';
   
-  // Method 1: Browser SpeechSynthesis
+  // Method 1: Google Translate TTS — 你在韩国应该能访问
+  const gUrl=`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`;
+  try{
+    const a=new Audio(gUrl);
+    await new Promise((resolve,reject)=>{
+      a.onended=resolve;a.onerror=()=>reject('Google TTS error');
+      a.play().then(()=>{}).catch(reject);
+    });
+    done();return;
+  }catch(e){console.log('Google:',e);toast('Google TTS 不通，试浏览器...')}
+  
+  // Method 2: Browser SpeechSynthesis
   try{
     const s=window.speechSynthesis;
-    if(!s)throw new Error('no synth');
+    if(!s)throw new Error('no API');
     s.cancel();
     const u=new SpeechSynthesisUtterance(cur);
-    u.lang=mode==='zh2ko'?'ko-KR':'zh-CN';u.rate=0.85;
+    u.lang=tl==='ko'?'ko-KR':'zh-CN';u.rate=0.85;u.volume=1;
     const v=s.getVoices();
-    if(v.length){const vv=v.find(x=>x.lang.startsWith(mode==='zh2ko'?'ko':'zh'));if(vv)u.voice=vv}
+    if(v.length){const vv=v.find(x=>x.lang.startsWith(tl==='ko'?'ko':'zh'));if(vv)u.voice=vv}
     await new Promise((resolve,reject)=>{
-      u.onend=resolve;u.onerror=()=>reject('err');
+      u.onend=resolve;u.onerror=()=>reject('Browser TTS error');
       s.speak(u);
     });
     done();return;
-  }catch(e){console.log('Browser TTS:',e)}
+  }catch(e){console.log('Browser:',e)}
   
-  // Method 2: Google TTS
-  try{
-    const tl=mode==='zh2ko'?'ko':'zh-CN';
-    const a=new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`);
-    await new Promise((resolve,reject)=>{
-      a.onended=resolve;a.onerror=reject;
-      a.play().catch(reject);
-    });
-    done();return;
-  }catch(e){console.log('Google TTS:',e)}
-  
-  done();toast('朗读失败')
+  done();toast('朗读失败：两种方式都不通')
 }
 
 // History
