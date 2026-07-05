@@ -182,6 +182,7 @@ async function toggleMic(){
   r.maxAlternatives=1;
 
   const btn=document.getElementById('micBtn');
+  function resetBtn(){btn.textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';btn.style.background='#e94560';btn.style.color='#fff'}
   btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
   btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
 
@@ -199,11 +200,10 @@ async function toggleMic(){
     go();
   };
 
-  r.onerror=e=>{resetBtn();toast(e.error==='not-allowed'?'请开启麦克风权限':'识别失败')};
+  r.onerror=e=>{resetBtn();toast('识别失败: '+e.error)};
   r.onend=()=>{if(btn.textContent.startsWith('🎙️'))resetBtn()};
   
-  function resetBtn(){btn.textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';btn.style.background='#e94560';btn.style.color='#fff'}
-  try{r.start()}catch(e){toast('语音不可用')}
+  try{r.start()}catch(e){resetBtn();toast('语音不可用: '+e.message)}
 }
 
 // Init
