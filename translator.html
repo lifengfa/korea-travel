@@ -127,16 +127,30 @@ async function go(){
   const from=mode==='ko2zh'?'ko':'zh-CN';
   const to=mode==='ko2zh'?'zh-CN':'ko';
   try{
-    const url=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
-    const r=await fetch(url);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const d=await r.json();
-    const t=d[0].map(s=>s[0]).join('');
+    // Try multiple endpoints
+    const urls=[
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`,
+      `https://translate.google.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`,
+      `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=${from}&tl=${to}&q=${encodeURIComponent(text)}`
+    ];
+    let t='';
+    for(const url of urls){
+      try{
+        const r=await fetch(url);
+        if(!r.ok)continue;
+        const d=await r.json();
+        if(Array.isArray(d)&&Array.isArray(d[0])){t=d[0].map(s=>s[0]).join('')}
+        else if(d.sentences){t=d.sentences.map(s=>s.trans).join('')}
+        else if(typeof d[0]==='string'){t=d[0]}
+        if(t)break;
+      }catch(e){continue}
+    }
+    if(!t)throw new Error('所有接口不通');
     cur=t;
     showResult(t,text);
     document.getElementById('inp').value='';
     if(mode==='zh2ko') setTimeout(()=>speakR(),300);
-  }catch(e){toast('翻译失败: '+e.message)}
+  }catch(e){toast('翻译失败')}
 }
 
 function showResult(translated,orig){
