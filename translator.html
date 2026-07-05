@@ -80,7 +80,7 @@ body{
   💡 <strong>点输入框 → 按键盘 🎤 → 说话</strong> → 自动输入文字 → 点翻译
 </div>
 
-<div style="margin-bottom:12px">
+<div style="margin-bottom:12px" id="micWrap">
   <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 按住说话（韩语→中文）</button>
 </div>
 
@@ -106,7 +106,6 @@ body{
 <div class="toast" id="toast"></div>
 
 <script>
-const isSamsung=/SamsungBrowser/i.test(navigator.userAgent);
 let mode='ko2zh',cur='';
 let hist=[];try{hist=JSON.parse(localStorage.getItem('kt3_hist')||'[]')}catch(e){}
 
@@ -147,37 +146,54 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: Samsung→SpeechSynthesis, Chrome→Google TTS Audio
+// TTS: Edge TTS via tunnel (primary) + browser fallback
+const TTS_BASE = 'https://4038fcc6bee995.lhr.life';
+
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
+  const lang=mode==='zh2ko'?'ko':'zh';
   const btn=document.getElementById('spkBtn');
-  const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
   
-  // Samsung browser: SpeechSynthesis (sync call, no await before speak)
-  if(isSamsung){
-    const s=window.speechSynthesis;
-    if(s){
-      s.cancel();
-      const u=new SpeechSynthesisUtterance(cur);
-      u.lang=mode==='zh2ko'?'ko-KR':'zh-CN';u.rate=0.85;u.volume=1;
-      const v=s.getVoices();
-      if(v.length){const vv=v.find(x=>x.lang.startsWith(mode==='zh2ko'?'ko':'zh'));if(vv)u.voice=vv}
-      u.onend=()=>done();u.onerror=()=>{done();toast('朗读失败')};
-      s.speak(u);
-      setTimeout(()=>done(),Math.max(cur.length*250,3000));
-      return;
-    }
-    done();toast('朗读不可用');return;
-  }
+  // Method 1: Edge TTS via tunnel (high quality Korean/Chinese)
+  try{
+    await speakEdge(cur,lang);
+    btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
+    return;
+  }catch(e){console.log('Edge TTS failed:',e)}
   
-  // Chrome/other: Google TTS Audio
-  const tl=mode==='zh2ko'?'ko':'zh-CN';
-  const a=new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`);
-  a.onended=()=>done();
-  a.onerror=()=>{done();toast('播放失败')};
-  a.play().catch(()=>{done();toast('播放失败')});
-  setTimeout(()=>done(),8000);
+  // Method 2: Browser SpeechSynthesis fallback
+  try{
+    await speakBrowser(cur,lang);
+    btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
+    return;
+  }catch(e){console.log('Browser TTS failed:',e)}
+  
+  btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
+  toast('朗读失败')
+}
+
+function speakEdge(text,lang){
+  return new Promise((resolve,reject)=>{
+    const a=new Audio(`${TTS_BASE}/tts?text=${encodeURIComponent(text)}&lang=${lang}`);
+    a.onended=()=>resolve();
+    a.onerror=()=>reject('edge tts');
+    a.play().catch(()=>reject('edge play'));
+  })
+}
+
+function speakBrowser(text,lang){
+  return new Promise((resolve,reject)=>{
+    const s=window.speechSynthesis;
+    if(!s)return reject('no synth');
+    s.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=lang==='ko'?'ko-KR':'zh-CN';u.rate=0.85;
+    const v=s.getVoices();
+    if(v.length){const vv=v.find(x=>x.lang.startsWith(lang==='ko'?'ko':'zh'));if(vv)u.voice=vv}
+    u.onstart=()=>resolve();u.onerror=e=>reject(e.error);
+    s.speak(u);
+  })
 }
 
 // History
@@ -189,7 +205,7 @@ function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toas
 
 // Voice recording via tunnel STT
 let mediaRecorder=null, audioChunks=[], isRecording=false;
-const STT_URL='https://5f2251d2ade61c.lhr.life/stt';
+const STT_URL='https://4038fcc6bee995.lhr.life/stt';
 
 async function toggleMic(){
   if(isRecording){stopRecording();return;}
@@ -208,7 +224,6 @@ function tryWebSpeechFirst(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   const r=new SR();
   r.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
-  r.continuous=false;
   r.interimResults=false;
   r.maxAlternatives=1;
 
@@ -216,14 +231,10 @@ function tryWebSpeechFirst(){
   btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
   btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
 
-  let done=false;
   r.onresult=e=>{
-    if(done)return;
+    // Only process final result to avoid duplicates
     if(!e.results[0].isFinal)return;
-    done=true;
-    // Samsung browser: use abort() for aggressive stop, clear handlers
-    try{r.abort()}catch(ex){try{r.stop()}catch(ex){}}
-    r.onresult=r.onerror=r.onend=null;
+    r.stop();
     const t=e.results[0][0].transcript.trim();
     if(!t)return;
     document.getElementById('inp').value=t;
@@ -310,7 +321,13 @@ async function sendSTT(blob){
 }
 
 // Init
-if(isSamsung)toast('⚠️ 三星浏览器兼容性差，建议用 Chrome 打开');
+const isSamsung=/SamsungBrowser/i.test(navigator.userAgent);
+if(isSamsung){
+  // Samsung browser: hide mic button + TTS button, show keyboard mic instructions
+  document.getElementById('micWrap').style.display='none';
+  document.getElementById('spkBtn').style.display='none';
+  document.getElementById('hint').innerHTML='💡 <strong>点输入框 → 按键盘 🎤 说话</strong> → 翻译<br><small style="color:#f0a058">建议用 Chrome 体验更好（语音识别+朗读）</small>';
+}
 document.getElementById('inp').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
 const s=window.speechSynthesis;if(s){s.getVoices();if(s.onvoiceschanged!==undefined)s.onvoiceschanged=()=>s.getVoices()}
 document.getElementById('inp').focus();
