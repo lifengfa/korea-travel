@@ -2,640 +2,410 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1a1a2e">
-<title>🇰🇷 中韩实时翻译</title>
-<link rel="manifest" href="data:application/json,{}">
+<title>中韩翻译</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;touch-action:manipulation}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
-  color:#e0e0e0;
-  display:flex;flex-direction:column;
+  font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+  background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);
+  color:#e0e0e0;display:flex;flex-direction:column;
   user-select:none;-webkit-user-select:none;
 }
+.header{text-align:center;padding:16px 12px 4px;flex-shrink:0}
+.header h1{font-size:20px;font-weight:700}
+.header .sub{font-size:11px;color:#8892b0;margin-top:2px}
 
-/* Header */
-.header{
-  text-align:center;padding:16px 12px 8px;
-  flex-shrink:0;
-}
-.header h1{font-size:22px;font-weight:700;letter-spacing:1px}
-.header .sub{font-size:12px;color:#8892b0;margin-top:2px}
+.modes{display:flex;gap:6px;padding:8px 14px;flex-shrink:0}
+.mode-btn{flex:1;padding:10px 6px;border-radius:14px;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#8892b0;font-size:13px;font-weight:600;text-align:center;cursor:pointer;transition:.2s}
+.mode-btn.active{border-color:#e94560;background:rgba(233,69,96,.15);color:#fff;box-shadow:0 0 15px rgba(233,69,96,.15)}
+.mode-btn .emoji{font-size:20px;display:block;margin-bottom:2px}
 
-/* Mode tabs */
-.modes{
-  display:flex;gap:8px;padding:0 16px;margin-bottom:12px;
-  flex-shrink:0;
-}
-.mode-btn{
-  flex:1;padding:14px 8px;border-radius:16px;
-  border:2px solid rgba(255,255,255,0.08);
-  background:rgba(255,255,255,0.04);
-  color:#8892b0;font-size:15px;font-weight:600;
-  text-align:center;cursor:pointer;
-  transition:all 0.25s;
-  backdrop-filter:blur(10px);
-}
-.mode-btn.active{
-  border-color:#e94560;
-  background:rgba(233,69,96,0.15);
-  color:#fff;
-  box-shadow:0 0 20px rgba(233,69,96,0.2);
-}
-.mode-btn .emoji{font-size:24px;display:block;margin-bottom:4px}
+.main{flex:1;overflow-y:auto;padding:0 14px;-webkit-overflow-scrolling:touch}
 
-/* Main area */
-.main{
-  flex:1;display:flex;flex-direction:column;
-  overflow-y:auto;padding:0 16px;
-  -webkit-overflow-scrolling:touch;
-}
+/* Input area */
+.input-area{display:flex;gap:8px;margin:8px 0}
+.input-area input{flex:1;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:#fff;font-size:17px;outline:none}
+.input-area input::placeholder{color:#555}
+.input-area button{flex:0 0 auto;padding:14px 18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:15px;font-weight:600;cursor:pointer}
+.input-area button:active{opacity:.8}
 
-/* Mic button */
-.mic-wrap{
-  display:flex;justify-content:center;align-items:center;
-  padding:20px 0;flex-shrink:0;
-}
-.mic-btn{
-  width:90px;height:90px;border-radius:50%;
-  border:3px solid rgba(255,255,255,0.15);
-  background:rgba(255,255,255,0.05);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:all 0.3s;position:relative;
-}
-.mic-btn svg{width:40px;height:40px;fill:#8892b0;transition:fill 0.3s}
-.mic-btn.recording{
-  border-color:#e94560;background:rgba(233,69,96,0.2);
-  animation:pulse 1.5s ease-in-out infinite;
-}
-.mic-btn.recording svg{fill:#e94560}
-.mic-btn:active{transform:scale(0.95)}
-@keyframes pulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(233,69,96,0.4)}
-  50%{box-shadow:0 0 0 20px rgba(233,69,96,0)}
-}
-.mic-label{
-  text-align:center;font-size:13px;color:#8892b0;margin-top:8px;
-}
+/* Voice record button */
+.rec-wrap{display:flex;justify-content:center;align-items:center;gap:12px;margin:8px 0}
+.rec-btn{width:64px;height:64px;border-radius:50%;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.3s;position:relative}
+.rec-btn svg{width:28px;height:28px;fill:#8892b0;transition:.3s}
+.rec-btn.recording{border-color:#e94560;background:rgba(233,69,96,.2);animation:pulse 1.2s infinite}
+.rec-btn.recording svg{fill:#e94560}
+.rec-label{font-size:12px;color:#8892b0}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(233,69,96,.4)}50%{box-shadow:0 0 0 16px rgba(233,69,96,0)}}
 
-/* Speech text */
-.speech-area{
-  background:rgba(255,255,255,0.04);border-radius:16px;
-  padding:16px;margin-bottom:8px;min-height:60px;
-  border:1px solid rgba(255,255,255,0.06);
-}
-.speech-label{font-size:11px;color:#8892b0;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.speech-text{font-size:20px;line-height:1.5;word-break:break-word}
-.speech-text.interim{color:#8892b0;font-style:italic}
+/* Result */
+.result-area{background:rgba(233,69,96,.08);border-radius:16px;padding:14px;margin:8px 0;border:1px solid rgba(233,69,96,.15);display:none}
+.result-label{font-size:11px;color:#e94560;letter-spacing:1px;margin-bottom:6px}
+.result-text{font-size:18px;line-height:1.5;word-break:break-word;min-height:24px}
 
-/* Translation */
-.trans-area{
-  background:rgba(233,69,96,0.08);border-radius:16px;
-  padding:16px;margin-bottom:8px;min-height:60px;
-  border:1px solid rgba(233,69,96,0.15);
-  position:relative;
-}
-.trans-label{font-size:11px;color:#e94560;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
-.trans-text{font-size:20px;line-height:1.5;word-break:break-word}
+.result-actions{display:flex;gap:6px;margin-top:10px}
+.ract{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#e0e0e0;font-size:13px;cursor:pointer;text-align:center;transition:.2s}
+.ract:active{background:rgba(255,255,255,.1)}
+.ract.primary{background:#e94560;border-color:#e94560;font-weight:600}
 
-/* Action bar */
-.actions{
-  display:flex;gap:8px;margin-bottom:16px;flex-shrink:0;
-}
-.act-btn{
-  flex:1;padding:12px;border-radius:12px;
-  border:1px solid rgba(255,255,255,0.1);
-  background:rgba(255,255,255,0.05);
-  color:#e0e0e0;font-size:14px;cursor:pointer;
-  text-align:center;transition:all 0.2s;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.act-btn:active{background:rgba(255,255,255,0.1);transform:scale(0.97)}
-.act-btn.primary{background:#e94560;border-color:#e94560;font-weight:600}
+/* Status bar */
+.status{text-align:center;font-size:11px;color:#8892b0;padding:4px 0;min-height:20px}
 
 /* History */
-.history{
-  flex-shrink:0;margin-bottom:20px;
-}
-.hist-header{
-  font-size:13px;color:#8892b0;margin-bottom:8px;
-  display:flex;justify-content:space-between;align-items:center;
-}
-.hist-clear{font-size:12px;color:#e94560;cursor:pointer}
-.hist-item{
-  background:rgba(255,255,255,0.03);border-radius:12px;
-  padding:12px;margin-bottom:6px;
-  border:1px solid rgba(255,255,255,0.04);
-}
-.hist-item .orig{font-size:14px;color:#ccc}
-.hist-item .tran{font-size:16px;color:#fff;margin-top:4px;font-weight:500}
+.hist{margin:8px 0 16px}
+.hist-h{font-size:12px;color:#8892b0;margin-bottom:6px;display:flex;justify-content:space-between}
+.hist-clr{color:#e94560;cursor:pointer;font-size:11px}
+.hist-item{background:rgba(255,255,255,.03);border-radius:10px;padding:10px;margin-bottom:5px;border:1px solid rgba(255,255,255,.04);cursor:pointer}
+.hist-item .orig{font-size:13px;color:#aaa}
+.hist-item .tran{font-size:15px;color:#fff;margin-top:3px;font-weight:500}
 
-/* Text input fallback */
-.text-input-wrap{
-  flex-shrink:0;display:flex;gap:8px;margin-bottom:12px;
-}
-.text-input{
-  flex:1;padding:14px;border-radius:12px;
-  border:1px solid rgba(255,255,255,0.1);
-  background:rgba(255,255,255,0.05);color:#fff;
-  font-size:16px;outline:none;
-}
-.text-input::placeholder{color:#555}
-
-/* Toast */
-.toast{
-  position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,0.85);color:#fff;
-  padding:10px 24px;border-radius:24px;font-size:14px;
-  z-index:999;pointer-events:none;
-  opacity:0;transition:opacity 0.3s;
-}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 22px;border-radius:22px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
 .toast.show{opacity:1}
 
-/* Unsupport banner */
-.unsupported{
-  background:rgba(255,193,7,0.1);border:1px solid rgba(255,193,7,0.3);
-  border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;
-  font-size:13px;color:#ffc107;display:none;
-}
+.debug{font-size:9px;color:#444;text-align:center;margin-top:4px;word-break:break-all}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>🇰🇷 中韩实时翻译</h1>
-  <div class="sub">按话筒说话，实时翻译</div>
+  <h1>中韩翻译</h1>
+  <div class="sub">键盘🎤说话 · 自动翻译 · 朗读</div>
 </div>
 
 <div class="modes">
-  <button class="mode-btn active" onclick="setMode('ko2zh')" id="modeKo2zh">
-    <span class="emoji">🇰🇷→🇨🇳</span>
-    听韩语 · 译中文
+  <button class="mode-btn active" onclick="setMode('ko2zh')" id="mKo2zh">
+    <span class="emoji">🇰🇷→🇨🇳</span>韩语→中文
   </button>
-  <button class="mode-btn" onclick="setMode('zh2ko')" id="modeZh2ko">
-    <span class="emoji">🇨🇳→🇰🇷</span>
-    说中文 · 译韩语
+  <button class="mode-btn" onclick="setMode('zh2ko')" id="mZh2ko">
+    <span class="emoji">🇨🇳→🇰🇷</span>中文→韩语
   </button>
 </div>
 
 <div class="main">
-  <div class="unsupported" id="unsupported">
-    <div style="font-size:14px">💡 用<strong>键盘麦克风</strong>说话更快</div>
-    <div style="font-size:11px;opacity:0.7;margin-top:2px">点下方输入框 → 按键盘上的 🎤 → 说话</div>
+  <div class="status" id="status">输入文字或按🎤录音</div>
+
+  <!-- Text input -->
+  <div class="input-area">
+    <input type="text" id="textInput" placeholder="输入文字或按键盘🎤语音...">
+    <button onclick="translateText()">翻译</button>
   </div>
 
-  <div class="mic-wrap" style="padding:8px 0">
-    <button class="mic-btn" id="micBtn" onclick="toggleMic()" style="width:50px;height:50px">
-      <svg viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+  <!-- Voice record button -->
+  <div class="rec-wrap">
+    <button class="rec-btn" id="recBtn" onclick="toggleRec()">
+      <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
     </button>
-    <span class="mic-label" id="micLabel" style="margin:0;font-size:11px">试试语音</span>
+    <div class="rec-label" id="recLabel">按住录音</div>
   </div>
 
-  <div class="text-input-wrap" style="margin-top:8px">
-    <input type="text" class="text-input" id="textInput" placeholder="输入文字或按键盘 🎤 语音输入..." style="font-size:18px;padding:16px">
-    <button class="act-btn primary" style="flex:0 0 auto;padding:14px 20px;font-size:16px" onclick="translateText()">翻译</button>
-  </div>
-
-  <div class="speech-area" style="display:none">
-    <div class="speech-label" id="speechLabel">🗣 正在听：韩语</div>
-    <div class="speech-text" id="speechText">语音识别中...</div>
-  </div>
-
-  <div class="trans-area" id="transArea" style="display:none">
-    <div class="trans-label">📝 翻译结果</div>
-    <div class="trans-text" id="transText"></div>
-  </div>
-
-  <div class="actions" id="actionsBar" style="display:none">
-    <button class="act-btn" onclick="copyTrans()">📋 复制</button>
-    <button class="act-btn primary" id="speakBtn" onclick="speakTrans()">🔊 朗读</button>
-    <button class="act-btn" onclick="shareTrans()">📤 分享</button>
-  </div>
-
-  <div class="history" id="historyWrap" style="display:none">
-    <div class="hist-header">
-      <span>📜 翻译记录</span>
-      <span class="hist-clear" onclick="clearHistory()">清空</span>
+  <!-- Result -->
+  <div class="result-area" id="resultArea">
+    <div class="result-label" id="resultLabel">翻译结果</div>
+    <div class="result-text" id="resultText"></div>
+    <div class="result-actions">
+      <button class="ract" onclick="copyResult()">复制</button>
+      <button class="ract primary" id="speakBtn" onclick="speakResult()">🔊 朗读</button>
     </div>
-    <div id="historyList"></div>
   </div>
+
+  <!-- History -->
+  <div class="hist" id="histWrap" style="display:none">
+    <div class="hist-h"><span>记录</span><span class="hist-clr" onclick="clearHist()">清空</span></div>
+    <div id="histList"></div>
+  </div>
+
+  <div class="debug" id="debug"></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 // ===== STATE =====
-let mode = 'ko2zh'; // 'ko2zh' or 'zh2ko'
-let isRecording = false;
-let recognition = null;
-let synth = window.speechSynthesis;
-let history = [];
-let currentSpeech = '';
-let currentTranslation = '';
+let mode='ko2zh', mediaRecorder=null, audioChunks=[], isRec=false;
+let currentResult='';
+let hist=[]; try{hist=JSON.parse(localStorage.getItem('kt2_hist')||'[]')}catch(e){hist=[]}
 
-// Load history
-try{history=JSON.parse(localStorage.getItem('kt_trans_history')||'[]')}catch(e){history=[]}
-
-// ===== COPY PAGE URL =====
-function copyPageUrl() {
-  navigator.clipboard.writeText(window.location.href).then(() => toast('链接已复制！用 Chrome/Safari 打开即可')).catch(() => toast('复制失败，请手动复制地址栏链接'));
-}
-
-// ===== INIT =====
-function init(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const isWebView = /wv|WebView|Feishu|Lark|DingTalk|WeChat|MicroMessenger/i.test(navigator.userAgent);
-  
-  // Show text input hint
-  document.getElementById('unsupported').style.display = 'block';
-  
-  if(!SpeechRecognition || isWebView){
-    // Mic won't work - hide it
-    document.querySelector('.mic-wrap').style.display = 'none';
-  }
-  
-  // Pre-load voices
-  if(synth) {
-    synth.getVoices();
-    if(synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged = () => synth.getVoices();
-    }
-  }
-  
-  // Focus the text input
-  document.getElementById('textInput').focus();
-}
+function log(s){document.getElementById('debug').textContent=s;console.log(s)}
+function toast(s){const e=document.getElementById('toast');e.textContent=s;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2000)}
 
 // ===== MODE =====
 function setMode(m){
   mode=m;
-  document.getElementById('modeKo2zh').classList.toggle('active',m==='ko2zh');
-  document.getElementById('modeZh2ko').classList.toggle('active',m==='zh2ko');
-  if(m==='ko2zh'){
-    document.getElementById('speechLabel').textContent='🗣 正在听：韩语';
-    document.getElementById('speakBtn').style.display='';
-  }else{
-    document.getElementById('speechLabel').textContent='🗣 正在听：中文';
-  }
-  // Update speech label even when not recording
-  updateSpeechLabel();
-  // Clear results
-  document.getElementById('speechText').textContent='点按话筒开始录音...';
-  document.getElementById('transText').textContent='等待翻译...';
-  currentSpeech='';currentTranslation='';
+  document.getElementById('mKo2zh').classList.toggle('active',m==='ko2zh');
+  document.getElementById('mZh2ko').classList.toggle('active',m==='zh2ko');
+  document.getElementById('status').textContent=m==='ko2zh'?'听韩语→显示中文':'说中文→翻译韩语+朗读';
+  log('Mode: '+m);
 }
 
-function updateSpeechLabel(){
-  const labels={
-    'ko2zh':{idle:'🗣 正在听：韩语',listening:'🎙️ 正在听韩语...'},
-    'zh2ko':{idle:'🗣 正在听：中文',listening:'🎙️ 正在听中文...'}
-  };
-  const lbl=labels[mode];
-  document.getElementById('speechLabel').textContent=isRecording?lbl.listening:lbl.idle;
+// ===== TEXT TRANSLATE =====
+async function translateText(){
+  const text=document.getElementById('textInput').value.trim();
+  if(!text){toast('请输入文字');return;}
+  log('Translating: '+text);
+  await doTranslate(text);
+  document.getElementById('textInput').value='';
 }
 
-// ===== MIC =====
-function toggleMic(){
-  if(isRecording){stopRecording();return;}
-  startRecording();
-}
-
-function startRecording(){
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRecognition){toast('浏览器不支持语音识别，请用文本输入');return;}
-
-  recognition = new SpeechRecognition();
-  recognition.interimResults = true;
-  recognition.continuous = false;  // IMPORTANT: one-shot, don't auto-restart
-  recognition.maxAlternatives = 1;
-
-  // Set language
-  recognition.lang = mode==='ko2zh' ? 'ko-KR' : 'zh-CN';
-
-  recognition.onstart = () => {
-    document.getElementById('speechText').textContent = '🎙️ 正在听，请说话...';
-  };
-
-  recognition.onresult = (e) => {
-    let interim='', final='';
-    for(let i=e.resultIndex; i<e.results.length; i++){
-      if(!e.results[i] || !e.results[i][0]) continue;
-      const t = e.results[i][0].transcript;
-      if(e.results[i].isFinal) { final += t; } else { interim += t; }
-    }
-    const display = final + interim;
-    currentSpeech = display;
-    const speechEl = document.getElementById('speechText');
-    
-    if (display) {
-      speechEl.textContent = display;
-      speechEl.className = 'speech-text' + (interim && !final ? ' interim' : '');
-    }
-    
-    // Translate on final results
-    if(final.trim()){
-      doTranslate(final.trim());
-      stopRecording();  // auto-stop after getting result
-    }
-  };
-
-  recognition.onerror = (e) => {
-    console.error('Speech error:', e.error);
-    const msgs = {
-      'no-speech': '没听到声音，请再试一次',
-      'audio-capture': '无法访问麦克风，请检查浏览器权限',
-      'not-allowed': '麦克风权限被拒绝，请在系统设置中开启',
-      'network': '网络连接失败，请检查网络',
-      'aborted': ''
-    };
-    const msg = msgs[e.error] || ('识别出错: ' + e.error);
-    if (msg) {
-      document.getElementById('speechText').textContent = msg;
-      toast(msg);
-    }
-    stopRecording();
-  };
-
-  recognition.onend = () => {
-    // Don't auto-restart - let user click again
-    if (isRecording) stopRecording();
-  };
-
-  try{
-    recognition.start();
-    isRecording=true;
-    document.getElementById('micBtn').classList.add('recording');
-    document.getElementById('micLabel').textContent='正在听... 点击停止';
-    document.getElementById('speechText').textContent='🎙️ 正在听，请说话...';
-    updateSpeechLabel();
-  }catch(e){
-    console.error('Start recognition error:', e);
-    toast('无法启动语音: ' + e.message);
-    stopRecording();
-  }
-}
-
-function stopRecording(){
-  isRecording=false;
-  if(recognition){
-    try{recognition.abort()}catch(e){}
-    recognition=null;
-  }
-  document.getElementById('micBtn').classList.remove('recording');
-  document.getElementById('micLabel').textContent='点按开始说话';
-  updateSpeechLabel();
-}
-
-// ===== TRANSLATE =====
 async function doTranslate(text){
-  const from = mode==='ko2zh' ? 'ko' : 'zh-CN';
-  const to = mode==='ko2zh' ? 'zh-CN' : 'ko';
+  const from=mode==='ko2zh'?'ko':'zh-CN';
+  const to=mode==='ko2zh'?'zh-CN':'ko';
 
   try{
     const url=`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
     const resp=await fetch(url);
     const data=await resp.json();
     const translated=data[0].map(s=>s[0]).join('');
-    currentTranslation=translated;
-    
-    // Show results
-    document.getElementById('transArea').style.display='';
-    document.getElementById('actionsBar').style.display='';
-    document.getElementById('transText').textContent=translated;
 
-    // Add to history
-    addHistory(text,translated);
+    currentResult=translated;
+    document.getElementById('resultArea').style.display='block';
+    document.getElementById('resultLabel').textContent=mode==='ko2zh'?'中文翻译':'한국어 번역';
+    document.getElementById('resultText').textContent=translated;
+    addHist(text,translated);
 
-    // Auto-speak if zh2ko mode (brief delay for voices to load)
-    if(mode==='zh2ko' && translated.trim()){
-      setTimeout(() => speakKorean(translated), 300);
+    log('Translated: '+translated);
+
+    // Auto-speak Korean in zh2ko mode
+    if(mode==='zh2ko'&&translated.trim()){
+      setTimeout(()=>speak(translated,'ko'),200);
     }
   }catch(e){
-    document.getElementById('transArea').style.display='';
-    document.getElementById('transText').textContent='翻译失败，请重试';
-    console.error('Translate error:',e);
+    log('Translate error: '+e.message);
+    toast('翻译失败，请重试');
   }
 }
 
-// ===== TEXT INPUT TRANSLATE =====
-async function translateText(){
-  const input=document.getElementById('textInput');
-  const text=input.value.trim();
-  if(!text){toast('请输入文字');return;}
-  currentSpeech=text;
-  
-  // Show output areas
-  document.getElementById('transArea').style.display='';
-  document.getElementById('actionsBar').style.display='';
-  document.getElementById('transText').textContent='翻译中...';
-  
-  await doTranslate(text);
-  input.value='';
-  input.focus();
+// ===== VOICE RECORD =====
+async function toggleRec(){
+  if(isRec){stopRec();return;}
+  await startRec();
 }
 
-// ===== TTS: multi-fallback =====
-let ttsPlaying = false;
+async function startRec(){
+  try{
+    log('Requesting mic...');
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream,{mimeType:'audio/webm;codecs=opus'});
+    audioChunks=[];
 
-// Method 1: Browser SpeechSynthesis (try without explicit voice first)
-function trySpeakBrowser(text, lang) {
-  return new Promise((resolve, reject) => {
-    if (!synth) return reject('no synth');
-    synth.cancel();
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data)};
+
+    mediaRecorder.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      const blob=new Blob(audioChunks,{type:'audio/webm'});
+      log('Recording done: '+blob.size+' bytes');
+      await sendAudioForSTT(blob);
+    };
+
+    mediaRecorder.start();
+    isRec=true;
+    document.getElementById('recBtn').classList.add('recording');
+    document.getElementById('recLabel').textContent='录音中...松手停止';
+    document.getElementById('status').textContent='🎙️ 正在录音...';
+    log('Recording...');
+  }catch(e){
+    log('Mic error: '+e.message);
+    toast('无法访问麦克风: '+e.message);
+  }
+}
+
+function stopRec(){
+  if(mediaRecorder&&mediaRecorder.state==='recording'){
+    mediaRecorder.stop();
+  }
+  isRec=false;
+  document.getElementById('recBtn').classList.remove('recording');
+  document.getElementById('recLabel').textContent='按住录音';
+  document.getElementById('status').textContent='处理中...';
+  log('Stopped recording');
+}
+
+// ===== SEND AUDIO FOR STT =====
+async function sendAudioForSTT(blob){
+  log('Sending audio for STT...');
+  document.getElementById('status').textContent='识别中...';
+
+  try{
+    // Convert to base64
+    const reader=new FileReader();
+    const base64=await new Promise((resolve,reject)=>{
+      reader.onload=()=>resolve(reader.result.split(',')[1]);
+      reader.onerror=reject;
+      reader.readAsDataURL(blob);
+    });
+
+    // Try Google Speech-to-Text v1 REST (free tier, no API key for short audio via Chrome variant)
+    // First try: Google's speech recognition endpoint
+    const lang=mode==='ko2zh'?'ko-KR':'zh-CN';
     
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = lang === 'ko' ? 'ko-KR' : 'zh-CN';
-    utter.rate = 0.85;
-    
-    // Try to find a matching voice, but don't require it
-    const voices = synth.getVoices();
-    if (voices.length > 0) {
-      let voice = null;
-      if (lang === 'ko') {
-        voice = voices.find(v => v.lang === 'ko-KR') || voices.find(v => v.lang.startsWith('ko'));
-      } else {
-        voice = voices.find(v => v.lang === 'zh-CN') || voices.find(v => v.lang.startsWith('zh')) || voices.find(v => v.lang === 'zh-TW');
+    // Use Google's STT endpoint (works without API key for short audio)
+    const resp=await fetch(`https://www.google.com/speech-api/v2/recognize?output=json&lang=${lang}&key=AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw`,{
+      method:'POST',
+      headers:{'Content-Type':'audio/webm;codecs=opus'},
+      body:blob
+    });
+
+    const text=await resp.text();
+    log('STT raw: '+text.substring(0,100));
+
+    // Parse response
+    let transcript='';
+    try{
+      // Response is JSON lines
+      const lines=text.split('\n').filter(l=>l.trim());
+      for(const line of lines){
+        const parsed=JSON.parse(line);
+        if(parsed.result&&parsed.result[0]&&parsed.result[0].alternative){
+          transcript=parsed.result[0].alternative[0].transcript||'';
+          break;
+        }
       }
-      if (voice) utter.voice = voice;
+    }catch(e){
+      log('Parse error: '+e.message);
     }
-    
-    let resolved = false;
-    utter.onstart = () => { if(!resolved){ resolved=true; resolve(); } };
-    utter.onerror = (e) => { if(!resolved){ resolved=true; reject(e.error || 'utter error'); } };
-    utter.onend = () => { if(!resolved){ resolved=true; resolve(); } };
-    
+
+    if(transcript){
+      log('Recognized: '+transcript);
+      document.getElementById('status').textContent='已识别: '+transcript;
+      await doTranslate(transcript);
+    }else{
+      // Fallback: use Web Speech API if available
+      log('Google STT failed, trying Web Speech...');
+      document.getElementById('status').textContent='识别失败，请用键盘🎤或手动输入';
+      toast('语音识别失败，请手动输入');
+    }
+  }catch(e){
+    log('STT error: '+e.message);
+    document.getElementById('status').textContent='识别出错，请手动输入';
+    toast('识别出错: '+e.message);
+  }
+}
+
+// ===== SPEAK =====
+function speak(text,lang){
+  log('Speaking: '+text.substring(0,30));
+  document.getElementById('speakBtn').textContent='🔊 播放中...';
+
+  // Method 1: Browser SpeechSynthesis
+  const synth=window.speechSynthesis;
+  if(synth){
+    synth.cancel();
+    const utter=new SpeechSynthesisUtterance(text);
+    utter.lang=lang==='ko'?'ko-KR':'zh-CN';
+    utter.rate=0.85;
+    utter.onend=()=>{document.getElementById('speakBtn').textContent='🔊 朗读'};
+    utter.onerror=()=>{
+      log('Browser TTS failed, trying Google TTS...');
+      speakViaGoogle(text,lang);
+    };
     synth.speak(utter);
-    
-    // Timeout: if no event in 3 seconds, consider it failed
-    setTimeout(() => { if(!resolved){ resolved=true; synth.cancel(); reject('timeout'); } }, 3000);
+    // Timeout fallback
+    setTimeout(()=>{
+      if(document.getElementById('speakBtn').textContent==='🔊 播放中...'){
+        log('Browser TTS timeout, trying Google TTS...');
+        synth.cancel();
+        speakViaGoogle(text,lang);
+      }
+    },4000);
+  }else{
+    speakViaGoogle(text,lang);
+  }
+}
+
+function speakViaGoogle(text,lang){
+  log('Google TTS for: '+text.substring(0,30));
+  const chunks=[];
+  for(let i=0;i<text.length;i+=180)chunks.push(text.slice(i,i+180));
+
+  let idx=0;
+  function playNext(){
+    if(idx>=chunks.length){
+      document.getElementById('speakBtn').textContent='🔊 朗读';
+      return;
+    }
+    const url=`https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodeURIComponent(chunks[idx++])}`;
+    const a=new Audio(url);
+    a.onended=playNext;
+    a.onerror=()=>{
+      log('Google TTS chunk failed, trying alt');
+      speakViaAlt(idx<chunks.length?chunks.slice(idx-1).join(' '):text,lang);
+    };
+    a.play().catch(()=>{
+      log('Google TTS play failed');
+      speakViaAlt(text,lang);
+    });
+  }
+  playNext();
+}
+
+function speakViaAlt(text,lang){
+  log('Alt TTS');
+  const url=`https://api.streamelements.com/kappa/v2/speech?voice=${lang==='ko'?'Korean Female':'Chinese Female'}&text=${encodeURIComponent(text)}`;
+  const a=new Audio(url);
+  a.onended=()=>{document.getElementById('speakBtn').textContent='🔊 朗读'};
+  a.onerror=()=>{
+    document.getElementById('speakBtn').textContent='🔊 朗读';
+    toast('朗读失败，请检查手机TTS设置');
+  };
+  a.play().catch(()=>{
+    document.getElementById('speakBtn').textContent='🔊 朗读';
+    toast('朗读失败');
   });
 }
 
-// Method 2: Google Translate TTS via Audio element (works in Korea)
-function trySpeakGoogle(text, lang) {
-  return new Promise((resolve, reject) => {
-    // Split long text (Google TTS has length limits)
-    const maxLen = 150;
-    const chunks = [];
-    for (let i = 0; i < text.length; i += maxLen) {
-      chunks.push(text.slice(i, i + maxLen));
-    }
-    
-    let idx = 0;
-    function playNext() {
-      if (idx >= chunks.length) return resolve();
-      const chunk = chunks[idx++];
-      const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodeURIComponent(chunk)}`;
-      const audio = new Audio();
-      audio.src = url;
-      audio.onended = playNext;
-      audio.onerror = () => reject('google tts failed');
-      audio.play().catch(() => reject('google tts play failed'));
-    }
-    playNext();
-  });
-}
-
-// Method 3: Alternative free TTS API (VoiceRSS-like)
-function trySpeakAlt(text, lang) {
-  return new Promise((resolve, reject) => {
-    const lc = lang === 'ko' ? 'ko-KR' : 'zh-CN';
-    const url = `https://api.streamelements.com/kappa/v2/speech?voice=${lang === 'ko' ? 'Korean Female' : 'Chinese Female'}&text=${encodeURIComponent(text)}`;
-    const audio = new Audio();
-    audio.src = url;
-    audio.onended = () => resolve();
-    audio.onerror = () => reject('alt tts failed');
-    audio.play().catch(() => reject('alt tts play failed'));
-  });
-}
-
-async function doSpeak(text, lang) {
-  if (ttsPlaying) return;
-  ttsPlaying = true;
-  document.getElementById('speakBtn').textContent = '🔊 播放中...';
-  
-  const methods = [
-    () => trySpeakBrowser(text, lang),
-    () => trySpeakGoogle(text, lang),
-    () => trySpeakAlt(text, lang),
-  ];
-  
-  for (const fn of methods) {
-    try {
-      await fn();
-      ttsPlaying = false;
-      document.getElementById('speakBtn').textContent = '🔊 朗读译文';
-      return; // success!
-    } catch(e) {
-      console.log('TTS method failed, trying next:', e);
-    }
-  }
-  
-  // All methods failed
-  ttsPlaying = false;
-  document.getElementById('speakBtn').textContent = '🔊 朗读译文';
-  toast('朗读失败。请尝试：设置 > 文字转语音 > 安装语音包');
-}
-
-function speakKorean(text) {
-  doSpeak(text, 'ko');
-}
-
-function speakTrans() {
-  if (!currentTranslation || currentTranslation === '等待翻译...') {
-    toast('还没有翻译结果');
-    return;
-  }
-  if (mode === 'zh2ko') {
-    doSpeak(currentTranslation, 'ko');
-  } else {
-    doSpeak(currentTranslation, 'zh');
-  }
+function speakResult(){
+  if(!currentResult){toast('还没有翻译结果');return;}
+  const lang=mode==='zh2ko'?'ko':'zh-CN';
+  speak(currentResult,lang==='zh-CN'?'zh':'ko');
 }
 
 // ===== HISTORY =====
-function addHistory(orig,trans){
-  history.unshift({orig,trans,mode,time:Date.now()});
-  if(history.length>20) history.length=20;
-  try{localStorage.setItem('kt_trans_history',JSON.stringify(history))}catch(e){}
-  renderHistory();
+function addHist(orig,tran){
+  hist.unshift({orig,tran,mode,time:Date.now()});
+  if(hist.length>20)hist.length=20;
+  try{localStorage.setItem('kt2_hist',JSON.stringify(hist))}catch(e){}
+  renderHist();
 }
-
-function renderHistory(){
-  const wrap=document.getElementById('historyWrap');
-  const list=document.getElementById('historyList');
-  if(history.length===0){wrap.style.display='none';return;}
-  wrap.style.display='block';
-  list.innerHTML=history.slice(0,10).map(h=>`
-    <div class="hist-item" onclick="replayHistory('${escapeHtml(h.orig)}','${escapeHtml(h.trans)}','${h.mode}')">
-      <div class="orig">${h.orig}</div>
-      <div class="tran">${h.trans}</div>
-    </div>
-  `).join('');
+function renderHist(){
+  const w=document.getElementById('histWrap'),l=document.getElementById('histList');
+  if(!hist.length){w.style.display='none';return}
+  w.style.display='block';
+  l.innerHTML=hist.slice(0,10).map(h=>`<div class="hist-item" onclick="replay('${h.orig.replace(/'/g,"\'")}','${h.tran.replace(/'/g,"\'")}','${h.mode}')"><div class="orig">${h.orig}</div><div class="tran">${h.tran}</div></div>`).join('');
 }
+function replay(orig,tran,m){currentResult=tran;if(m!==mode)setMode(m);document.getElementById('resultArea').style.display='block';document.getElementById('resultText').textContent=tran}
+function clearHist(){hist=[];localStorage.removeItem('kt2_hist');renderHist()}
+function copyResult(){if(!currentResult)return;navigator.clipboard.writeText(currentResult).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
-function replayHistory(orig,trans,m){
-  currentSpeech=unescapeHtml(orig);
-  currentTranslation=unescapeHtml(trans);
-  // Switch mode if different
-  if(m!==mode) setMode(m);
-  document.getElementById('speechText').textContent=currentSpeech;
-  document.getElementById('transText').textContent=currentTranslation;
-  document.getElementById('speechLabel').textContent='📜 历史记录';
-}
-
-function clearHistory(){
-  history=[];
-  localStorage.removeItem('kt_trans_history');
-  renderHistory();
-}
-
-function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function unescapeHtml(s){return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"')}
-
-// ===== ACTIONS =====
-function copyTrans(){
-  if(!currentTranslation||currentTranslation==='等待翻译...'){
-    toast('还没有翻译结果');
-    return;
-  }
-  navigator.clipboard.writeText(currentTranslation).then(()=>toast('✅ 已复制到剪贴板')).catch(()=>toast('复制失败'));
-}
-
-function shareTrans(){
-  if(!currentTranslation||currentTranslation==='等待翻译...'){
-    toast('还没有翻译结果');
-    return;
-  }
-  if(navigator.share){
-    navigator.share({text:currentTranslation}).catch(()=>{});
+// ===== INIT =====
+function init(){
+  log('Init');
+  // Test mic availability
+  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+      s.getTracks().forEach(t=>t.stop());
+      log('Mic OK, ready');
+    }).catch(e=>{
+      log('Mic denied: '+e.message);
+      document.getElementById('recLabel').textContent='麦克风不可用';
+      document.getElementById('recBtn').style.opacity='0.4';
+    });
   }else{
-    copyTrans();
+    log('No mediaDevices');
+    document.querySelector('.rec-wrap').style.display='none';
   }
+
+  // Load voices
+  const s=window.speechSynthesis;
+  if(s){s.getVoices();if(s.onvoiceschanged!==undefined)s.onvoiceschanged=()=>s.getVoices()}
+
+  document.getElementById('textInput').focus();
+  renderHist();
 }
-
-// ===== TOAST =====
-let toastTimer;
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>el.classList.remove('show'),2000);
-}
-
-// ===== KEYBOARD =====
-document.getElementById('textInput').addEventListener('keydown',(e)=>{
-  if(e.key==='Enter') translateText();
-});
-
-// ===== START =====
 init();
-renderHistory();
 </script>
 </body>
 </html>
