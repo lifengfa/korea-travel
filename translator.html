@@ -77,13 +77,13 @@ body{
   💡 <strong>点输入框 → 按键盘 🎤 → 说话</strong> → 自动输入文字 → 点翻译
 </div>
 
-<div class="input-row">
-  <input type="text" id="inp" placeholder="输入文字，或按键盘🎤说话...">
-  <button onclick="go()">翻译</button>
+<div style="margin-bottom:12px">
+  <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 按住说话（语音输入）</button>
 </div>
 
-<div class="input-row" style="margin-bottom:8px">
-  <button id="micBtn" onclick="toggleMic()" style="flex:1;padding:14px;border-radius:14px;border:2px solid rgba(240,160,88,.3);background:rgba(240,160,88,.08);color:#f0a058;font-size:15px;font-weight:600;cursor:pointer;transition:.2s">🎤 按住说话（韩语）</button>
+<div class="input-row">
+  <input type="text" id="inp" placeholder="或手动输入文字...">
+  <button onclick="go()">翻译</button>
 </div>
 
 <div class="result" id="result">
