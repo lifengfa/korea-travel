@@ -146,7 +146,7 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: Browser SpeechSynthesis → Google TTS fallback
+// TTS: Google TTS → Browser fallback
 let ttsTimer=null;
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
@@ -154,7 +154,17 @@ async function speakR(){
   const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');clearTimeout(ttsTimer)};
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
   
-  // Method 1: Browser SpeechSynthesis
+  // Method 1: Google TTS (you're in Korea, should work)
+  try{
+    const tl=mode==='zh2ko'?'ko':'zh-CN';
+    const a=new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`);
+    a.onended=()=>done();a.onerror=()=>{done();toast('Google不通')};
+    a.play().catch(()=>{done();toast('播放失败')});
+    ttsTimer=setTimeout(()=>done(),8000);
+    return;
+  }catch(e){}
+  
+  // Method 2: Browser SpeechSynthesis
   const s=window.speechSynthesis;
   if(s){
     s.cancel();await new Promise(r=>setTimeout(r,50));
@@ -167,15 +177,7 @@ async function speakR(){
     ttsTimer=setTimeout(()=>done(),Math.max(cur.length*(mode==='zh2ko'?250:330),3000));
     return;
   }
-  
-  // Method 2: Google TTS
-  try{
-    const tl=mode==='zh2ko'?'ko':'zh-CN';
-    const a=new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&tl=${tl}&client=gtx&q=${encodeURIComponent(cur)}`);
-    a.onended=()=>done();a.onerror=()=>{done();toast('Google不通')};
-    a.play().catch(()=>{done();toast('播放失败')});
-    ttsTimer=setTimeout(()=>done(),8000);
-  }catch(e){done();toast('朗读失败')}
+  done();toast('朗读失败')
 }
 
 // History
@@ -206,6 +208,7 @@ function tryWebSpeechFirst(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   const r=new SR();
   r.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
+  r.continuous=false;
   r.interimResults=false;
   r.maxAlternatives=1;
 
