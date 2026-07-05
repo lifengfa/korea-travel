@@ -256,19 +256,27 @@ function init(){
     const banner = document.getElementById('unsupported');
     banner.style.display = 'block';
     if (isWebView) {
-      banner.querySelector('div:first-child').textContent = '⚠️ 检测到你在 App 内置浏览器中';
+      banner.querySelector('div:first-child').textContent = '⚠️ 请在系统浏览器中打开';
+    } else if (!SpeechRecognition) {
+      banner.querySelector('div:first-child').textContent = '⚠️ 浏览器不支持语音';
     }
-    // Still allow text input translation
-    document.getElementById('micBtn').style.opacity = '0.4';
-    document.getElementById('micBtn').style.pointerEvents = 'auto';
-    document.getElementById('micBtn').onclick = function() {
-      toast('请用系统浏览器打开此页面才能使用语音');
-      copyPageUrl();
-    };
+    // Hide mic, show text input as primary
+    document.querySelector('.mic-wrap').style.display = 'none';
+    document.getElementById('micLabel').textContent = '语音不可用，请使用文本输入';
+    document.getElementById('speechLabel').textContent = '📝 请输入文字';
+    document.getElementById('speechText').textContent = '在此输入要翻译的文字，然后点翻译按钮';
+    document.getElementById('textInput').placeholder = '输入韩语或中文...';
+    document.getElementById('textInput').focus();
     return;
   }
-  // Load voices for fallback
-  if(synth) synth.getVoices();
+  // Pre-load voices
+  if(synth) {
+    synth.getVoices();
+    // Some browsers load voices async
+    if(synth.onvoiceschanged !== undefined) {
+      synth.onvoiceschanged = () => synth.getVoices();
+    }
+  }
 }
 
 // ===== MODE =====
@@ -311,50 +319,59 @@ function startRecording(){
 
   recognition = new SpeechRecognition();
   recognition.interimResults = true;
-  recognition.continuous = true;
+  recognition.continuous = false;  // IMPORTANT: one-shot, don't auto-restart
   recognition.maxAlternatives = 1;
 
   // Set language
   recognition.lang = mode==='ko2zh' ? 'ko-KR' : 'zh-CN';
 
-  recognition.onresult = (e) => {
-    let interim='',final='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const t=e.results[i][0].transcript;
-      if(e.results[i].isFinal){final+=t;}else{interim+=t;}
-    }
-    const display=final+interim;
-    currentSpeech=display;
-    const speechEl=document.getElementById('speechText');
-    speechEl.textContent=display||(isRecording?'正在听...':'');
-    speechEl.className='speech-text'+(interim&&!final?' interim':'');
+  recognition.onstart = () => {
+    document.getElementById('speechText').textContent = '🎙️ 正在听，请说话...';
+  };
 
+  recognition.onresult = (e) => {
+    let interim='', final='';
+    for(let i=e.resultIndex; i<e.results.length; i++){
+      if(!e.results[i] || !e.results[i][0]) continue;
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) { final += t; } else { interim += t; }
+    }
+    const display = final + interim;
+    currentSpeech = display;
+    const speechEl = document.getElementById('speechText');
+    
+    if (display) {
+      speechEl.textContent = display;
+      speechEl.className = 'speech-text' + (interim && !final ? ' interim' : '');
+    }
+    
     // Translate on final results
     if(final.trim()){
       doTranslate(final.trim());
+      stopRecording();  // auto-stop after getting result
     }
   };
 
   recognition.onerror = (e) => {
-    console.error('Speech error:',e.error);
-    if(e.error==='no-speech'){
-      document.getElementById('speechText').textContent='没听到声音，请再试一次...';
-    }else if(e.error==='aborted'){return;
-    }else if(e.error==='audio-capture'){
-      toast('无法访问麦克风，请检查权限');
-    }else if(e.error==='not-allowed'){
-      toast('麦克风权限被拒绝，请在设置中开启');
-    }else{
-      toast('语音识别出错: '+e.error);
+    console.error('Speech error:', e.error);
+    const msgs = {
+      'no-speech': '没听到声音，请再试一次',
+      'audio-capture': '无法访问麦克风，请检查浏览器权限',
+      'not-allowed': '麦克风权限被拒绝，请在系统设置中开启',
+      'network': '网络连接失败，请检查网络',
+      'aborted': ''
+    };
+    const msg = msgs[e.error] || ('识别出错: ' + e.error);
+    if (msg) {
+      document.getElementById('speechText').textContent = msg;
+      toast(msg);
     }
     stopRecording();
   };
 
   recognition.onend = () => {
-    if(isRecording){
-      // Auto-restart for continuous listening
-      try{recognition.start()}catch(e){stopRecording()}
-    }
+    // Don't auto-restart - let user click again
+    if (isRecording) stopRecording();
   };
 
   try{
@@ -362,10 +379,11 @@ function startRecording(){
     isRecording=true;
     document.getElementById('micBtn').classList.add('recording');
     document.getElementById('micLabel').textContent='正在听... 点击停止';
-    document.getElementById('speechText').textContent='正在听...';
+    document.getElementById('speechText').textContent='🎙️ 正在听，请说话...';
     updateSpeechLabel();
   }catch(e){
-    toast('启动语音识别失败');
+    console.error('Start recognition error:', e);
+    toast('无法启动语音: ' + e.message);
     stopRecording();
   }
 }
@@ -419,38 +437,55 @@ async function translateText(){
   input.value='';
 }
 
-// ===== TTS (Google TTS MP3 primary, SpeechSynthesis fallback) =====
-let ttsAudio = null;
-
-// Google TTS: returns MP3, works everywhere (even in WebViews)
-function speakViaGoogleTTS(text, lang) {
-  // Stop any current playback
-  if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+// ===== TTS (Browser native SpeechSynthesis) =====
+function doSpeak(text, lang) {
+  if (!synth) {
+    toast('你的浏览器不支持朗读，请用 Chrome/Safari 打开');
+    return;
+  }
+  synth.cancel();
   
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=gtx&q=${encodeURIComponent(text)}`;
-  ttsAudio = new Audio(url);
-  ttsAudio.play().catch(e => {
-    console.log('Google TTS failed, trying browser TTS:', e);
-    // Fallback to browser SpeechSynthesis
-    speakViaBrowserTTS(text, lang);
-  });
+  // Load voices (may need async on some browsers)
+  let voices = synth.getVoices();
+  if (voices.length === 0) {
+    // Voices not loaded yet, try again after they load
+    synth.onvoiceschanged = () => {
+      synth.onvoiceschanged = null;
+      doSpeakNow(text, lang);
+    };
+    return;
+  }
+  doSpeakNow(text, lang);
 }
 
-// Browser SpeechSynthesis fallback
-function speakViaBrowserTTS(text, lang) {
-  if (!synth) { toast('语音朗读不支持，请检查浏览器'); return; }
-  synth.cancel();
+function doSpeakNow(text, lang) {
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = lang === 'ko' ? 'ko-KR' : 'zh-CN';
-  utter.rate = 0.9;
+  utter.rate = 0.85;
+  utter.pitch = 1;
+  
   const voices = synth.getVoices();
-  const v = voices.find(x => x.lang.startsWith(lang === 'ko' ? 'ko' : 'zh'));
-  if (v) utter.voice = v;
+  let voice = null;
+  if (lang === 'ko') {
+    voice = voices.find(v => v.lang === 'ko-KR') || voices.find(v => v.lang.startsWith('ko'));
+  } else {
+    voice = voices.find(v => v.lang === 'zh-CN') || voices.find(v => v.lang.startsWith('zh'));
+  }
+  if (voice) utter.voice = voice;
+  
+  utter.onstart = () => { document.getElementById('speakBtn').textContent = '🔊 播放中...'; };
+  utter.onend = () => { document.getElementById('speakBtn').textContent = '🔊 朗读译文'; };
+  utter.onerror = (e) => {
+    document.getElementById('speakBtn').textContent = '🔊 朗读译文';
+    console.error('TTS error:', e);
+    toast('朗读失败，请重试');
+  };
+  
   synth.speak(utter);
 }
 
 function speakKorean(text) {
-  speakViaGoogleTTS(text, 'ko');
+  doSpeak(text, 'ko');
 }
 
 function speakTrans() {
@@ -459,9 +494,9 @@ function speakTrans() {
     return;
   }
   if (mode === 'zh2ko') {
-    speakKorean(currentTranslation);
+    doSpeak(currentTranslation, 'ko');
   } else {
-    speakViaGoogleTTS(currentTranslation, 'zh-CN');
+    doSpeak(currentTranslation, 'zh');
   }
 }
 
