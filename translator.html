@@ -80,8 +80,8 @@ body{
   💡 <strong>点输入框 → 按键盘 🎤 → 说话</strong> → 自动输入文字 → 点翻译
 </div>
 
-<div style="margin-bottom:12px" id="micWrap">
-  <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 点击开始说话（韩语→中文）</button>
+<div style="margin-bottom:12px">
+  <button id="micBtn" onclick="toggleMic()" style="width:100%;padding:18px;border-radius:14px;border:none;background:#e94560;color:#fff;font-size:18px;font-weight:700;cursor:pointer;transition:.2s">🎤 按住说话（韩语→中文）</button>
 </div>
 
 <div class="input-row">
@@ -114,11 +114,11 @@ function setMode(m){
   mode=m;
   document.getElementById('mKo2zh').classList.toggle('active',m==='ko2zh');
   document.getElementById('mZh2ko').classList.toggle('active',m==='zh2ko');
-  document.getElementById('hint').innerHTML=mode==='ko2zh'
-    ?'💡 <strong>店员说韩语时</strong>：按红色按钮说话 → 自动翻译'
-    :'💡 <strong>你说中文时</strong>：按红色按钮说话 → 自动翻译 → 点🔊朗读';
-  document.getElementById('micBtn').textContent=mode==='ko2zh'
-    ?'🎤 点击开始说话（听韩语）':'🎤 点击开始说话（听中文）';
+  document.getElementById('hint').innerHTML=m==='ko2zh'
+    ?'💡 <strong>店员说韩语时</strong>：输入韩文 → 翻译成中文'
+    :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 自动朗读';
+  document.getElementById('micBtn').textContent=m==='ko2zh'
+    ?'🎤 按住说话（听韩语）':'🎤 按住说话（听中文）';
 }
 
 async function go(){
@@ -135,6 +135,7 @@ async function go(){
     cur=t;
     showResult(t,text);
     document.getElementById('inp').value='';
+    if(mode==='zh2ko') setTimeout(()=>speakR(),300);
   }catch(e){toast('翻译失败: '+e.message)}
 }
 
@@ -149,8 +150,8 @@ function showResult(translated,orig){
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
   const btn=document.getElementById('spkBtn');
-  const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
+  const done=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
   
   const s=window.speechSynthesis;
   if(!s){done();toast('朗读不可用');return}
@@ -171,64 +172,53 @@ function replay(t){cur=t;document.getElementById('result').style.display='block'
 function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
-// Voice: click to start, click again to stop
-let rec=null, listening=false;
-
-function toggleMic(){
-  const btn=document.getElementById('micBtn');
-  const label='🎤 点击开始说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
-  
-  if(listening){
-    listening=false;
-    if(rec){try{rec.stop()}catch(ex){};rec=null}
-    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
-    return;
-  }
-  
+// Voice: SpeechRecognition
+async function toggleMic(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('浏览器不支持语音');return}
-  
-  rec=new SR();
-  rec.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
-  rec.continuous=true;
-  rec.interimResults=false;
-  rec.maxAlternatives=1;
+  if(SR){tryWebSpeechFirst();return}
+  toast('浏览器不支持语音');
+}
 
-  btn.textContent='🎙️ 正在听…再点停止';
-  btn.style.background='rgba(233,69,96,.2)';btn.style.color='#e94560';
-  listening=true;
+function tryWebSpeechFirst(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r=new SR();
+  r.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
+  r.interimResults=false;
+  r.maxAlternatives=1;
 
-  rec.onresult=e=>{
-    const last=e.results.length-1;
-    if(!e.results[last].isFinal)return;
-    const t=e.results[last][0].transcript.trim();
-    if(!t){listening=false;rec=null;btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';return}
-    listening=false;rec=null;
-    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
+  const btn=document.getElementById('micBtn');
+  btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
+  btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
+
+  r.onresult=e=>{
+    // Only process final result to avoid duplicates
+    if(!e.results[0].isFinal)return;
+    r.stop();
+    const t=e.results[0][0].transcript.trim();
+    if(!t)return;
     document.getElementById('inp').value=t;
     document.getElementById('result').style.display='block';
     document.getElementById('rl').textContent='🎙️ 识别结果';
     document.getElementById('rt').textContent=t;
+    btn.textContent='🎤 按住说话';
+    btn.style.background='#e94560';btn.style.color='#fff';
     go();
   };
 
-  rec.onerror=e=>{
-    if(e.error==='aborted')return;
-    listening=false;rec=null;
-    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
-    toast('识别失败: '+e.error);
+  r.onerror=e=>{
+    btn.textContent='🎤 按住说话';
+    btn.style.background='#e94560';btn.style.color='#fff';
+    toast(e.error==='not-allowed'?'请开启麦克风权限':'识别失败: '+e.error);
   };
-  rec.onend=()=>{
-    if(!listening)return;
-    listening=false;rec=null;
-    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
+
+  r.onend=()=>{
+    if(btn.textContent==='🎙️ 正在听…'){
+      btn.textContent='🎤 按住说话';
+      btn.style.background='#e94560';btn.style.color='#fff';
+    }
   };
-  
-  try{rec.start()}catch(e){
-    listening=false;rec=null;
-    btn.textContent=label;btn.style.background='#e94560';btn.style.color='#fff';
-    toast('语音不可用');
-  }
+
+  try{r.start()}catch(e){toast('语音不可用')}
 }
 
 // Init
