@@ -211,6 +211,7 @@ function tryWebSpeechFirst(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   const r=new SR();
   r.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
+  r.continuous=false;
   r.interimResults=false;
   r.maxAlternatives=1;
 
@@ -218,9 +219,11 @@ function tryWebSpeechFirst(){
   btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
   btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
 
+  let done=false;
   r.onresult=e=>{
-    // Only process final result to avoid duplicates
+    if(done)return;
     if(!e.results[0].isFinal)return;
+    done=true;
     r.stop();
     const t=e.results[0][0].transcript.trim();
     if(!t)return;
