@@ -172,7 +172,7 @@ function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
 // Voice: SpeechRecognition — press and hold
-let rec=null, listening=false;
+let rec=null, listening=false, micStart=0;
 
 function startMic(e){e.preventDefault();
   if(listening)return;
@@ -188,7 +188,7 @@ function startMic(e){e.preventDefault();
   const btn=document.getElementById('micBtn');
   btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
   btn.style.background='rgba(233,69,96,.2)';btn.style.color='#e94560';
-  listening=true;
+  listening=true;micStart=Date.now();
 
   rec.onresult=e=>{
     const last=e.results.length-1;
@@ -199,11 +199,16 @@ function startMic(e){e.preventDefault();
     document.getElementById('result').style.display='block';
     document.getElementById('rl').textContent='🎙️ 识别结果';
     document.getElementById('rt').textContent=t;
-    stopMic();
+    listening=false;if(rec){try{rec.stop()}catch(ex){};rec=null}
+    document.getElementById('micBtn').textContent='🎤 按住说话（听'+(mode==='ko2zh'?'韩语':'中文')+')';
+    document.getElementById('micBtn').style.background='#e94560';document.getElementById('micBtn').style.color='#fff';
     go();
   };
 
-  rec.onerror=e=>{stopMic();toast('识别失败: '+e.error)};
+  rec.onerror=e=>{
+    if(e.error==='aborted')return; // normal when user releases early
+    stopMic();toast('识别失败: '+e.error)
+  };
   rec.onend=()=>{if(listening)stopMic()};
   
   try{rec.start()}catch(e){stopMic();toast('语音不可用')}
@@ -211,6 +216,7 @@ function startMic(e){e.preventDefault();
 
 function stopMic(e){if(e)e.preventDefault();
   if(!listening)return;
+  if(Date.now()-micStart<400)return; // minimum 400ms hold
   listening=false;
   if(rec){try{rec.stop()}catch(ex){};rec=null}
   const btn=document.getElementById('micBtn');
