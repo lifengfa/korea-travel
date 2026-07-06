@@ -108,7 +108,17 @@ body{
 <script>
 let mode='ko2zh',cur='';
 let hist=[];try{hist=JSON.parse(localStorage.getItem('kt3_hist')||'[]')}catch(e){}
-const TUNNEL='https://2ce06fcfc82678.lhr.life';
+let TUNNEL='';
+(async()=>{
+  try{
+    const r=await fetch('https://lifengfa.github.io/korea-travel/proxy.txt?t='+Date.now());
+    TUNNEL=(await r.text()).trim();
+    if(!TUNNEL.startsWith('https://'))throw new Error('bad url');
+  }catch(e){
+    TUNNEL=localStorage.getItem('kt_tunnel')||'';
+  }
+  if(TUNNEL) localStorage.setItem('kt_tunnel',TUNNEL);
+})();
 
 function toast(s){const e=document.getElementById('toast');e.textContent=s;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
 function setMode(m){
