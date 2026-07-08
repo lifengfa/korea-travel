@@ -76,8 +76,8 @@ body{
   </button>
 </div>
 
-<div class="hint" id="hint">
-  💡 <strong>点输入框 → 按键盘 🎤 → 说话</strong> → 自动输入文字 → 点翻译
+<div class="hint" id="hint" style="font-size:13px">
+  👆 <strong>点输入框 → 键盘🎤 → 说话</strong> → 自动翻译 ✨
 </div>
 
 <div style="margin-bottom:12px">
@@ -108,6 +108,17 @@ body{
 <script>
 let mode='ko2zh',cur='';
 let hist=[];try{hist=JSON.parse(localStorage.getItem('kt3_hist')||'[]')}catch(e){}
+let TUNNEL='';
+(async()=>{
+  try{
+    const r=await fetch('https://lifengfa.github.io/korea-travel/proxy.txt?t='+Date.now());
+    TUNNEL=(await r.text()).trim();
+    if(!TUNNEL.startsWith('https://'))throw new Error('bad url');
+  }catch(e){
+    TUNNEL=localStorage.getItem('kt_tunnel')||'';
+  }
+  if(TUNNEL) localStorage.setItem('kt_tunnel',TUNNEL);
+})();
 
 function toast(s){const e=document.getElementById('toast');e.textContent=s;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1800)}
 function setMode(m){
@@ -118,7 +129,7 @@ function setMode(m){
     ?'💡 <strong>店员说韩语时</strong>：输入韩文 → 翻译成中文'
     :'💡 <strong>你说中文时</strong>：输入中文 → 翻译成韩文 → 自动朗读';
   document.getElementById('micBtn').textContent=m==='ko2zh'
-    ?'🎤 点击开始说话（听韩语）':'🎤 点击开始说话（听中文）';
+    ?'🎤 按住说话（听韩语）':'🎤 按住说话（听中文）';
 }
 
 async function go(){
@@ -127,11 +138,13 @@ async function go(){
   const from=mode==='ko2zh'?'ko':'zh-CN';
   const to=mode==='ko2zh'?'zh-CN':'ko';
   try{
-    const url=`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${mode==='ko2zh'?'ko|zh-CN':'zh-CN|ko'}`;
+    const lp=mode==='ko2zh'?'ko|zh-CN':'zh-CN|ko';
+    const url=TUNNEL+'/translate?q='+encodeURIComponent(text)+'&lp='+lp;
     const r=await fetch(url);
     if(!r.ok)throw new Error('HTTP '+r.status);
     const d=await r.json();
-    const t=d.responseData?.translatedText||'';
+    const t=d.text;
+    if(!t)throw new Error('无翻译结果');
     cur=t;
     showResult(t,text);
     document.getElementById('inp').value='';
@@ -146,22 +159,54 @@ function showResult(translated,orig){
   addHist(orig,translated);
 }
 
-// TTS: system SpeechSynthesis
+// TTS: Edge TTS via tunnel (primary) + browser fallback
+const TTS_BASE = TUNNEL;
+
 async function speakR(){
   if(!cur){toast('没有翻译结果');return}
+  const lang=mode==='zh2ko'?'ko':'zh';
   const btn=document.getElementById('spkBtn');
   btn.textContent='🔊 播放中...';btn.classList.add('spk-playing');
-  const s=window.speechSynthesis;
-  if(!s){btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');toast('朗读不可用');return}
-  s.cancel();
-  const u=new SpeechSynthesisUtterance(cur);
-  u.lang=mode==='zh2ko'?'ko-KR':'zh-CN';u.rate=0.85;u.volume=1;
-  const v=s.getVoices();
-  if(v.length){const vv=v.find(x=>x.lang.startsWith(mode==='zh2ko'?'ko':'zh'));if(vv)u.voice=vv}
-  u.onend=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')};
-  u.onerror=()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');toast('朗读失败')};
-  s.speak(u);
-  setTimeout(()=>{btn.textContent='🔊 朗读';btn.classList.remove('spk-playing')},Math.max(cur.length*250,3000));
+  
+  // Method 1: Edge TTS via tunnel (high quality Korean/Chinese)
+  try{
+    await speakEdge(cur,lang);
+    btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
+    return;
+  }catch(e){console.log('Edge TTS failed:',e)}
+  
+  // Method 2: Browser SpeechSynthesis fallback
+  try{
+    await speakBrowser(cur,lang);
+    btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
+    return;
+  }catch(e){console.log('Browser TTS failed:',e)}
+  
+  btn.textContent='🔊 朗读';btn.classList.remove('spk-playing');
+  toast('朗读失败')
+}
+
+function speakEdge(text,lang){
+  return new Promise((resolve,reject)=>{
+    const a=new Audio(`${TTS_BASE}/tts?text=${encodeURIComponent(text)}&lang=${lang}`);
+    a.onended=()=>resolve();
+    a.onerror=()=>reject('edge tts');
+    a.play().catch(()=>reject('edge play'));
+  })
+}
+
+function speakBrowser(text,lang){
+  return new Promise((resolve,reject)=>{
+    const s=window.speechSynthesis;
+    if(!s)return reject('no synth');
+    s.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang=lang==='ko'?'ko-KR':'zh-CN';u.rate=0.85;
+    const v=s.getVoices();
+    if(v.length){const vv=v.find(x=>x.lang.startsWith(lang==='ko'?'ko':'zh'));if(vv)u.voice=vv}
+    u.onstart=()=>resolve();u.onerror=e=>reject(e.error);
+    s.speak(u);
+  })
 }
 
 // History
@@ -171,64 +216,72 @@ function replay(t){cur=t;document.getElementById('result').style.display='block'
 function clearHist(){hist=[];localStorage.removeItem('kt3_hist');renderHist()}
 function copyR(){if(!cur)return;navigator.clipboard.writeText(cur).then(()=>toast('已复制')).catch(()=>toast('复制失败'))}
 
-// Voice recording via tunnel STT
-// Voice: Browser SpeechRecognition (Chrome in Korea)
+// Voice: 录音 → 隧道 STT（纯备用方案，不走 Google）
+let mediaRecorder=null, audioChunks=[], isRecording=false;
 
 async function toggleMic(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('浏览器不支持语音，请用键盘🎤');return}
-  tryWebSpeechFirst();
+  if(isRecording){stopRecording();return;}
+  await startRecording();
 }
 
-function tryWebSpeechFirst(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  const r=new SR();
-  r.lang=mode==='ko2zh'?'ko-KR':'zh-CN';
-  r.interimResults=false;
-  r.maxAlternatives=1;
+async function startRecording(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    let opts={};
+    if(MediaRecorder.isTypeSupported('audio/webm'))opts.mimeType='audio/webm';
+    mediaRecorder=new MediaRecorder(stream,{...opts, audioBitsPerSecond: 16000}); // 极低码率，语音识别够用
+    audioChunks=[];
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data)};
+    mediaRecorder.onstop=async()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      if(!audioChunks.length)return;
+      const blob=new Blob(audioChunks,{type:mediaRecorder.mimeType||'audio/webm'});
+      await sendSTT(blob);
+    };
+    mediaRecorder.start();
+    isRecording=true;
+    const btn=document.getElementById('micBtn');
+    btn.textContent='🎙️ 录音中…点击停止';
+    btn.style.background='#c03950';
+  }catch(e){toast('麦克风不可用: '+e.message)}
+}
 
+function stopRecording(){
+  if(mediaRecorder&&mediaRecorder.state==='recording')mediaRecorder.stop();
+  isRecording=false;
   const btn=document.getElementById('micBtn');
-  btn.textContent='🎙️ 正在听'+(mode==='ko2zh'?'韩语':'中文')+'…';
-  btn.style.background='rgba(233,69,96,.2)';btn.style.borderColor='#e94560';btn.style.color='#e94560';
-
-  r.onresult=e=>{
-    // Only process final result to avoid duplicates
-    if(!e.results[0].isFinal)return;
-    r.stop();
-    const t=e.results[0][0].transcript.trim();
-    if(!t)return;
-    document.getElementById('inp').value=t;
-    document.getElementById('result').style.display='block';
-    document.getElementById('rl').textContent='🎙️ 识别结果';
-    document.getElementById('rt').textContent=t;
-    btn.textContent='🎤 点击开始说话';
-    btn.style.background='#e94560';btn.style.color='#fff';
-    go();
-  };
-
-  r.onerror=e=>{
-    btn.textContent='🎤 点击开始说话';
-    btn.style.background='#e94560';btn.style.color='#fff';
-    if(e.error==='not-allowed'){
-      toast('麦克风权限未开启，请在浏览器设置中允许');
-    }else if(e.error==='network'){
-      document.getElementById('hint').innerHTML='⚠️ <strong>语音识别不可用</strong><br>请点输入框 → 用键盘 <strong>🎤</strong>';
-    }else{
-      toast('语音错误: '+e.error);
-    }
-  };
-
-  r.onend=()=>{
-    if(btn.textContent.startsWith('🎙️')){
-      btn.textContent='🎤 点击开始说话';
-      btn.style.background='#e94560';btn.style.color='#fff';
-    }
-  };
-
-  try{r.start()}catch(e){toast('语音不可用: '+e.message)}
+  btn.textContent='🎤 点击开始说话';btn.style.background='#e94560';
 }
 
-// Init
+async function sendSTT(blob){
+  const btn=document.getElementById('micBtn');
+  btn.textContent='⏳ 识别中…';
+  const lang=mode==='ko2zh'?'ko-KR':'zh-CN';
+  try{
+    const ctrl=new AbortController();
+    const tmr=setTimeout(()=>ctrl.abort(), 15000); // 15秒超时
+    const resp=await fetch(TUNNEL+'/stt?lang='+lang,{method:'POST',body:blob,signal:ctrl.signal});
+    clearTimeout(tmr);
+    const data=await resp.json();
+    if(data.text){
+      document.getElementById('inp').value=data.text;
+      go();
+    }else{
+      toast('未识别到语音');
+    }
+  }catch(e){
+    toast(e.name==='AbortError'?'识别超时，请说短一点':('识别失败: '+e.message));
+  }
+  btn.textContent='🎤 点击开始说话';btn.style.background='#e94560';
+}
+
+// Init — 键盘🎤输入后自动翻译
+let inpTimer=null;
+document.getElementById('inp').addEventListener('input',()=>{
+  clearTimeout(inpTimer);
+  const v=document.getElementById('inp').value.trim();
+  if(v) inpTimer=setTimeout(()=>go(), 800); // 停顿0.8秒后自动翻译
+});
 document.getElementById('inp').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
 const s=window.speechSynthesis;if(s){s.getVoices();if(s.onvoiceschanged!==undefined)s.onvoiceschanged=()=>s.getVoices()}
 document.getElementById('inp').focus();
